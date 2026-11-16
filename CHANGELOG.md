@@ -42,11 +42,11 @@ systemd/Docker packaging.
 - AGPL-3.0, CONTRIBUTING and SECURITY docs, demo seed data, theme validation and CI with `go vet`,
   `go mod tidy -diff`, `go test -race ./...` and release builds.
 
-## Unreleased
+## v0.1.1 — 2026-11-16
 
 - Discovery probes one API path for title-less services (Grafana, Proxmox, ntfy, Portainer).
 - Domain pages show nameservers/DNSSEC/transfer lock and can compare them with live DNS.
 - Trusted-proxy-aware client addresses (`HS_TRUSTED_PROXIES`), login rate limiting hardening and
   `staticcheck` in CI.
 
-[Unreleased]: https://github.com/dawidof/home-services/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/dawidof/home-services/compare/v0.1.1...HEAD
