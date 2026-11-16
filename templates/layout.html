@@ -1,0 +1,124 @@
+{{define "bars"}}<span class="avail" aria-hidden="true">{{range .}}<i class="{{.Class}}"></i>{{end}}</span>{{end}}
+{{define "layout"}}<!doctype html>
+<html lang="en" data-theme="dark" data-sb="{{.Sidebar}}" data-datefmt="{{.DateFmt}}" data-clock="{{.Clock}}">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{.Title}} · Home Services</title>
+<script>try{if(!localStorage.getItem('sb'))localStorage.setItem('sb','{{.Sidebar}}')}catch(e){}</script>
+<script src="/assets/boot.js?v=30"></script>
+<link rel="icon" href="/assets/favicon.svg">
+<link rel="stylesheet" href="/assets/app.css?v=32">
+<link rel="stylesheet" href="/static/ui.css?v=10">
+<script src="/static/htmx.min.js?v=1" defer></script>
+<script src="/static/ui.js?v=5" defer></script>
+<script src="/static/widgets.js?v=8" defer></script>
+</head>
+<body data-page="{{.Page}}">
+<div class="app">
+<aside class="sidebar" id="sidebar">
+  <a class="brand" href="/"><span class="logo">{{icon "server" 15}}</span><span>Home Services<small>{{.HostLabel}}</small></span></a>
+  <nav class="nav">
+    {{- range .Nav}}
+    <a href="{{.Href}}" class="{{if eq .Key $.Page}}active{{end}}" data-label="{{.Label}}">{{icon .Icon 16}}<span>{{.Label}}</span>{{if .Count}}<span class="count {{.CountClass}}">{{.Count}}</span>{{end}}</a>
+    {{- end}}
+  </nav>
+  <div class="nav-section">Operations</div>
+  <nav class="nav">
+    {{- range .Ops}}
+    <a href="{{.Href}}" class="{{if eq .Key $.Page}}active{{end}}" data-label="{{.Label}}">{{icon .Icon 16}}<span>{{.Label}}</span>{{if .Count}}<span class="count {{.CountClass}}">{{.Count}}</span>{{end}}</a>
+    {{- end}}
+  </nav>
+  <div class="sidebar-foot">
+    <a class="mcp-status" href="/settings/mcp">{{icon "bot" 14}} MCP · {{plural .TokenCount "token"}}{{if .TokenCount}} · <span class="ok-t">online</span>{{end}}</a>
+    <div class="user">
+      <span class="avatar" data-tip="Home Services {{.Version}}">H</span><span class="small">{{.HostLabel}}</span>
+      <button class="btn ghost sm icon" id="themeBtn" data-tip="Switch light / dark" style="margin-left:auto">{{icon "moon" 15}}</button>
+    </div>
+  </div>
+</aside>
+<div class="main">
+<header class="topbar">
+  <button class="btn ghost icon sb-toggle" id="sbToggle" aria-label="Toggle sidebar">{{icon "sidebar" 18}}</button>
+  <div class="crumbs">
+    {{- range .Crumbs}}
+    {{- if .Last}}<b>{{.Label}}</b>{{else}}<a href="{{.Href}}">{{.Label}}</a>{{icon "right" 14}}{{end}}
+    {{- end}}
+  </div>
+  <button class="search-trigger" id="paletteBtn" type="button" aria-label="Search or jump to">
+    {{icon "search" 16}} <span>Search or jump to…</span><span class="kbd">⌘K</span>
+  </button>
+  <div class="menu-wrap">
+    <button class="btn ghost icon bell" aria-label="Notifications" data-tip="Notifications">{{icon "bell" 18}}{{if .Alerts}}<span class="bell-n">{{.Alerts}}</span>{{end}}</button>
+    <div class="notif-pop" role="dialog" aria-label="Notifications">
+      <div class="notif-h"><b>Needs attention</b><span class="muted small">{{plural .Alerts "alert"}}</span><a class="muted small" href="/settings/integrations" style="margin-left:auto">Settings</a></div>
+      {{- $sug := false}}
+      {{- range .Notices}}{{if eq .Group ""}}
+      <div class="n-item"><span class="n-ic {{.Class}}">{{icon .Icon 16}}</span><div class="n-txt"><b>{{.Title}}</b>{{if .Sub}}<small>{{.Sub}}</small>{{end}}</div><a class="btn sm" href="{{.Href}}">{{.Btn}}</a></div>
+      {{- else}}{{$sug = true}}{{end}}{{end}}
+      {{- if not .Alerts}}<div class="n-item"><span class="n-ic info">{{icon "check" 16}}</span><div class="n-txt"><b>All clear</b><small>no failing checks or expiring domains</small></div></div>{{end}}
+      {{- if $sug}}
+      <div class="notif-sec">Suggestions</div>
+      {{- range .Notices}}{{if eq .Group "s"}}
+      <div class="n-item"><span class="n-ic {{.Class}}">{{icon .Icon 16}}</span><div class="n-txt"><b>{{.Title}}</b>{{if .Sub}}<small>{{.Sub}}</small>{{end}}</div><a class="btn sm" href="{{.Href}}">{{.Btn}}</a></div>
+      {{- end}}{{end}}
+      {{- end}}
+      <div class="notif-f"><a href="/problems">See all alerts →</a></div>
+    </div>
+  </div>
+  <div class="menu-wrap">
+    <button class="btn primary" data-tip="Add something (N)" id="addBtn">{{icon "plus" 16}} Add</button>
+    <div class="menu" style="right:0;left:auto">
+      <a href="/hosts/new">{{icon "server" 16}}Host</a>
+      <a href="/projects/new">{{icon "folder" 16}}Project</a>
+      <a href="/domains/new">{{icon "globe" 16}}Domain</a>
+      <a href="/costs#add">{{icon "coin" 16}}Cost</a>
+      <hr>
+      <a href="/discovery">{{icon "radar" 16}}Scan the network</a>
+    </div>
+  </div>
+</header>
+<main class="content">
+  {{template "content" .}}
+</main>
+</div>
+</div>
+{{- if .Undo}}
+<div class="toast show actionable" id="toast">
+  <span>{{.Undo.Name}} deleted.</span>
+  <form method="post" action="{{.Undo.Path}}"><button type="submit">Undo</button></form>
+</div>
+{{- else if .Error}}
+{{block "errtoast" .}}<div class="toast show err" id="toast" role="alert">{{.Error}}</div>{{end}}
+{{- else if .Flash}}
+<div class="toast show" id="toast">{{.Flash}}</div>
+{{- end}}
+<div class="palette-backdrop" id="paletteBackdrop" hidden>
+  <div class="palette" role="dialog" aria-modal="true" aria-label="Search and actions">
+    <div class="palette-in">
+      {{icon "search" 16}}
+      <input id="paletteInput" autocomplete="off" spellcheck="false" placeholder="Search hosts, projects, services, app links…" aria-label="Search">
+      <span class="kbd">esc</span>
+    </div>
+    <div class="palette-list" id="paletteList"></div>
+    <div class="palette-foot"><span><span class="kbd">↑↓</span> move</span><span><span class="kbd">↵</span> open</span><span class="muted">Search is a read-only API call</span></div>
+  </div>
+</div>
+<nav class="mobile-nav">
+  <a href="/" class="{{if eq .Page "dashboard"}}active{{end}}">{{icon "grid" 20}}<span>Dashboard</span></a>
+  <a href="/hosts" class="{{if eq .Page "hosts"}}active{{end}}">{{icon "server" 20}}<span>Hosts</span></a>
+  <a href="/projects" class="{{if eq .Page "projects"}}active{{end}}">{{icon "folder" 20}}<span>Projects</span></a>
+  <a href="/discovery" class="{{if eq .Page "discovery"}}active{{end}}">{{icon "radar" 20}}<span>Discovery</span></a>
+  <a href="#" data-open="palette">{{icon "search" 20}}<span>Search</span></a>
+</nav>
+</body>
+</html>{{end}}
+
+{{define "settingsnav"}}<nav class="subnav">
+  <a class="{{if eq .Title "Display"}}active{{end}}" href="/settings/display">Display</a>
+  <a class="{{if eq .Title "Currency"}}active{{end}}" href="/settings/currency">Currency</a>
+  <a class="{{if eq .Title "Integrations"}}active{{end}}" href="/settings/integrations">Integrations</a>
+  <a class="{{if eq .Title "MCP & tokens"}}active{{end}}" href="/settings/mcp">MCP &amp; AI access</a>
+  <a class="{{if eq .Title "Notifications"}}active{{end}}" href="/settings/notifications">Notifications</a>
+  <a class="{{if eq .Title "Scanning"}}active{{end}}" href="/settings/scanning">Scanning</a>
+  <a class="{{if eq .Title "Favicons"}}active{{end}}" href="/settings/favicons">Favicons</a>
+</nav>{{end}}

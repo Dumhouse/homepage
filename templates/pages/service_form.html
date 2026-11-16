@@ -1,0 +1,49 @@
+{{define "content"}}
+<div class="page-head">
+  <div>
+    <h1>Edit {{.Service.Name}}</h1>
+    <div class="sub">On {{if .Host}}<a href="/hosts/{{.Host.ID}}">{{.Host.Name}}</a>{{else}}host #{{.Service.HostID}}{{end}}</div>
+  </div>
+  <div class="actions"><a class="btn ghost" href="/hosts/{{.Service.HostID}}">Cancel</a></div>
+</div>
+
+{{if .Error}}<div class="card err" style="margin-bottom:16px"><div class="card-b">{{icon "alert" 15}} {{.Error}}</div></div>{{end}}
+
+<form method="post" action="/services/{{.Service.ID}}">
+  <section class="card">
+    <div class="card-h"><h3>{{icon "activity" 15}}Service</h3></div>
+    <div class="card-b form-grid">
+      <div class="field"><label>Name *</label><input class="input" name="name" required value="{{.Service.Name}}"></div>
+      <div class="field"><label>Type</label><input class="input" name="type" value="{{.Service.Type}}" placeholder="rails, postgres, caddy"></div>
+      <div class="field"><label>Port</label><input class="input" name="port" inputmode="numeric" value="{{if .Service.Port}}{{.Service.Port}}{{end}}"></div>
+      <div class="field"><label>Protocol</label>
+        <select class="input" name="protocol">
+          <option value="tcp" {{if eq .Service.Protocol "tcp"}}selected{{end}}>tcp</option>
+          <option value="udp" {{if eq .Service.Protocol "udp"}}selected{{end}}>udp</option>
+          <option value="http" {{if eq .Service.Protocol "http"}}selected{{end}}>http</option>
+          <option value="https" {{if eq .Service.Protocol "https"}}selected{{end}}>https</option>
+        </select>
+      </div>
+      <div class="field"><label>Path</label><input class="input" name="path" value="{{.Service.Path}}" placeholder="/"></div>
+      <div class="field"><label>Domain</label><input class="input" name="domain" value="{{.Service.Domain}}" placeholder="app.example.com"></div>
+      <div class="field"><label>Version</label><input class="input" name="version" value="{{.Service.Version}}"></div>
+      <div class="field"><label>Tags</label><input class="input" name="tags" value="{{join .Service.Tags ", "}}" placeholder="db, rails"></div>
+      <div class="field wide"><label>Notes</label><input class="input" name="notes" value="{{.Service.Notes}}"></div>
+    </div>
+    <div class="card-f row" style="gap:8px">
+      <button class="btn primary">{{icon "check" 15}} Save changes</button>
+      <a class="btn ghost" href="/hosts/{{.Service.HostID}}">Cancel</a>
+    </div>
+  </section>
+</form>
+
+<section class="card" style="margin-top:16px">
+  <div class="card-b row">
+    <span class="muted small" style="margin-right:auto">Remove the service if it no longer runs here.</span>
+    <form method="post" action="/services/{{.Service.ID}}/delete">
+      <button class="btn danger">{{icon "trash" 15}} Remove service</button>
+    </form>
+  </div>
+</section>
+{{end}}
+{{define "errtoast"}}{{end}}

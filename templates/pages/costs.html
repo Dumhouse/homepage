@@ -1,0 +1,113 @@
+{{define "content"}}
+<div class="page-head">
+  <div><h1>Costs</h1><div class="sub">What the home lab costs to run · totals in {{.Currency}} · domain renewals come from the domain entries</div></div>
+  <div class="actions">
+    <div class="seg"><a href="/costs{{if .Filter}}?f={{.Filter}}{{end}}" class="{{if not .PerYear}}on{{end}}">Per month</a><a href="/costs?per=year{{if .Filter}}&f={{.Filter}}{{end}}" class="{{if .PerYear}}on{{end}}">Per year</a></div>
+    <a class="btn" href="/costs.csv" download>{{icon "download" 16}}Export CSV</a>
+    <button class="btn primary" type="button" data-drawer="cost">{{icon "plus" 16}}Add cost</button>
+  </div>
+</div>
+
+<div class="stats four" style="margin-bottom:16px">
+  {{if .PerYear}}
+  <div class="card stat"><div class="label">{{icon "coin" 14}}Per year</div><div class="value">{{money .YearlyCents .Currency}}</div><div class="meta">{{money .MonthlyCents .Currency}} per month</div></div>
+  {{else}}
+  <div class="card stat"><div class="label">{{icon "coin" 14}}Per month</div><div class="value">{{money .MonthlyCents .Currency}}</div><div class="meta">{{money .YearlyCents .Currency}} per year</div></div>
+  {{end}}
+  <div class="card stat"><div class="label">{{icon "clock" 14}}Next 30 days</div><div class="value">{{money .Next30Cents .Currency}}</div><div class="meta">{{plural .Next30Count "renewal"}}{{if .Decide}} · <span class="warn-t">{{.Decide}} {{if eq .Decide 1}}needs{{else}}need{{end}} a decision</span>{{end}}</div></div>
+  <div class="card stat"><div class="label">{{icon "cpu" 14}}Hardware bought</div><div class="value">{{money .OneTimeCents .Currency}}</div><div class="meta">one-time · {{plural (len .Hardware) "item"}}</div></div>
+  <div class="card stat"><div class="label">{{icon "star" 14}}Free plans</div><div class="value">{{len .FreeNames}}</div><div class="meta">{{if .FreeNames}}{{join .FreeNames ", "}}{{else}}add one with amount 0{{end}}</div></div>
+</div>
+
+<div class="grid-2">
+  <div class="card">
+    <div class="card-h"><h3>{{icon "list" 16}}Recurring</h3>
+      <div class="actions"><div class="chips">
+        <a class="chip {{if eq .Filter ""}}on{{end}}" href="/costs{{if .PerYear}}?per=year{{end}}">All</a>
+        <a class="chip {{if eq .Filter "domain"}}on{{end}}" href="/costs?f=domain{{if .PerYear}}&per=year{{end}}">Domains</a>
+        <a class="chip {{if eq .Filter "server"}}on{{end}}" href="/costs?f=server{{if .PerYear}}&per=year{{end}}">Servers</a>
+        <a class="chip {{if eq .Filter "other"}}on{{end}}" href="/costs?f=other{{if .PerYear}}&per=year{{end}}">Estimates</a>
+        <a class="chip {{if eq .Filter "power"}}on{{end}}" href="/costs?f=power{{if .PerYear}}&per=year{{end}}">Electricity</a>
+      </div></div></div>
+    {{if .Recurring}}
+    <table class="table">
+      <thead><tr><th>What</th><th>Provider · account</th><th>Next</th><th class="r">Cost</th><th class="r hide-md">Per month</th><th></th></tr></thead>
+      <tbody>
+      {{range .Recurring}}
+        <tr class="{{if .Free}}free{{else if and .NextRenewal (lt .DaysLeft 31) (not .AutoRenew)}}unmatched{{end}}">
+          <td><span class="row"><span class="ico sm" style="--c:{{colorFor .Label}}">{{initial .Label}}</span><span>{{if eq .Kind "domain"}}<a href="/domains/{{.ID}}"><b>{{.Label}}</b></a>{{else if eq .Kind "power"}}<a href="/hosts/{{.ID}}#facts"><b>{{.Label}}</b></a>{{else}}<b>{{.Label}}</b>{{end}}<div class="muted xs">{{if eq .Kind "domain"}}domain{{else if eq .Kind "power"}}electricity{{else}}{{.Kind}}{{if .Detail}} · {{.Detail}}{{end}}{{end}}{{if .Project}} · project {{.Project}}{{end}}</div></span></span></td>
+          <td class="small">{{if .Provider}}{{.Provider}}{{else if .Payment}}{{.Payment}}{{else}}<span class="muted">—</span>{{end}}{{if .Account}}<div class="muted xs">{{.Account}}{{if .Payment}} · {{.Payment}}{{end}}</div>{{else if and .Provider .Payment}}<div class="muted xs">{{.Payment}}</div>{{end}}</td>
+          <td class="small">{{if .NextRenewal}}<span {{if and (lt .DaysLeft 31) (not .AutoRenew)}}class="warn-t"{{end}}>{{.Pretty}}{{if and (ge .DaysLeft 0) (lt .DaysLeft 31)}} · {{.DaysLeft}} d{{end}}</span><div class="xs">{{if .AutoRenew}}<span class="badge ok xs">auto</span>{{else}}<span class="badge warn xs">auto off</span>{{end}}</div>{{else}}<span class="muted">{{if eq .Kind "domain"}}—{{else}}{{.Kind}}{{end}}</span>{{end}}</td>
+          <td class="r">{{if .Free}}<span class="badge xs">free</span>{{else}}<span class="mono">{{money .AmountCents .Currency}}</span> <span class="muted xs">{{if or (eq .Kind "yearly") (eq .Kind "domain")}}/yr{{else}}/mo{{end}}</span>{{if .Foreign}}<div class="muted xs" data-tip="{{.RateNote}}">{{if .NoRate}}no rate — not in totals{{else}}≈ {{money .ConvCents $.Currency}} · {{.RateNote}}{{end}}</div>{{end}}{{end}}</td>
+          <td class="r mono hide-md {{if .Free}}muted{{end}}">{{money .MonthlyCents $.Currency}}</td>
+          <td class="r">{{if .Explicit}}<form method="post" action="/costs/{{.ID}}/delete" class="inline"><button class="btn sm ghost icon" data-tip="Delete cost" aria-label="Delete cost">{{icon "trash" 14}}</button></form>{{end}}</td>
+        </tr>
+      {{end}}
+      </tbody>
+      <tfoot><tr><td colspan="3"><b>Total</b></td><td class="r mono"><b>{{money .YearlyCents .Currency}} /yr</b></td><td class="r mono hide-md"><b>{{money .MonthlyCents .Currency}}</b></td><td></td></tr></tfoot>
+    </table>
+    {{else}}<div class="card-b muted small">{{if .Filter}}Nothing in this group.{{else}}No recurring costs yet. Add hosting, subscriptions or a domain with a price.{{end}}</div>{{end}}
+    <div class="card-f">Domain renewals are read from the domain entries; electricity from each host's Power card at the price in <a href="/settings/integrations?p=power">Electricity</a>. Totals are in {{.Currency}}; other currencies are converted at {{if .RatesDate}}ECB rates of {{.RatesDate}}{{else}}your manual rates{{end}} (<a href="/settings/currency">change</a>).{{if .NoRate}} <span class="warn-t">No rate for {{join .NoRate ", "}} — those entries are left out. Add a rate in Settings → Currency.</span>{{end}}</div>
+  </div>
+
+  <div class="stack">
+    {{if .ByKind}}
+    <div class="card">
+      <div class="card-h"><h3>{{icon "layout" 16}}By kind</h3><span class="muted small" style="margin-left:auto">per year</span></div>
+      <div class="card-b stack" style="gap:12px">
+        {{range .ByKind}}<div class="split"><div class="row small"><span>{{.Label}}</span><span class="spacer"></span><span class="mono">{{money .Cents $.Currency}}</span><span class="muted xs" style="width:34px;text-align:right">{{.Pct}}%</span></div><div class="bar"><i style="width:{{.Pct}}%;background:{{.Color}}"></i></div></div>{{end}}
+      </div>
+    </div>
+    {{end}}
+    {{if .ByProject}}
+    <div class="card">
+      <div class="card-h"><h3>{{icon "folder" 16}}By project</h3><span class="muted small" style="margin-left:auto">per year</span></div>
+      <div class="card-b stack" style="gap:12px">
+        {{range .ByProject}}<div class="split"><div class="row small">{{if .Href}}<a href="{{.Href}}">{{.Label}}</a>{{else}}<span {{if .Warn}}class="muted"{{end}}>{{.Label}}</span>{{end}}<span class="spacer"></span><span class="mono">{{money .Cents $.Currency}}</span></div><div class="bar"><i style="width:{{.Pct}}%;background:{{.Color}}"></i></div></div>{{end}}
+      </div>
+      <div class="card-f">Set a project on a cost to see it here.</div>
+    </div>
+    {{end}}
+    <div class="card">
+      <div class="card-h"><h3>{{icon "cpu" 16}}Hardware</h3><span class="muted small" style="margin-left:auto">one-time</span></div>
+      {{if .Hardware}}
+      <table class="table"><tbody>
+        {{range .Hardware}}<tr><td><b>{{.Label}}</b>{{if .Project}}<div class="muted xs">project {{.Project}}</div>{{end}}</td><td class="r mono">{{money .AmountCents .Currency}}{{if .Foreign}}<div class="muted xs">{{if .NoRate}}no rate{{else}}≈ {{money .ConvCents $.Currency}} · {{.RateNote}}{{end}}</div>{{end}}</td>
+          <td class="r" style="width:40px"><form method="post" action="/costs/{{.ID}}/delete" class="inline"><button class="btn sm ghost icon" data-tip="Delete" aria-label="Delete">{{icon "trash" 14}}</button></form></td></tr>{{end}}
+      </tbody></table>
+      {{else}}<div class="card-b muted small">Add a cost with cycle “one-time” for machines you bought.</div>{{end}}
+    </div>
+  </div>
+</div>
+
+<template id="drawer-cost">
+  <form method="post" action="/costs">
+    <div class="drawer-h">
+      <span class="ico" style="--c:#16a34a">{{icon "coin" 16}}</span>
+      <div><h2>Add cost</h2><div class="sub">A plan, a server, a subscription or hardware you bought. Domains are counted from their own entries.</div></div>
+      <button class="btn ghost sm icon close" type="button" data-close aria-label="Close">{{icon "x" 16}}</button>
+    </div>
+    <div class="drawer-b">
+      <div class="field"><label for="c-label">What is it? *</label><input class="input" id="c-label" name="label" required placeholder="Hetzner CX22, Proxmox power, Mini PC…"></div>
+      <div class="form-grid">
+        <div class="field"><label for="c-amount">Amount</label><input class="input" id="c-amount" name="amount" inputmode="decimal" placeholder="4.51"><span class="hint">0 or empty = free plan</span></div>
+        <div class="field"><label for="c-cur">Currency</label>
+          <select class="input" id="c-cur" name="currency">{{range .Currencies}}<option>{{.}}</option>{{end}}</select><span class="hint">Totals are converted to {{.Currency}}.</span></div>
+        <div class="field"><label for="c-cycle">How often</label>
+          <select class="input" id="c-cycle" name="cycle"><option value="monthly">Every month</option><option value="yearly">Every year</option><option value="one_time">Once (hardware)</option><option value="estimate">Estimate per month</option></select></div>
+        <div class="field"><label for="c-next">Next renewal</label><input class="input" id="c-next" type="date" name="next_renewal"></div>
+        <div class="field"><label for="c-paid">Paid on</label><input class="input" id="c-paid" type="date" name="paid_at"><span class="hint">For another currency: its value in {{.Currency}} is fixed with the ECB rate of this day. Hardware defaults to today.</span></div>
+        <div class="field"><label for="c-charged">Charged in {{.Currency}}</label><input class="input" id="c-charged" name="charged" inputmode="decimal" placeholder="optional"><span class="hint">What your bank actually took — wins over the ECB rate.</span></div>
+        <div class="field"><label for="c-proj">Project</label>
+          <select class="input" id="c-proj" name="project_id"><option value="">No project</option>{{range .Projects}}<option value="{{.ID}}">{{.Name}}</option>{{end}}</select></div>
+        <div class="field"><label for="c-target">Belongs to</label>
+          <select class="input" id="c-target" name="target_entity"><option value="">—</option><option value="host">a host</option><option value="service">a service</option><option value="project">a project</option><option value="provider">a provider</option><option value="other">other</option></select></div>
+      </div>
+      <div class="field"><label for="c-pay">Paid with</label><input class="input" id="c-pay" name="payment_label" placeholder="Revolut ··42"><span class="hint">A label only — never card numbers.</span></div>
+      <div class="field"><label for="c-notes">Notes</label><input class="input" id="c-notes" name="notes"></div>
+      <label class="check"><input type="checkbox" name="auto_renew"> Renews automatically</label>
+    </div>
+    <div class="drawer-f"><button class="btn ghost" type="button" data-close>Cancel</button><button class="btn primary">Add cost</button></div>
+  </form>
+</template>
+{{end}}

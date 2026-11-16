@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>New host · Home Services</title>
+<script src="assets/boot.js?v=30"></script>
+<link rel="stylesheet" href="assets/app.css?v=32">
+<script src="assets/app.js?v=32" defer></script>
+</head>
+<body data-page="hosts" data-crumbs="Hosts|hosts.html / New host">
+<div class="app">
+<aside class="sidebar" id="sidebar"></aside>
+<div class="main">
+<header class="topbar" id="topbar"></header>
+<main class="content">
+
+  <div class="page-head">
+    <div>
+      <h1>New host</h1>
+      <div class="sub">Register a machine, VM or container</div>
+    </div>
+  </div>
+
+  <div class="banner">
+    <i data-i="radar" data-s="18"></i>
+    <div><b>Prefilled from discovery</b> <span class="muted">— 192.168.2.251 found at 09:12 with ports 22, 8080, 8081 and SSH banner “OpenSSH 10.0p2 Debian-7”.</span></div>
+  </div>
+
+  <div class="card" style="padding:14px 16px;margin-bottom:8px;max-width:1040px">
+    <div class="row" style="margin-bottom:8px"><i data-i="zap" data-s="15"></i><b>Fill from a paste</b><span class="muted small">— an ssh command, URL, IP:port or Proxmox ID fills the fields below</span></div>
+    <input class="paste" placeholder="ssh root@192.168.2.251 -p 22" value="ssh root@192.168.2.251">
+  </div>
+
+  <form class="form" onsubmit="event.preventDefault(); say('Saved · checks scheduled'); setTimeout(()=>location.href='host.html',700)">
+
+    <section class="fsection">
+      <div><h3>Basics</h3><p>Name, type, where it lives and how it looks on the dashboard.</p></div>
+      <div class="fgrid">
+        <div class="field">
+          <label>Name</label>
+          <input class="input" value="sensors-api" autofocus>
+        </div>
+        <div class="field">
+          <label>Type</label>
+          <div class="seg" style="align-self:flex-start">
+            <button type="button">VM</button><button type="button">LXC</button><button type="button" class="on">Bare metal</button><button type="button">VPS</button>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Location</label>
+          <div class="combo">
+            <input class="input" value="LAN 88" placeholder="Pick or type a new one…">
+            <span class="caret"><i data-i="chevron" data-s="16"></i></span>
+            <div class="combo-list">
+              <div class="combo-opt" data-v="Proxmox · .250"><span class="ico sm" style="--c:#e57000">P</span>Proxmox · .250<span class="r">12 hosts</span></div>
+              <div class="combo-opt" data-v="LAN 88"><span class="ico sm" style="--c:#b91c1c">M</span>LAN 88<span class="r">3 hosts</span></div>
+              <div class="combo-opt" data-v="OVH · GRA"><span class="ico sm" style="--c:#123f6d">O</span>OVH · GRA<span class="r">1 host</span></div>
+              <div class="combo-opt" data-v="Home rack"><span class="ico sm" style="--c:#475569">H</span>Home rack<span class="r">1 host</span></div>
+              <div class="combo-opt create" data-v=""><i data-i="plus" data-s="14"></i>Create “<b></b>”</div>
+            </div>
+          </div>
+          <span class="hint">Pick an existing location or type a new name to create it.</span>
+        </div>
+        <div class="field">
+          <label>Lifecycle <span class="help" data-tip="Planned: not built yet. Active: in use. Deprecated: still running but on its way out. Decommissioned: gone, kept for history.">?</span></label>
+          <div class="seg" style="align-self:flex-start">
+            <button type="button">Planned</button><button type="button" class="on">Active</button><button type="button">Deprecated</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>Group</label>
+          <div class="combo">
+            <input class="input" value="" placeholder="e.g. Infrastructure">
+            <span class="caret"><i data-i="chevron" data-s="16"></i></span>
+            <div class="combo-list">
+              <div class="combo-opt" data-v="Infrastructure">Infrastructure<span class="r">8</span></div>
+              <div class="combo-opt" data-v="Apps">Apps<span class="r">4</span></div>
+              <div class="combo-opt" data-v="Projects">Projects<span class="r">4</span></div>
+              <div class="combo-opt" data-v="LAN 88">LAN 88<span class="r">2</span></div>
+              <div class="combo-opt create" data-v=""><i data-i="plus" data-s="14"></i>Create “<b></b>”</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="field full">
+          <label>Icon</label>
+          <div class="row wrap gap-12">
+            <div class="iconpick">
+              <button type="button" class="on"><span class="ico" style="--c:#0ea5a4">S</span></button>
+              <button type="button"><span class="ico" style="--c:#7c3aed">S</span></button>
+              <button type="button"><span class="ico" style="--c:#e11d48">S</span></button>
+              <button type="button"><span class="ico" style="--c:#2496ed">D</span></button>
+              <button type="button"><span class="ico" style="--c:#336791">P</span></button>
+              <button type="button"><i data-i="globe" data-s="18"></i></button>
+              <button type="button" title="Upload"><i data-i="upload" data-s="18"></i></button>
+            </div>
+            <span class="hint">Letter + colour, a bundled icon (simple-icons / selfh.st), the site’s favicon, or upload.</span>
+          </div>
+        </div>
+
+        <div class="field full">
+          <label>Description</label>
+          <textarea class="input" placeholder="What is this machine for?">Raspberry Pi with temperature sensors; JSON API on :8080, metrics on :8081.</textarea>
+        </div>
+        <div class="field full">
+          <details class="fold">
+            <summary><i data-i="cpu"></i>Physical device <span class="muted small">— model, serial, warranty (optional)</span><span class="chev"><i data-i="chevron"></i></span></summary>
+            <div class="fold-b fgrid">
+              <div class="field"><label>Model</label><input class="input" value="Raspberry Pi 4 Model B · 4 GB"></div>
+              <div class="field"><label>Serial number</label><input class="input mono" placeholder="optional"></div>
+              <div class="field"><label>Bought</label><input class="input" type="date" value="2024-03-12"></div>
+              <div class="field"><label>Warranty until</label><input class="input" type="date" value="2026-03-12"><span class="hint">You’ll get a reminder 30 days before.</span></div>
+              <div class="field full"><label>Where is it?</label><input class="input" placeholder="e.g. hallway shelf, rack U3"></div>
+            </div>
+          </details>
+        </div>
+        <div class="field full">
+          <label>Tags</label>
+          <div class="taginput"><span class="tag">iot<button type="button">×</button></span><span class="tag">raspberry-pi<button type="button">×</button></span><input placeholder="Add tag, press Enter"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="fsection">
+      <div><h3>Addresses</h3><p>LAN, Tailscale, public IPs and domain names. The first one is used for checks.</p></div>
+      <div class="rep">
+        <div class="rep-row addr rep-head"><span>Kind</span><span>Address</span><span></span><span></span></div>
+        <div class="rep-row addr">
+          <select class="input"><option>LAN</option><option>Tailscale</option><option>WireGuard</option><option>Public</option><option>Domain</option></select>
+          <input class="input mono" value="192.168.2.251">
+          <span class="badge ok"><i data-i="check"></i>free</span>
+          <button type="button" class="btn ghost icon"><i data-i="trash"></i></button>
+        </div>
+        <div class="rep-row addr">
+          <select class="input"><option>Domain</option><option>LAN</option></select>
+          <input class="input mono" value="sensors.lan">
+          <span></span>
+          <button type="button" class="btn ghost icon"><i data-i="trash"></i></button>
+        </div>
+        <div><button type="button" class="btn sm"><i data-i="plus"></i>Add address</button></div>
+      </div>
+    </section>
+
+    <section class="fsection">
+      <div><h3>SSH access</h3><p>One row per login. After saving, the app asks the server which login methods it allows — passwords are never sent or stored.</p></div>
+      <div class="rep">
+        <div class="rep-row ssh rep-head"><span>User</span><span>Port</span><span>Credentials link</span><span>Status</span><span></span></div>
+        <div class="rep-row ssh">
+          <input class="input mono" value="root">
+          <input class="input mono" value="22">
+          <div class="combo">
+            <input class="input" value="" placeholder="Vaultwarden item or Clavis key…">
+            <div class="combo-list">
+              <div class="combo-opt" data-v="Vaultwarden · sensors root"><span class="ico sm" style="--c:#175ddc">V</span>Vaultwarden · sensors root</div>
+              <div class="combo-opt" data-v="Clavis · iot/prod/SSH_KEY"><span class="ico sm" style="--c:#d97706">C</span>Clavis · iot/prod/SSH_KEY</div>
+            </div>
+          </div>
+          <span class="badge warn"><i data-i="unlock"></i>password allowed</span>
+          <button type="button" class="btn ghost icon"><i data-i="trash"></i></button>
+        </div>
+        <div class="rep-row ssh">
+          <input class="input mono" value="pi">
+          <input class="input mono" value="22">
+          <input class="input" placeholder="Vaultwarden item or Clavis key…">
+          <span class="badge">not checked</span>
+          <button type="button" class="btn ghost icon"><i data-i="trash"></i></button>
+        </div>
+        <div class="row"><button type="button" class="btn sm"><i data-i="plus"></i>Add login</button><span class="hint">Discovery saw <code>password</code> offered for root — you’ll get an alert until it’s key-only.</span></div>
+      </div>
+    </section>
+
+    <section class="fsection">
+      <div><h3>Services</h3><p>Ports running on this host. Each gets a health check automatically.</p></div>
+      <div class="rep">
+        <div class="row wrap" style="margin-bottom:6px">
+          <span class="small muted">Templates:</span>
+          <div class="templates">
+            <button type="button" class="tpl" data-say="Added: web :3000, postgres :5432, redis :6379"><span class="ico sm" style="--c:#cc0000">R</span>Rails app</button>
+            <button type="button" class="tpl" data-say="Added: postgres :5432"><span class="ico sm" style="--c:#336791">P</span>Postgres</button>
+            <button type="button" class="tpl" data-say="Added: redis :6379"><span class="ico sm" style="--c:#dc382d">R</span>Redis</button>
+            <button type="button" class="tpl" data-say="Added: caddy :80 :443"><span class="ico sm" style="--c:#1f88c0">C</span>Caddy</button>
+            <button type="button" class="tpl" data-say="Added: compose stack (detect via SSH)"><span class="ico sm" style="--c:#2496ed">D</span>Docker compose</button>
+          </div>
+        </div>
+        <div class="rep-row svc rep-head"><span></span><span>Name</span><span>Type</span><span>Port</span><span>Check</span><span></span></div>
+        <div class="rep-row svc">
+          <span class="ico sm" style="--c:#0ea5a4">A</span>
+          <input class="input" value="sensors api">
+          <select class="input"><option>HTTP</option><option>Rails</option><option>Postgres</option><option>Redis</option><option>Other</option></select>
+          <input class="input mono" value="8080">
+          <select class="input"><option>HTTP</option><option>TCP</option><option>none</option></select>
+          <button type="button" class="btn ghost icon"><i data-i="trash"></i></button>
+        </div>
+        <div class="rep-row svc">
+          <span class="ico sm" style="--c:#e6522c">M</span>
+          <input class="input" value="metrics">
+          <select class="input"><option>HTTP</option><option>Other</option></select>
+          <input class="input mono" value="8081">
+          <select class="input"><option>TCP</option><option>HTTP</option></select>
+          <button type="button" class="btn ghost icon"><i data-i="trash"></i></button>
+        </div>
+        <div class="row"><button type="button" class="btn sm"><i data-i="plus"></i>Add service</button><span class="hint">Next free port on this host: <code>3000</code></span></div>
+      </div>
+    </section>
+
+    <section class="fsection">
+      <div><h3>Projects & notes</h3><p>Link to projects and write a runbook in Markdown.</p></div>
+      <div class="fgrid">
+        <div class="field full">
+          <label>Used by projects</label>
+          <div class="combo">
+            <input class="input" value="Homeboard" placeholder="Pick projects…">
+            <div class="combo-list">
+              <div class="combo-opt" data-v="Homeboard"><span class="ico sm" style="--c:#0ea5a4">H</span>Homeboard</div>
+              <div class="combo-opt" data-v="Home Assistant"><span class="ico sm" style="--c:#18bcf2">H</span>Home Assistant</div>
+              <div class="combo-opt create" data-v=""><i data-i="plus" data-s="14"></i>Create project “<b></b>”</div>
+            </div>
+          </div>
+        </div>
+        <div class="field full">
+          <label>Runbook <span class="muted">(Markdown)</span></label>
+          <textarea class="input mono" rows="5">## Restart
+sudo systemctl restart sensors-api</textarea>
+        </div>
+      </div>
+    </section>
+
+    <div class="form-foot">
+      <a class="btn ghost" href="discovery.html">Cancel</a>
+      <button class="btn" type="button" data-say="Saved as draft">Save draft</button>
+      <button class="btn primary" type="submit"><i data-i="check"></i>Save & run checks</button>
+    </div>
+  </form>
+
+</main>
+</div>
+</div>
+</body>
+</html>

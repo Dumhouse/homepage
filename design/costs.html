@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Costs · Home Services</title>
+<script src="assets/boot.js?v=30"></script>
+<link rel="icon" href="assets/favicon.svg"><link rel="stylesheet" href="assets/app.css?v=32">
+<script src="assets/app.js?v=32" defer></script>
+</head>
+<body data-page="costs" data-crumbs="Costs">
+<div class="app">
+<aside class="sidebar" id="sidebar"></aside>
+<div class="main">
+<header class="topbar" id="topbar"></header>
+<main class="content">
+
+  <div class="page-head">
+    <div><h1>Costs</h1><div class="sub">What the home lab costs to run · all amounts in EUR · example numbers</div></div>
+    <div class="actions">
+      <div class="seg"><button class="on">Per month</button><button>Per year</button></div>
+      <button class="btn" data-say="costs-2026.csv downloaded"><i data-i="download"></i>Export CSV</button>
+      <button class="btn primary" data-todo><i data-i="plus"></i>Add cost</button>
+    </div>
+  </div>
+
+  <div class="stats" style="grid-template-columns:repeat(4,minmax(0,1fr));margin-bottom:16px">
+    <div class="card stat"><div class="label"><i data-i="coin" data-s="14"></i>Per month</div><div class="value">€17.10</div><div class="meta">€205.16 per year</div></div>
+    <div class="card stat"><div class="label"><i data-i="clock" data-s="14"></i>Next 30 days</div><div class="value">€20.48</div><div class="meta">2 renewals · <span class="warn-t">1 needs a decision</span></div></div>
+    <div class="card stat"><div class="label"><i data-i="cpu" data-s="14"></i>Hardware bought</div><div class="value">€495</div><div class="meta">one-time · 2 items</div></div>
+    <div class="card stat"><div class="label"><i data-i="star" data-s="14"></i>Free plans</div><div class="value">4</div><div class="meta">Cloudflare, Tailscale, GitHub, ntfy</div></div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-h"><h3><i data-i="list"></i>Recurring</h3>
+        <div class="actions"><div class="chips" data-single><button class="chip on">All</button><button class="chip">Domains</button><button class="chip">Servers</button><button class="chip">Power</button></div></div></div>
+      <table class="table">
+        <thead><tr><th>What</th><th>Provider · account</th><th>Next</th><th class="r">Cost</th><th class="r hide-md">Per month</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><span class="row"><span class="ico sm" style="--c:#123f6d">O</span><span><b>ovh-web-1</b><div class="muted xs">VPS · project Acme</div></span></span></td>
+            <td class="small">OVH<div class="muted xs">nic dw1234-ovh · Revolut ··42</div></td>
+            <td class="small">Dec 18<div class="xs"><span class="badge ok xs">auto</span></div></td>
+            <td class="r mono">€5.99 <span class="muted xs">/mo</span></td><td class="r mono hide-md">€5.99</td>
+          </tr>
+          <tr>
+            <td><span class="row"><span class="ico sm" style="--c:#e57000">P</span><span><b>Proxmox server · power</b><div class="muted xs"><span class="badge xs plug-b"><i data-i="zap" data-s="11"></i>Power plugin</span> Home Assistant · 45 W avg · <button class="linklike" style="color:var(--accent)" data-drawer="power">settings</button></div></span></span></td>
+            <td class="small">Electricity<div class="muted xs">home</div></td>
+            <td class="small muted">monthly</td>
+            <td class="r mono">€8.10 <span class="muted xs">/mo</span></td><td class="r mono hide-md">€8.10</td>
+          </tr>
+          <tr class="link-row">
+            <td><span class="row"><span class="ico sm" style="--c:#f38020">S</span><span><a href="domain.html"><b>home.example</b></a><div class="muted xs">domain · home lab</div></span></span></td>
+            <td class="small">Cloudflare Registrar<div class="muted xs">Google · d•••@gmail.com</div></td>
+            <td class="small">Apr 2, 2027<div class="xs"><span class="badge ok xs">auto</span></div></td>
+            <td class="r mono">€9.60 <span class="muted xs">/yr</span></td><td class="r mono hide-md">€0.80</td>
+          </tr>
+          <tr>
+            <td><span class="row"><span class="ico sm" style="--c:#7c3aed">N</span><span><a href="domain.html"><b>acme-app.com</b></a><div class="muted xs">domain · project Acme</div></span></span></td>
+            <td class="small">OVH<div class="muted xs">nic dw1234-ovh</div></td>
+            <td class="small">Aug 14, 2027<div class="xs"><span class="badge ok xs">auto</span></div></td>
+            <td class="r mono">€11.99 <span class="muted xs">/yr</span></td><td class="r mono hide-md">€1.00</td>
+          </tr>
+          <tr class="unmatched">
+            <td><span class="row"><span class="ico sm" style="--c:#64748b">O</span><span><a href="domain.html"><b>old-blog.net</b></a><div class="muted xs">domain · not used by anything</div></span></span></td>
+            <td class="small">OVH<div class="muted xs">nic dw1234-ovh</div></td>
+            <td class="small warn-t">Dec 10 · 24 d<div class="xs"><span class="badge warn xs">auto off</span></div></td>
+            <td class="r mono">€14.49 <span class="muted xs">/yr</span></td><td class="r mono hide-md">€1.21</td>
+          </tr>
+          <tr class="free">
+            <td><span class="row"><span class="ico sm" style="--c:#f38020">C</span><span><b>Cloudflare</b><div class="muted xs">DNS · Tunnel · free plan</div></span></span></td>
+            <td class="small">Cloudflare<div class="muted xs">Google · d•••@gmail.com</div></td>
+            <td class="small muted">—</td>
+            <td class="r"><span class="badge xs">free</span></td><td class="r mono hide-md muted">€0</td>
+          </tr>
+          <tr class="free">
+            <td><span class="row"><span class="ico sm" style="--c:#111827">T</span><span><b>Tailscale</b><div class="muted xs">Personal · up to 3 users</div></span></span></td>
+            <td class="small">Tailscale<div class="muted xs">GitHub sign-in</div></td>
+            <td class="small muted">—</td>
+            <td class="r"><span class="badge xs">free</span></td><td class="r mono hide-md muted">€0</td>
+          </tr>
+        </tbody>
+        <tfoot><tr><td colspan="3"><b>Total</b></td><td class="r mono"><b>€205.16 /yr</b></td><td class="r mono hide-md"><b>€17.10</b></td></tr></tfoot>
+      </table>
+      <div class="card-f">Domains and OVH services are filled in by sync. Electricity comes from the optional <b>Power plugin</b> — without it, this page just shows bills and renewals. <button class="linklike" style="color:var(--accent)" data-drawer="power">Plugin settings</button></div>
+    </div>
+
+    <div class="stack">
+      <div class="card">
+        <div class="card-h"><h3><i data-i="layout"></i>By provider</h3><span class="muted small" style="margin-left:auto">per year</span></div>
+        <div class="card-b stack" style="gap:12px">
+          <div class="split"><div class="row small"><span>OVH</span><span class="spacer"></span><span class="mono">€98.36</span><span class="muted xs" style="width:34px;text-align:right">48%</span></div><div class="bar"><i style="width:48%;background:#5b8def"></i></div></div>
+          <div class="split"><div class="row small"><span>Electricity</span><span class="spacer"></span><span class="mono">€97.20</span><span class="muted xs" style="width:34px;text-align:right">47%</span></div><div class="bar"><i style="width:47%;background:#e5a000"></i></div></div>
+          <div class="split"><div class="row small"><span>Cloudflare</span><span class="spacer"></span><span class="mono">€9.60</span><span class="muted xs" style="width:34px;text-align:right">5%</span></div><div class="bar"><i style="width:5%;background:#f38020"></i></div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-h"><h3><i data-i="folder"></i>By project</h3><span class="muted small" style="margin-left:auto">per year</span></div>
+        <div class="card-b stack" style="gap:12px">
+          <div class="split"><div class="row small"><span>Home lab</span><span class="spacer"></span><span class="mono">€106.80</span></div><div class="bar"><i style="width:52%;background:#5b9cff"></i></div></div>
+          <div class="split"><div class="row small"><a href="project.html">Acme</a><span class="spacer"></span><span class="mono">€83.87</span></div><div class="bar"><i style="width:41%;background:#7c3aed"></i></div></div>
+          <div class="split"><div class="row small"><span class="warn-t">Not used by anything</span><span class="spacer"></span><span class="mono">€14.49</span></div><div class="bar warn"><i style="width:7%"></i></div></div>
+        </div>
+        <div class="card-f">Costs follow the project of the host or domain they belong to.</div>
+      </div>
+
+      <div class="card">
+        <div class="card-h"><h3><i data-i="cpu"></i>Hardware</h3><span class="muted small" style="margin-left:auto">one-time</span></div>
+        <table class="table">
+          <tbody>
+            <tr><td><b>Mini PC · Proxmox</b><div class="muted xs">bought Mar 2024 · warranty to Mar 2027</div></td><td class="r mono">€420</td></tr>
+            <tr><td><b>Raspberry Pi 4 · sensors</b><div class="muted xs">bought Mar 2025 · warranty to Mar 2027</div></td><td class="r mono">€75</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+<template id="drawer-power">
+  <div class="drawer-h">
+    <span class="ico" style="--c:#e5a000"><i data-i="zap" data-s="16"></i></span>
+    <div><h2>Power plugin</h2><div class="sub">Optional. Adds electricity to Costs and live watts to host pages. Uninstall it and nothing else changes.</div></div>
+    <button class="btn ghost sm icon close" data-close><i data-i="x"></i></button>
+  </div>
+  <div class="drawer-b">
+    <div>
+      <b>Where do the watts come from?</b>
+      <div class="pw-opts mt-8">
+        <label class="pw-opt"><input type="radio" name="pw" checked><div><b>Home Assistant</b><span class="badge ok xs">detected · 192.168.10.200</span>
+          <small>Uses the power sensors you already have in HA (smart plugs, UPS, energy meters). Needs a long-lived access token — read-only.</small>
+          <div class="pw-map mt-8">
+            <div class="row"><span class="ico sm" style="--c:#e57000">P</span><span class="small">Proxmox server</span><span class="spacer"></span><select class="input" style="width:230px"><option>sensor.server_plug_power · 45 W</option><option>sensor.ups_load · 61 W</option><option>— none —</option></select></div>
+            <div class="row"><span class="ico sm" style="--c:#b91c1c">M</span><span class="small">MikroTik</span><span class="spacer"></span><select class="input" style="width:230px"><option>— none —</option><option>sensor.network_shelf_power · 9 W</option></select></div>
+          </div>
+          <div class="muted xs mt-8">Also used for the price: <span class="mono">sensor.electricity_price</span> if your HA has one.</div></div></label>
+        <label class="pw-opt"><input type="radio" name="pw"><div><b>Smart plug directly</b><span class="badge xs">no Home Assistant</span>
+          <small>Shelly, Tasmota or TP-Link Kasa on the local network — found by Discovery.</small></div></label>
+        <label class="pw-opt"><input type="radio" name="pw"><div><b>UPS or server management</b>
+          <small>NUT (UPS load) or IPMI / iDRAC / iLO power reading.</small></div></label>
+        <label class="pw-opt"><input type="radio" name="pw"><div><b>Estimate or type it</b><span class="badge xs">no hardware</span>
+          <small>Pick the machine type (e.g. “Mini PC i5 · 12–45 W”, combined with CPU load) or enter what a plug-in power meter shows.</small></div></label>
+      </div>
+    </div>
+    <div>
+      <b>Price per kWh</b>
+      <p class="small text-2 mt-8">From your electricity bill: “price per kWh” or “unit rate”, with taxes. Or start with the country average.</p>
+      <div class="row mt-8" style="gap:8px"><input class="input mono" style="width:110px" value="0.25"><span class="muted">€ / kWh</span><span class="spacer"></span><button class="btn sm ghost" data-say="Filled in the country average: €0.24/kWh">Country average</button></div>
+    </div>
+    <div class="alert info" style="align-items:flex-start"><i data-i="info" data-s="18"></i><div class="body"><b>45 W × 24 h × 30 days = 32.4 kWh</b><div class="muted">32.4 kWh × €0.25 = <b>€8.10 per month</b>.</div></div></div>
+  </div>
+  <div class="drawer-f"><button class="btn ghost" data-say="Power plugin removed — Costs no longer shows electricity" data-close>Uninstall plugin</button><span class="spacer"></span><button class="btn ghost" data-close>Cancel</button><button class="btn primary" data-say="Saved" data-close>Save</button></div>
+</template>
+</main>
+</div>
+</div>
+</body>
+</html>

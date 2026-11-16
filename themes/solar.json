@@ -1,0 +1,42 @@
+{
+  "id": "solar",
+  "name": "Solar",
+  "author": "Home Services",
+  "version": 1,
+  "modes": {
+    "dark": {
+      "--bg": "#0f172a",
+      "--panel": "#111c33",
+      "--panel-2": "#16233d",
+      "--text": "#e8eefc",
+      "--text-2": "#c2cde6",
+      "--muted": "#8595b5",
+      "--border": "#24324f",
+      "--border-2": "#31425f",
+      "--accent": "#7aa2ff",
+      "--accent-2": "#4f7df0",
+      "--ok": "#4ade80",
+      "--warn": "#fbbf24",
+      "--bad": "#fb7185"
+    },
+    "light": {
+      "--bg": "#f6f8fd",
+      "--panel": "#ffffff",
+      "--panel-2": "#eef3fc",
+      "--text": "#14213a",
+      "--text-2": "#334260",
+      "--muted": "#5f6f8f",
+      "--border": "#d8e1f2",
+      "--border-2": "#c5d2ea",
+      "--accent": "#2f5bd3",
+      "--accent-2": "#1f47b5",
+      "--ok": "#15803d",
+      "--warn": "#a16207",
+      "--bad": "#be123c"
+    }
+  },
+  "font": "inter",
+  "radius": 10,
+  "density": "comfortable",
+  "css": ""
+}

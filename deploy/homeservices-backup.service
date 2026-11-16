@@ -1,0 +1,18 @@
+[Unit]
+Description=Home Services SQLite backup
+Documentation=https://github.com/dawidof/home-services
+
+[Service]
+Type=oneshot
+User=homeservices
+Group=homeservices
+StateDirectory=homeservices
+Environment=HS_ADDR=:8080
+Environment=HS_DATA=/var/lib/homeservices
+EnvironmentFile=-/etc/homeservices/env
+ExecStart=/usr/local/bin/homeservices backup -keep 14
+ReadWritePaths=/var/lib/homeservices
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true

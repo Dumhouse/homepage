@@ -1,0 +1,50 @@
+{{define "content"}}
+<div class="page-head">
+  <div>
+    <h1>Projects</h1>
+    <div class="sub">What runs where — grouped, with links to code and public pages</div>
+  </div>
+  <div class="actions">
+    <label class="search-input">{{icon "search" 14}}<input placeholder="Filter projects…" data-filter="#projectCards" aria-label="Filter projects"></label>
+    <div class="chips">
+      <a class="chip {{if eq .Filter ""}}on{{end}}" href="/projects">All</a>
+      <a class="chip {{if eq .Filter "oss"}}on{{end}}" href="/projects?f=oss">Open source</a>
+      <a class="chip {{if eq .Filter "issues"}}on{{end}}" href="/projects?f=issues">Has issues</a>
+    </div>
+    <a class="btn primary" href="/projects/new">{{icon "plus" 16}}New project</a>
+  </div>
+</div>
+
+<div id="projectCards">
+{{range .Groups}}
+<div class="group-h"><h2>{{.Name}}</h2><span class="line"></span><span class="muted">{{len .Projects}}</span></div>
+<div class="pcards">
+  {{range .Projects}}
+  <a class="card pcard" href="/projects/{{.Slug}}" data-name="{{.Name}} {{.Slug}} {{.Description}}">
+    <div class="head">
+      <span class="ico lg" style="--c:{{colorFor .Name}}">{{initial .Name}}</span>
+      <div style="min-width:0;flex:1">
+        <div class="row"><h3>{{.Name}}</h3><span class="spacer"></span>
+          {{if eq .Status "archived"}}<span class="badge">archived</span>{{else if .Down}}<span class="badge warn">{{.Down}} not up</span>{{else if .SvcCount}}<span class="badge ok">healthy</span>{{end}}</div>
+        {{if .Envs}}<div class="envs mt-8">{{range .Envs}}<span class="env">{{if .Class}}<span class="dot {{.Class}}"></span>{{end}}{{.Name}}</span>{{end}}</div>{{end}}
+      </div>
+    </div>
+    {{if .Description}}<p class="desc">{{.Description}}</p>{{end}}
+    {{if .OpenSource}}<div class="row wrap gap-4"><span class="tag" style="color:var(--accent)">open source</span></div>{{end}}
+    <div class="foot">
+      {{if .RepoURL}}<span class="linkbtn" title="Code">{{icon "git" 15}}</span>{{end}}
+      {{if .PublicURL}}<span class="linkbtn" title="Public page">{{icon "globe" 15}}</span>{{end}}
+      <span class="spacer"></span>
+      <span class="muted small">{{plural .HostCount "host"}} · {{plural .SvcCount "service"}}</span>
+    </div>
+  </a>
+  {{end}}
+</div>
+{{else}}
+<div class="card"><div class="card-b">
+  <p class="muted" style="margin:0 0 10px">{{if .Filter}}No projects match this filter.{{else}}No projects yet.{{end}}</p>
+  <a class="btn" href="/projects/new">{{icon "plus" 15}} New project</a>
+</div></div>
+{{end}}
+</div>
+{{end}}

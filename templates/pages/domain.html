@@ -1,0 +1,115 @@
+{{define "content"}}
+{{$d := .Domain}}
+<div class="page-head">
+  <div class="row gap-12">
+    <span class="ico lg" style="--c:{{if $d.Registrar}}{{colorFor $d.Registrar}}{{else}}{{colorFor $d.Name}}{{end}}">{{initial $d.Name}}</span>
+    <div>
+      <div class="row"><h1>{{$d.Name}}</h1>{{if $d.AutoRenew}}<span class="badge ok" style="margin-left:6px">auto-renew on</span>{{else}}<span class="badge warn" style="margin-left:6px">auto-renew off</span>{{end}}</div>
+      <div class="sub">{{if $d.Registrar}}Bought at {{$d.Registrar}} · {{end}}{{plural (len .Records) "record"}} · used by {{plural .UsedBy "host"}}</div>
+    </div>
+  </div>
+  <div class="actions">
+    <a class="btn" href="/domains">{{icon "arrowl" 16}}Domains</a>
+    <a class="btn" href="/domains/{{$d.ID}}/edit">{{icon "edit" 16}}Edit</a>
+    <details class="menu-wrap add-pop">
+      <summary class="btn icon" aria-label="More">{{icon "dots" 16}}</summary>
+      <div class="card pop" style="width:240px">
+        <form method="post" action="/domains/{{$d.ID}}/delete" onsubmit="return confirm('Delete {{$d.Name}}?')" class="stack" style="gap:8px">
+          <span class="muted xs">Deleting is undoable from the domains list.</span>
+          <button class="btn danger sm">{{icon "trash" 14}}Delete domain</button>
+        </form>
+      </div>
+    </details>
+  </div>
+</div>
+
+{{if .FormError}}<div class="alert warn" style="margin-bottom:16px">{{icon "alert" 16}}<div class="body">{{.FormError}}</div></div>{{end}}
+
+<div class="grid-2">
+  <div class="stack">
+    <div class="card">
+      <div class="card-h"><h3>{{icon "clock" 16}}Registration</h3><span class="muted small" style="margin-left:auto" data-tip="{{if eq $d.Source "manual"}}Typed in by hand.{{else}}Imported by the {{$d.Source}} integration (Settings → Integrations); its next sync proposes updates in Changes.{{end}}">{{if eq $d.Source "manual"}}added by hand{{else}}imported from {{$d.Source}}{{end}}</span>
+        <form method="post" action="/domains/{{$d.ID}}/lookup" data-async><button class="btn sm ghost icon" data-tip="Refresh registrar and expiry from public registration data (RDAP)">{{icon "refresh" 14}}</button></form></div>
+      <div class="card-b">
+        {{if .Pretty}}
+        <div class="renew">
+          <div><div class="muted small">{{if $d.AutoRenew}}Renews{{else}}Expires{{end}}</div><b class="big {{if lt $d.DaysLeft 31}}warn-t{{end}}">{{.Pretty}}</b><div class="muted small">{{if lt $d.DaysLeft 0}}expired {{$d.DaysLeft}} days ago{{else}}in {{$d.DaysLeft}} days{{end}}</div></div>
+          <div style="flex:1;min-width:160px"><div class="bar {{if lt $d.DaysLeft 31}}warn{{end}}"><i style="width:{{.Pct}}%"></i></div><div class="row xs muted" style="margin-top:4px"><span>{{.PrevYear}}</span><span class="spacer"></span><span>{{.Pretty}}</span></div></div>
+        </div>
+        {{else}}<div class="muted small">No expiry date recorded. <a href="/domains/{{$d.ID}}/edit">Add it</a> to get reminders.</div>{{end}}
+        <dl class="kv" style="margin-top:16px">
+          <dt>Bought at</dt><dd>{{if $d.Registrar}}<span class="row"><span class="ico sm" style="--c:{{colorFor $d.Registrar}}">{{initial $d.Registrar}}</span>{{$d.Registrar}}</span>{{else}}<span class="muted">—</span>{{end}}</dd>
+          <dt>Price</dt><dd>{{if $d.PriceCents}}<b class="mono">{{money $d.PriceCents $d.Currency}}</b> / year{{else}}<span class="muted">—</span>{{end}}</dd>
+        </dl>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-h"><h3>{{icon "network" 16}}Records</h3><span class="muted small">{{len .Records}}{{if .Stale}} · {{.Stale}} {{if eq .Stale 1}}needs{{else}}need{{end}} cleanup{{end}}</span>
+        <div class="actions">
+          <details class="add-pop">
+            <summary class="btn sm">{{icon "plus" 14}}Add record</summary>
+            <div class="card pop">
+              <form method="post" action="/domains/{{$d.ID}}/records" class="form-grid">
+                <div class="field"><label>Name *</label><input class="input" name="name" required placeholder="www"></div>
+                <div class="field"><label>Type</label>
+                  <select class="input" name="type"><option>A</option><option>AAAA</option><option>CNAME</option><option>TXT</option><option>MX</option><option>NS</option><option>SRV</option><option>CAA</option></select></div>
+                <div class="field wide"><label>Content</label><input class="input" name="content" placeholder="192.168.1.240"></div>
+                <div class="field wide"><label>Goes to host</label>
+                  <select class="input" name="matched_host_id"><option value="">none</option>{{range .Hosts}}<option value="{{.ID}}">{{.Name}}</option>{{end}}</select></div>
+                <label class="row" style="gap:8px"><input type="checkbox" name="proxied"> Proxied</label>
+                <label class="row" style="gap:8px"><input type="checkbox" name="stale"> Stale</label>
+                <div class="wide"><button class="btn primary sm">Add record</button></div>
+              </form>
+            </div>
+          </details>
+        </div></div>
+      {{if .Records}}
+      <table class="table">
+        <thead><tr><th>Name</th><th>How</th><th>Goes to</th><th>Status</th><th></th></tr></thead>
+        <tbody>
+        {{range .Records}}
+          <tr {{if or .Stale (not .Host)}}class="unmatched"{{end}}>
+            <td><span class="copy" data-copy="{{.FQDN}}">{{if or (eq .Name "") (eq .Name "@")}}@{{else}}{{.Name}}{{end}}</span></td>
+            <td><span class="badge xs {{if .Proxied}}info{{end}}">{{if .Proxied}}proxied {{end}}{{.Type}}</span></td>
+            <td class="small">{{if .Host}}<a class="row" href="/hosts/{{.Host.ID}}"><span class="ico sm" style="--c:{{colorFor .Host.Name}}">{{initial .Host.Name}}</span>{{.Host.Name}} <span class="muted mono">{{.HostAddr}}</span></a>{{else}}<span class="muted">{{if .Content}}<span class="mono">{{.Content}}</span>{{else}}nothing{{end}}</span>{{end}}</td>
+            <td>{{if .Stale}}<span class="badge warn">stale · clean up</span>{{else if .Host}}<span class="badge ok">matched</span>{{else}}<span class="badge">no host</span>{{end}}</td>
+            <td class="r"><form method="post" action="/records/{{.ID}}/delete" class="inline"><input type="hidden" name="domain_id" value="{{$d.ID}}"><button class="btn sm ghost icon" data-tip="Delete record" aria-label="Delete record">{{icon "trash" 14}}</button></form></td>
+          </tr>
+        {{end}}
+        </tbody>
+      </table>
+      {{else}}<div class="card-b muted small">No records recorded. Home Services never edits DNS.</div>{{end}}
+    </div>
+
+    <div class="card">
+      <div class="card-h"><h3>{{icon "book" 16}}Notes</h3><div class="actions"><a class="btn sm" href="/domains/{{$d.ID}}/edit">{{icon "edit" 14}}Edit</a></div></div>
+      <div class="card-b small text-2">{{if $d.Notes}}{{$d.Notes}}{{else}}<span class="muted">No notes yet.</span>{{end}}</div>
+    </div>
+  </div>
+
+  <div class="stack">
+    <div class="card">
+      <div class="card-h"><h3>{{icon "key" 16}}Account</h3><span class="help" data-tip="Who can manage this domain. Losing this login means losing the domain.">?</span></div>
+      <div class="card-b acc-list" style="padding-top:4px;padding-bottom:4px">
+        <div class="acc-row">
+          <span class="acc-ic">{{icon "user" 16}}</span>
+          <div class="acc-txt"><b>{{if $d.Registrar}}{{$d.Registrar}} account{{else}}Registrar account{{end}}</b>
+            <div class="acc-meta">{{if $d.Account}}<span class="acc-acc">{{$d.Account}}</span>{{else}}<span class="muted xs">not recorded</span>{{end}}</div></div>
+          <div class="acc-sec"><span class="muted xs">no password stored</span></div>
+        </div>
+      </div>
+      <div class="card-f row" style="gap:6px">{{icon "bot" 14}}<span>AI agents see the method, account and item name — never the password.</span></div>
+    </div>
+
+    <div class="card">
+      <div class="card-h"><h3>{{icon "coin" 16}}Cost</h3></div>
+      <div class="card-b">
+        <div class="row"><b class="big mono">{{money $d.PriceCents $d.Currency}}</b><span class="muted">/ year</span><span class="spacer"></span><a class="small" href="/costs">All costs →</a></div>
+        <div class="muted xs mt-8">Domain renewals are counted on the Costs page from this entry.</div>
+      </div>
+    </div>
+  </div>
+</div>
+{{end}}
+{{define "errtoast"}}{{end}}

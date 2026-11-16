@@ -1,0 +1,10 @@
+.git
+.github
+.forgejo
+bin
+data
+demo-data
+design
+*.db
+*.db-wal
+*.db-shm

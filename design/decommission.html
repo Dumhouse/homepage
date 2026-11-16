@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Decommission openbao · Home Services</title>
+<script src="assets/boot.js?v=30"></script>
+<link rel="icon" href="assets/favicon.svg"><link rel="stylesheet" href="assets/app.css?v=32">
+<script src="assets/app.js?v=32" defer></script>
+</head>
+<body data-page="hosts" data-crumbs="Hosts|hosts.html / openbao / Decommission">
+<div class="app">
+<aside class="sidebar" id="sidebar"></aside>
+<div class="main">
+<header class="topbar" id="topbar"></header>
+<main class="content" style="max-width:980px">
+
+  <div class="page-head">
+    <div class="row gap-12" style="align-items:center">
+      <span class="ico lg" style="--c:#475569">B</span>
+      <div>
+        <h1>Decommission openbao</h1>
+        <div class="sub">192.168.10.249 · secrets server · nothing answers at this address any more</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="alert info" style="margin-bottom:18px;align-items:flex-start">
+    <i data-i="info" data-s="18"></i>
+    <div class="body"><b>Why this list?</b><div class="muted">Deleting a machine often leaves things behind — a DNS name, a proxy route, an old backup. Home Services found everything that still mentions this host. Tick items off as you go; nothing here is changed automatically.</div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-h">
+      <div class="progress-h" id="prog" style="flex:1"><b>Cleanup</b><div class="bar"><i style="width:0"></i></div><span class="n muted small">0 of 8 done</span></div>
+    </div>
+    <ul class="checklist" data-progress="#prog">
+      <li>
+        <input type="checkbox" checked disabled>
+        <div class="txt"><b>Proxmox guest</b><small>No VM or container uses 192.168.10.249 — already deleted.</small></div>
+        <span class="badge ok">checked automatically</span>
+      </li>
+      <li>
+        <input type="checkbox" checked disabled>
+        <div class="txt"><b>Caddy route <code>bao.home.example</code> on edge</b><small>Removed today 09:16 (backup: Caddyfile.bak.20261116-091627).</small></div>
+        <span class="badge ok">checked automatically</span>
+      </li>
+      <li>
+        <input type="checkbox">
+        <div class="txt"><b>Cloudflare DNS record <code>bao.home.example</code></b><small>Still resolves to Cloudflare. Delete it in home.example → DNS → Records.</small></div>
+        <a class="btn sm" href="https://dash.cloudflare.com" target="_blank"><i data-i="ext" data-s="14"></i>Open Cloudflare</a>
+      </li>
+      <li>
+        <input type="checkbox">
+        <div class="txt"><b>Proxmox backups</b><small>Check <code>local</code> storage for old vzdump files of this guest.</small></div>
+        <span class="copy" data-copy="ssh root@192.168.10.250 'ls -lh /var/lib/vz/dump/ | grep -i bao'">find backups</span>
+      </li>
+      <li>
+        <input type="checkbox">
+        <div class="txt"><b>SSH known_hosts on your Mac</b><small>An old key for 192.168.10.249 would warn if the IP is reused.</small></div>
+        <span class="copy">ssh-keygen -R 192.168.10.249</span>
+      </li>
+      <li>
+        <input type="checkbox">
+        <div class="txt"><b>Secrets that pointed at OpenBao</b><small>Apps now read from Clavis. Search Clavis and Vaultwarden for “bao”.</small></div>
+        <a class="btn sm" href="https://192.168.10.234" target="_blank"><i data-i="ext" data-s="14"></i>Open Clavis</a>
+      </li>
+      <li>
+        <input type="checkbox">
+        <div class="txt"><b>Projects &amp; links</b><small>No projects link to this host.</small></div>
+        <span class="badge ok">nothing found</span>
+      </li>
+      <li>
+        <input type="checkbox">
+        <div class="txt"><b>Release the IP address</b><small>192.168.10.249 goes back to the free pool on the network map.</small></div>
+        <span class="badge outline">on archive</span>
+      </li>
+    </ul>
+    <div class="card-f row">
+      <span>Archived hosts stay searchable with their history; you can restore them.</span>
+      <span class="spacer"></span>
+      <a class="btn ghost" href="hosts.html">Later</a>
+      <button class="btn primary" data-say="openbao archived · IP released" data-undo><i data-i="check"></i>Archive host</button>
+    </div>
+  </div>
+
+</main>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,22 @@
+[
+  {"service": "proxmox", "title": ["proxmox ve", "proxmox"], "ports": [8006]},
+  {"service": "caddy", "title": ["caddy"], "ports": [2019]},
+  {"service": "forgejo", "title": ["forgejo", "gitea"], "ports": [3000]},
+  {"service": "vaultwarden", "title": ["vaultwarden", "bitwarden web vault"]},
+  {"service": "ntfy", "title": ["ntfy"]},
+  {"service": "grafana", "title": ["grafana"], "ports": [3000]},
+  {"service": "portainer", "title": ["portainer"], "ports": [9000, 9443]},
+  {"service": "home-assistant", "title": ["home assistant"], "ports": [8123]},
+  {"service": "prometheus", "title": ["prometheus"], "ports": [9090]},
+  {"service": "plex", "title": ["plex"], "ports": [32400]},
+  {"service": "jellyfin", "title": ["jellyfin"], "ports": [8096]},
+  {"service": "nextcloud", "title": ["nextcloud"]},
+  {"service": "immich", "title": ["immich"]},
+  {"service": "truenas", "title": ["truenas"]},
+  {"service": "synology", "title": ["synology", "diskstation"]},
+  {"service": "unifi", "title": ["unifi", "unifi os"]},
+  {"service": "pihole", "title": ["pi-hole", "pihole"]},
+  {"service": "ssh", "banner": ["ssh-2.0", "openssh"]},
+  {"service": "postgres", "banner": ["postgresql"]},
+  {"service": "redis", "banner": ["redis"]}
+]

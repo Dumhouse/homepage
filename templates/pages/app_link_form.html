@@ -1,0 +1,54 @@
+{{define "content"}}
+<div class="page-head">
+  <div>
+    <h1>Edit {{.Link.Label}}</h1>
+    <div class="sub"><a href="/projects/{{.Project.Slug}}">{{.Project.Name}}</a> · {{.Link.Kind}}</div>
+  </div>
+  <div class="actions"><a class="btn ghost" href="/projects/{{.Project.Slug}}">Cancel</a></div>
+</div>
+
+{{if .Error}}<div class="card err" style="margin-bottom:16px"><div class="card-b">{{icon "alert" 15}} {{.Error}}</div></div>{{end}}
+
+<form method="post" action="/app-links/{{.Link.ID}}">
+  <section class="card">
+    <div class="card-h"><h3>{{icon "link" 15}}App link</h3></div>
+    <div class="card-b form-grid">
+      <div class="field"><label>Label *</label><input class="input" name="label" required value="{{.Link.Label}}"></div>
+      <div class="field"><label>Kind</label>
+        <select class="input" name="kind">
+          {{range $k := (list "page" "admin" "jobs" "db" "docs" "health" "mcp" "other")}}
+          <option value="{{$k}}" {{if eq $k $.Link.Kind}}selected{{end}}>{{$k}}</option>
+          {{end}}
+        </select>
+      </div>
+      <div class="field"><label>Path</label><input class="input" name="path" value="{{.Link.Path}}" placeholder="/sidekiq"></div>
+      <div class="field"><label>Or absolute URL</label><input class="input" name="url" value="{{.Link.OverrideURL}}" placeholder="https://…"></div>
+      <div class="field"><label>Only in env</label>
+        <select class="input" name="only_env">
+          <option value="">all environments</option>
+          {{range .Project.Envs}}<option value="{{.Name}}" {{if eq .Name $.Link.OnlyEnv}}selected{{end}}>{{.Name}}</option>{{end}}
+        </select>
+      </div>
+      <div class="field"><label>Access id</label><input class="input" name="access_id" inputmode="numeric" value="{{if .Link.AccessID}}{{.Link.AccessID}}{{end}}" placeholder="optional"></div>
+      <div class="field"><label>Icon</label><input class="input" name="icon" value="{{.Link.Icon}}"></div>
+      <div class="field"><label>Sort</label><input class="input" name="sort" inputmode="numeric" value="{{if .Link.Sort}}{{.Link.Sort}}{{end}}"></div>
+      <label class="row" style="gap:8px"><input type="checkbox" name="health_check" {{if .Link.HealthCheck}}checked{{end}}> Health check</label>
+    </div>
+    <div class="card-f row" style="gap:8px">
+      <button class="btn primary">{{icon "check" 15}} Save changes</button>
+      <a class="btn ghost" href="/projects/{{.Project.Slug}}">Cancel</a>
+    </div>
+  </section>
+</form>
+
+<section class="card" style="margin-top:16px">
+  <div class="card-b row">
+    <span class="muted small" style="margin-right:auto">Delete this link if the page no longer exists.</span>
+    <form method="post" action="/app-links/{{.Link.ID}}/delete">
+      <input type="hidden" name="back" value="/projects/{{.Project.Slug}}">
+      <button class="btn danger">{{icon "trash" 15}} Delete link</button>
+    </form>
+  </div>
+</section>
+{{end}}
+{{define "errtoast"}}{{end}}

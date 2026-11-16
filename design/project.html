@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Acme · Home Services</title>
+<script src="assets/boot.js?v=30"></script>
+<link rel="icon" href="assets/favicon.svg"><link rel="stylesheet" href="assets/app.css?v=32">
+<script src="assets/app.js?v=32" defer></script>
+</head>
+<body data-page="projects" data-crumbs="Projects|projects.html / Acme">
+<div class="app">
+<aside class="sidebar" id="sidebar"></aside>
+<div class="main">
+<header class="topbar" id="topbar"></header>
+<main class="content">
+
+  <div class="page-head">
+    <div class="row gap-12" style="align-items:center">
+      <span class="ico xl" style="--c:#7c3aed">N</span>
+      <div>
+        <div class="row"><h1>Acme</h1><span class="badge outline" style="margin-left:6px">Work</span></div>
+        <div class="sub" style="max-width:640px">Rails API + Next.js web with pgvector search, background workers and S3 storage.</div>
+        <div class="row wrap mt-8"><span class="tag">rails</span><span class="tag">nextjs</span><span class="tag">postgres</span><span class="tag">docker</span></div>
+      </div>
+    </div>
+    <div class="actions">
+      <span class="openbtns"><a class="btn primary" href="https://acme.192.168.10.240.sslip.io" target="_blank" rel="noopener" data-tip="Staging on your LAN · acme.192.168.10.240.sslip.io"><i data-i="home"></i>Open staging</a><a class="btn primary" href="https://acme.example.com" target="_blank" rel="noopener" data-tip="Public site · acme.example.com"><i data-i="globe"></i></a></span>
+      <a class="btn" href="http://192.168.10.247:3000/alex/acme" target="_blank" rel="noopener"><span style="color:#ff6600"><i data-i="git"></i></span>Forgejo</a>
+      <a class="btn" href="host-edit.html"><i data-i="edit"></i>Edit</a>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <a class="active" href="#">Staging <span class="count">8</span></a>
+    <a href="#" data-todo>Production <span class="count">3</span></a>
+    <a href="#" data-todo>Runbook</a>
+    <a href="#" data-todo>Timeline</a>
+  </div>
+
+  <div class="grid-2">
+    <div class="stack">
+
+      <div class="card" id="app-links" data-envs='{"staging":"https://acme.192.168.10.240.sslip.io","production":"https://acme.example.com"}'>
+        <div class="card-h"><h3><i data-i="link"></i>App links</h3><span class="help" data-tip="Pages inside the app — admin, Sidekiq, MCP… Paths are added to the environment’s address, so one list works for staging and production.">?</span>
+          <div class="actions"><div class="seg env-seg"><button class="on" data-env="staging">Staging</button><button data-env="production">Production</button></div>
+          <button class="btn sm" data-todo><i data-i="plus"></i>Add link</button></div></div>
+        <div class="card-b al-list">
+          <div class="al-base muted small"><i data-i="globe" data-s="13"></i>Base: <span class="mono al-base-u">https://acme.192.168.10.240.sslip.io</span></div>
+          <div class="al-row">
+            <span class="al-ic" style="--c:#7c3aed"><i data-i="home" data-s="15"></i></span>
+            <div class="al-main"><b>Site</b><span class="copy al-u mono xs" data-path="/">/</span></div>
+            <div class="al-login"><span class="badge xs ok">public</span></div>
+            <a class="btn sm al-open" data-path="/" target="_blank" rel="noopener"><i data-i="ext" data-s="14"></i><span class="hide-sm">Open</span></a>
+          </div>
+          <div class="al-row">
+            <span class="al-ic" style="--c:#7c3aed"><i data-i="edit" data-s="15"></i></span>
+            <div class="al-main"><b>Admin</b><span class="copy al-u mono xs" data-path="/admin">/admin</span></div>
+            <div class="al-login"><span class="badge xs ">email + password</span><span class="acc-acc">admin@acme.lan</span><a class="vw-link sm" href="https://vault.home.example/#/vault?itemId=a1f3" target="_blank" rel="noopener" data-tip="Open in Vaultwarden — password is not stored here"><i data-i="lock" data-s="12"></i>Acme admin</a></div>
+            <a class="btn sm al-open" data-path="/admin" target="_blank" rel="noopener"><i data-i="ext" data-s="14"></i><span class="hide-sm">Open</span></a>
+          </div>
+          <div class="al-row">
+            <span class="al-ic" style="--c:#b1003e"><b style="font-size:11px">SK</b></span>
+            <div class="al-main"><b>Sidekiq</b><span class="copy al-u mono xs" data-path="/sidekiq">/sidekiq</span><span class="badge xs ok">3 busy · 0 failed</span></div>
+            <div class="al-login"><span class="badge xs ">basic auth</span><span class="acc-acc">sidekiq</span><a class="vw-link sm" href="https://vault.home.example/#/vault?itemId=f210" target="_blank" rel="noopener" data-tip="Open in Vaultwarden — password is not stored here"><i data-i="lock" data-s="12"></i>Acme Sidekiq</a></div>
+            <a class="btn sm al-open" data-path="/sidekiq" target="_blank" rel="noopener"><i data-i="ext" data-s="14"></i><span class="hide-sm">Open</span></a>
+          </div>
+          <div class="al-row">
+            <span class="al-ic" style="--c:#336791"><i data-i="db" data-s="15"></i></span>
+            <div class="al-main"><b>PgHero</b><span class="copy al-u mono xs" data-path="/pghero">/pghero</span></div>
+            <div class="al-login"><span class="badge xs ">basic auth</span><span class="acc-acc">pghero</span><a class="vw-link sm" href="https://vault.home.example/#/vault?itemId=f2a8" target="_blank" rel="noopener" data-tip="Open in Vaultwarden — password is not stored here"><i data-i="lock" data-s="12"></i>Acme PgHero</a></div>
+            <a class="btn sm al-open" data-path="/pghero" target="_blank" rel="noopener"><i data-i="ext" data-s="14"></i><span class="hide-sm">Open</span></a>
+          </div>
+          <div class="al-row">
+            <span class="al-ic" style="--c:#0ea5a4"><i data-i="book" data-s="15"></i></span>
+            <div class="al-main"><b>API docs</b><span class="copy al-u mono xs" data-path="/api-docs">/api-docs</span></div>
+            <div class="al-login"><span class="badge xs warn">no login</span></div>
+            <a class="btn sm al-open" data-path="/api-docs" target="_blank" rel="noopener"><i data-i="ext" data-s="14"></i><span class="hide-sm">Open</span></a>
+          </div>
+          <div class="al-row">
+            <span class="al-ic" style="--c:#16a34a"><i data-i="activity" data-s="15"></i></span>
+            <div class="al-main"><b>Health</b><span class="copy al-u mono xs" data-path="/up">/up</span><span class="badge xs ok">200 · 31 ms</span></div>
+            <div class="al-login"><span class="badge xs ">no login</span></div>
+            <a class="btn sm al-open" data-path="/up" target="_blank" rel="noopener"><i data-i="ext" data-s="14"></i><span class="hide-sm">Open</span></a>
+          </div>
+          <div class="al-row">
+            <span class="al-ic" style="--c:#d97706"><i data-i="bot" data-s="15"></i></span>
+            <div class="al-main"><b>MCP server</b><span class="copy al-u mono xs" data-path="/mcp">/mcp</span><button class="badge xs info" style="border:0;cursor:pointer" data-drawer="mcp-connect">connect an agent</button></div>
+            <div class="al-login"><span class="badge xs ">bearer token</span><span class="acc-acc">Streamable HTTP</span><a class="vw-link sm" href="https://vault.home.example/#/vault?itemId=f3c4" target="_blank" rel="noopener" data-tip="Open in Vaultwarden — password is not stored here"><i data-i="lock" data-s="12"></i>Acme MCP token</a></div>
+            <a class="btn sm al-open" data-path="/mcp" target="_blank" rel="noopener"><i data-i="ext" data-s="14"></i><span class="hide-sm">Open</span></a>
+          </div>
+          <div class="al-row" data-only="staging">
+            <span class="al-ic" style="--c:#64748b"><i data-i="activity" data-s="15"></i></span>
+            <div class="al-main"><b>Mailpit</b><span class="copy al-u mono xs">192.168.10.240:8025</span></div>
+            <div class="al-login"><span class="badge xs warn">no login</span><span class="acc-acc">LAN only</span></div>
+            <a class="btn sm al-open" href="http://192.168.10.240:8025" target="_blank" rel="noopener"><i data-i="ext" data-s="14"></i><span class="hide-sm">Open</span></a>
+          </div>
+        </div>
+        <div class="card-f row wrap" style="gap:8px"><i data-i="zap" data-s="14"></i><span>Found in <span class="mono">config/routes.rb</span> on Forgejo:</span>
+          <button class="chip" data-say="Added /flipper — set its login?">+ /flipper</button><button class="chip" data-say="Added /rails/active_storage">+ /letter_opener</button>
+          <span class="spacer"></span><span class="muted xs">AI agents see these links and login methods — not the passwords.</span></div>
+      </div>
+
+      <div class="card" id="connected">
+        <div class="card-h"><h3><i data-i="zap"></i>Connected services</h3><span class="muted small">what Acme uses outside its own containers</span>
+          <div class="actions"><button class="btn sm" data-todo><i data-i="plus"></i>Connect</button></div></div>
+        <div class="card-b">
+          <div class="deploy">
+            <div class="deploy-h"><b>How it deploys</b><span class="badge ok xs">last: success · 3 h ago · 2 m 14 s</span><span class="spacer"></span>
+              <a class="btn sm ghost" href="http://192.168.10.247:3000/alex/acme/actions" target="_blank" rel="noopener"><i data-i="ext" data-s="14"></i>View run</a></div>
+            <div class="pipe">
+              <div class="pipe-s ok"><i data-i="git" data-s="15"></i><div><b>Push to main</b><small>a91f3c2 · Fix search ranking</small></div></div>
+              <span class="pipe-a">→</span>
+              <div class="pipe-s ok"><span class="mini-ico" style="--c:#ff6600">F</span><div><b>Forgejo Actions</b><small>build + test · 1 m 40 s</small></div></div>
+              <span class="pipe-a">→</span>
+              <div class="pipe-s ok"><span class="mini-ico" style="--c:#2496ed">R</span><div><b>Registry</b><small>acme:a91f3c2</small></div></div>
+              <span class="pipe-a">→</span>
+              <div class="pipe-s ok"><i data-i="terminal" data-s="15"></i><div><b>deploy@.240</b><small>clavis run → compose up</small></div></div>
+              <span class="pipe-a">→</span>
+              <div class="pipe-s ok"><i data-i="activity" data-s="15"></i><div><b>Health /up</b><small>200 · ntfy “deployed”</small></div></div>
+            </div>
+            <div class="muted xs" style="margin-top:8px">Read from <span class="mono">.forgejo/workflows/deploy.yml</span>. Home Services only shows deploys — it never runs them.</div>
+          </div>
+          <div class="cs-grid">
+          <div class="cs" data-url="http://192.168.10.247:3000/alex/acme" tabindex="0" role="link" aria-label="Open Forgejo">
+            <span class="ico" style="--c:#ff6600">F</span>
+            <div class="cs-t"><div class="row"><b>Forgejo</b><span class="dot ok"></span></div><span class="cs-role">Code · CI</span>
+              <span class="cs-d">alex/acme · push 3 h ago</span></div>
+            <span class="help cs-imp" data-tip="If Forgejo is down: no new deploys; the running app is fine">!</span>
+          </div>
+          <div class="cs" data-url="https://github.com" tabindex="0" role="link" aria-label="Open GitHub">
+            <span class="ico" style="--c:#24292f">G</span>
+            <div class="cs-t"><div class="row"><b>GitHub</b><span class="dot ok"></span></div><span class="cs-role">Public mirror</span>
+              <span class="cs-d">alex/acme · synced 3 h ago</span></div>
+            <span class="help cs-imp" data-tip="If GitHub is down: mirror lags behind; nothing breaks">!</span>
+          </div>
+          <div class="cs" data-url="http://192.168.10.40:5000" tabindex="0" role="link" aria-label="Open Docker registry">
+            <span class="ico" style="--c:#2496ed">R</span>
+            <div class="cs-t"><div class="row"><b>Docker registry</b><span class="dot ok"></span></div><span class="cs-role">Images</span>
+              <span class="cs-d">192.168.10.40:5000/acme · 14 tags</span></div>
+            <span class="help cs-imp" data-tip="If Docker registry is down: deploys can’t pull new images">!</span>
+          </div>
+          <div class="cs" data-url="https://192.168.10.234" tabindex="0" role="link" aria-label="Open Clavis">
+            <span class="ico" style="--c:#d97706">C</span>
+            <div class="cs-t"><div class="row"><b>Clavis</b><span class="dot ok"></span></div><span class="cs-role">Secrets</span>
+              <span class="cs-d">project acme · staging · 23 keys</span></div>
+            <span class="help cs-imp" data-tip="If Clavis is down: deploys fail (no env vars); running app is fine">!</span>
+          </div>
+          <div class="cs" data-url="https://vault.home.example" tabindex="0" role="link" aria-label="Open Vaultwarden">
+            <span class="ico" style="--c:#175ddc">V</span>
+            <div class="cs-t"><div class="row"><b>Vaultwarden</b><span class="dot ok"></span></div><span class="cs-role">Logins</span>
+              <span class="cs-d">folder “Acme” · 5 items</span></div>
+            <span class="help cs-imp" data-tip="If Vaultwarden is down: you can’t look up logins">!</span>
+          </div>
+          <div class="cs" data-url="https://ntfy.home.example" tabindex="0" role="link" aria-label="Open ntfy">
+            <span class="ico" style="--c:#317f6f">N</span>
+            <div class="cs-t"><div class="row"><b>ntfy</b><span class="dot ok"></span></div><span class="cs-role">Alerts</span>
+              <span class="cs-d">topic acme-staging</span></div>
+            <span class="help cs-imp" data-tip="If ntfy is down: no phone alerts for Acme">!</span>
+          </div>
+          <div class="cs" data-url="https://www.ovh.com/manager/" tabindex="0" role="link" aria-label="Open OVH">
+            <span class="ico" style="--c:#123f6d">O</span>
+            <div class="cs-t"><div class="row"><b>OVH</b><span class="dot "></span></div><span class="cs-role">Domain · VPS</span>
+              <span class="cs-d">acme-app.com · ovh-web-1</span></div>
+            <span class="help cs-imp" data-tip="If OVH is down: production may be down">!</span>
+          </div>
+          <div class="cs" data-url="http://192.168.10.245" tabindex="0" role="link" aria-label="Open BookStack">
+            <span class="ico" style="--c:#0288d1">B</span>
+            <div class="cs-t"><div class="row"><b>BookStack</b><span class="dot ok"></span></div><span class="cs-role">Docs</span>
+              <span class="cs-d">book “Acme” · 12 pages</span></div>
+            <span class="help cs-imp" data-tip="If BookStack is down: docs unavailable">!</span>
+          </div>
+          <div class="cs" data-url="http://192.168.10.240:8333" tabindex="0" role="link" aria-label="Open SeaweedFS">
+            <span class="ico" style="--c:#e0533d">S</span>
+            <div class="cs-t"><div class="row"><b>SeaweedFS</b><span class="dot ok"></span></div><span class="cs-role">S3 storage</span>
+              <span class="cs-d">bucket acme-uploads · on this host</span></div>
+            <span class="help cs-imp" data-tip="If SeaweedFS is down: uploads and images fail">!</span>
+          </div>
+          </div>
+          <div class="cs-suggest"><i data-i="info" data-s="14"></i><span>Found <span class="mono">SENTRY_DSN</span> in Clavis keys — add Sentry as a connected service?</span><span class="spacer"></span><button class="btn sm" data-say="Sentry added — set its URL and login">Add Sentry</button><button class="btn sm ghost" data-say="Hidden">Ignore</button></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-h"><h3><i data-i="server"></i>Runs on</h3>
+          <div class="actions"><button class="btn sm" data-todo><i data-i="link"></i>Link host / service</button></div></div>
+        <div class="card-b">
+          <a class="row" href="host.html" style="padding:4px 0">
+            <span class="ico" style="--c:#7c3aed">N</span>
+            <div><b>acme-staging</b><div class="muted small">LXC · Proxmox · .250</div></div>
+            <span class="spacer"></span>
+            <span class="copy" data-copy="ssh deploy@192.168.10.240">deploy@192.168.10.240</span>
+            <span class="badge warn">7 / 8 up</span>
+          </a>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-h"><h3><i data-i="network"></i>How it connects</h3><span class="muted small">auto-built from proxy routes + service links</span></div>
+        <div class="card-b diagram">
+          <svg viewBox="0 0 720 230" role="img" aria-label="Dependency diagram">
+            <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" fill="var(--border-2)"/></marker></defs>
+            <path class="edge ok" d="M130 115 H190"/>
+            <path class="edge ok" d="M330 115 C360 115 360 50 390 50"/>
+            <path class="edge ok" d="M330 115 C360 115 360 180 390 180"/>
+            <path class="edge ok" d="M530 50 C560 50 560 30 590 30"/>
+            <path class="edge ok" d="M530 50 C560 50 560 95 590 95"/>
+            <path class="edge ok" d="M530 180 C560 180 560 95 590 95"/>
+            <path class="edge ok" d="M530 180 C560 180 560 160 590 160"/>
+            <path class="edge" d="M530 180 C560 180 560 210 590 210" stroke-dasharray="4 4" style="stroke:var(--bad)"/>
+            <g class="node"><rect x="10" y="95" width="120" height="40" rx="8"/><text x="22" y="113">Internet</text><text class="sub" x="22" y="127">via Caddy :443</text></g>
+            <g class="node"><rect x="190" y="95" width="140" height="40" rx="8"/><text x="202" y="113">caddy</text><text class="sub" x="202" y="127">:80 :443</text></g>
+            <g class="node"><rect x="390" y="30" width="140" height="40" rx="8"/><text x="402" y="48">web · Next.js</text><text class="sub" x="402" y="62">:3000</text></g>
+            <g class="node"><rect x="390" y="160" width="140" height="40" rx="8"/><text x="402" y="178">api · Rails</text><text class="sub" x="402" y="192">:80 + worker</text></g>
+            <g class="node"><rect x="590" y="12" width="120" height="36" rx="8"/><text x="602" y="34">s3 :8333</text></g>
+            <g class="node"><rect x="590" y="77" width="120" height="36" rx="8"/><text x="602" y="99">postgres :5432</text></g>
+            <g class="node"><rect x="590" y="142" width="120" height="36" rx="8"/><text x="602" y="164">redis :6379</text></g>
+            <g class="node"><rect x="590" y="192" width="120" height="36" rx="8" style="stroke:var(--bad)"/><text x="602" y="214">mailpit :8025</text></g>
+          </svg>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-h"><h3><i data-i="book"></i>Runbook</h3><div class="actions"><button class="btn sm" data-todo><i data-i="edit"></i>Edit</button></div></div>
+        <div class="card-b md">
+          <h4>Deploy to staging</h4>
+          <ol>
+            <li>Push to <code>main</code> on Forgejo — CI builds images.</li>
+            <li>On the host: <code>cd /opt/acme-staging && docker compose pull && docker compose up -d</code></li>
+            <li>Run migrations: <code>docker compose exec api bin/rails db:migrate</code></li>
+          </ol>
+          <h4>Secrets</h4>
+          <p>All env vars come from Clavis project <code>acme</code>, env <code>staging</code> via <code>clavis run</code>.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="stack">
+      <div class="card">
+        <div class="card-h"><h3><span style="color:#ff6600"><i data-i="git"></i></span>Forgejo</h3><span class="muted small" style="margin-left:auto">alex/acme</span></div>
+        <div class="card-b">
+          <dl class="kv">
+            <dt>Last commit</dt><dd><code>a91f3c2</code> Fix search ranking <span class="muted small">· 3 h ago</span></dd>
+            <dt>CI</dt><dd><span class="badge ok"><i data-i="check"></i>passed</span> <span class="muted small">4 m 12 s</span></dd>
+            <dt>Latest release</dt><dd><span class="badge info">v0.14.2</span> <span class="muted small">yesterday</span></dd>
+            <dt>Open issues</dt><dd>7 · <span class="muted">2 PRs</span></dd>
+          </dl>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-h"><h3><i data-i="key"></i>Access</h3><span class="help" data-tip="How to log in to each part. Passwords stay in Vaultwarden; this card only links to the item.">?</span><div class="actions"><button class="btn sm ghost icon" data-todo data-tip="Add login"><i data-i="plus"></i></button></div></div>
+        <div class="card-b acc-list" style="padding-top:4px;padding-bottom:4px">
+          <div class="acc-row">
+            <span class="acc-ic"><i data-i="globe" data-s="16"></i></span>
+            <div class="acc-txt"><b>acme.example.com · admin</b><a class="mono xs muted" href="https://acme.example.com/admin" target="_blank" rel="noopener">acme.example.com/admin</a>
+              <div class="acc-meta"><span class="badge xs ">Sign in with Google</span><span class="acc-acc">d•••@gmail.com</span></div></div>
+            <div class="acc-sec"><span class="muted xs">no password stored</span></div>
+          </div>
+          <div class="acc-row">
+            <span class="acc-ic"><i data-i="git" data-s="16"></i></span>
+            <div class="acc-txt"><b>Forgejo repo</b><a class="mono xs muted" href="http://192.168.10.247:3000/alex/acme" target="_blank" rel="noopener">192.168.10.247:3000/alex/acme</a>
+              <div class="acc-meta"><span class="badge xs ok">SSH key</span><span class="acc-acc">alex</span></div></div>
+            <div class="acc-sec"><a class="vw-link" href="https://vault.home.example/#/vault?itemId=c19e" target="_blank" rel="noopener" data-tip="Opens the item in Vaultwarden — the password is never stored in Home Services"><i data-i="lock" data-s="13"></i>Forgejo<i data-i="ext" data-s="12"></i></a></div>
+          </div>
+          <div class="acc-row">
+            <span class="acc-ic"><i data-i="globe" data-s="16"></i></span>
+            <div class="acc-txt"><b>Domain registrar</b><a class="mono xs muted" href="https://www.ovh.com/manager/" target="_blank" rel="noopener">www.ovh.com/manager/</a>
+              <div class="acc-meta"><span class="badge xs ">email + password</span><span class="acc-acc">OVH · nic dw1234-ovh</span><span class="badge xs ok">2FA · TOTP</span></div></div>
+            <div class="acc-sec"><a class="vw-link" href="https://vault.home.example/#/vault?itemId=d04a" target="_blank" rel="noopener" data-tip="Opens the item in Vaultwarden — the password is never stored in Home Services"><i data-i="lock" data-s="13"></i>OVH account<i data-i="ext" data-s="12"></i></a></div>
+          </div>
+        </div>
+        <div class="card-f row" style="gap:6px"><i data-i="bot" data-s="14"></i><span>AI agents see the method, account and item name — never the password.</span></div>
+      </div>
+
+      <div class="card">
+        <div class="card-h"><h3><i data-i="globe"></i>Domains</h3></div>
+        <div class="card-b stack" style="gap:10px">
+          <div class="flow"><span class="copy">staging.acme.lan</span><span class="arrow">→</span><span class="mono small">192.168.10.240:443</span><span class="spacer"></span><span class="badge ok xs">TLS 61 d</span></div>
+          <a class="flow" href="domain.html"><span class="mono small">acme-app.com</span><span class="muted xs">OVH · renews Aug 14 · €11.99/yr</span><span class="spacer"></span><span class="badge xs">example</span></a>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-h"><h3><i data-i="clock"></i>Recent</h3></div>
+        <div class="card-b">
+          <ul class="tl">
+            <li class="warn"><div>mailpit down on staging</div><div class="when">14 min ago</div></li>
+            <li class="mcp"><div>Release <code>v0.14.2</code> deployed to staging</div><div class="when">yesterday · via MCP (claude-code)</div></li>
+            <li><div>Added production host <code>ovh-web-1</code></div><div class="when">Nov 9 · alex</div></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+</div>
+</div>
+</body>
+</html>

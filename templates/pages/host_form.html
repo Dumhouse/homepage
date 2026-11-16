@@ -1,0 +1,124 @@
+{{define "content"}}
+<div class="page-head">
+  <div>
+    <h1>{{if .IsNew}}New host{{else}}Edit {{.Host.Name}}{{end}}</h1>
+    <div class="sub">Addresses and SSH logins are stored here; passwords stay in Vaultwarden.</div>
+  </div>
+  <div class="actions"><a class="btn ghost" href="{{if .IsNew}}/hosts{{else}}/hosts/{{.Host.ID}}{{end}}">Cancel</a></div>
+</div>
+
+{{if .Error}}<div class="card err" style="margin-bottom:16px"><div class="card-b">{{icon "alert" 15}} {{.Error}}</div></div>{{end}}
+
+<form method="post" action="{{.Action}}">
+<div class="grid-2">
+  <div class="stack">
+    <section class="card">
+      <div class="card-h"><h3>{{icon "server" 15}}Basics</h3></div>
+      <div class="card-b form-grid">
+        <div class="field"><label for="name">Name *</label><input class="input" id="name" name="name" required value="{{.Host.Name}}" placeholder="acme-prod"></div>
+        <div class="field"><label for="hostname">Hostname</label><input class="input" id="hostname" name="hostname" value="{{.Host.Hostname}}" placeholder="acme.example.com"></div>
+        <div class="field"><label for="kind">Kind</label>
+          <select class="input" id="kind" name="kind">
+            <option value="vm" {{if eq .Host.Kind "vm"}}selected{{end}}>vm</option>
+            <option value="lxc" {{if eq .Host.Kind "lxc"}}selected{{end}}>lxc</option>
+            <option value="bare" {{if eq .Host.Kind "bare"}}selected{{end}}>bare</option>
+            <option value="vps" {{if eq .Host.Kind "vps"}}selected{{end}}>vps</option>
+          </select>
+        </div>
+        <div class="field"><label for="lifecycle">Lifecycle</label>
+          <select class="input" id="lifecycle" name="lifecycle">
+            <option value="active" {{if eq .Host.Lifecycle "active"}}selected{{end}}>active</option>
+            <option value="planned" {{if eq .Host.Lifecycle "planned"}}selected{{end}}>planned</option>
+            <option value="deprecated" {{if eq .Host.Lifecycle "deprecated"}}selected{{end}}>deprecated</option>
+            <option value="decommissioned" {{if eq .Host.Lifecycle "decommissioned"}}selected{{end}}>decommissioned</option>
+          </select>
+        </div>
+        <div class="field"><label for="location">Location</label>
+          <input class="input" id="location" name="location" list="locations" value="{{.LocationName}}" placeholder="pve1 (Proxmox at 192.168.1.250)">
+          <span class="hint">Where it physically runs: the Proxmox node, VPS provider or machine. Pick an existing one or type a new name.</span>
+          <datalist id="locations">{{range .Locations}}<option value="{{.Name}}">{{end}}</datalist>
+        </div>
+        <div class="field"><label for="tags">Tags</label><input class="input" id="tags" name="tags" list="tags" value="{{join .Host.Tags ", "}}" placeholder="prod, rails">
+          <datalist id="tags">{{range .Tags}}<option value="{{.Name}}">{{end}}</datalist></div>
+        <div class="field wide"><label for="os">OS</label><input class="input" id="os" name="os" value="{{.Host.OS}}" placeholder="Debian 13"></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-h"><h3>{{icon "globe" 15}}Addresses</h3><span class="muted small">first one is the primary</span>
+        <div class="actions"><button class="btn sm" type="button" data-add-row="addrRows">{{icon "plus" 14}}Add address</button></div></div>
+      <div class="card-b rows" id="addrRows" data-next="{{len .AddrSlots | inc}}">
+        {{range .AddrSlots}}
+        <div class="row-item" data-row-item>
+          <select class="input" name="addr_kind_{{.N}}" style="max-width:150px" aria-label="Address type">
+            <option value="lan" {{if eq .Kind "lan"}}selected{{end}}>LAN</option>
+            <option value="tailscale" {{if eq .Kind "tailscale"}}selected{{end}}>Tailscale</option>
+            <option value="public" {{if eq .Kind "public"}}selected{{end}}>Public</option>
+            <option value="other" {{if eq .Kind "other"}}selected{{end}}>Other</option>
+          </select>
+          <input class="input" name="addr_{{.N}}" value="{{.Address}}" placeholder="192.168.1.5 or host.lan" aria-label="Address">
+          <button class="btn ghost sm icon" type="button" data-remove-row data-tip="Remove" aria-label="Remove address">{{icon "x" 14}}</button>
+        </div>
+        {{end}}
+        <template><div class="row-item" data-row-item>
+          <select class="input" name="addr_kind___N__" style="max-width:150px" aria-label="Address type"><option value="lan">LAN</option><option value="tailscale">Tailscale</option><option value="public">Public</option><option value="other">Other</option></select>
+          <input class="input" name="addr___N__" placeholder="192.168.1.5 or host.lan" aria-label="Address">
+          <button class="btn ghost sm icon" type="button" data-remove-row data-tip="Remove" aria-label="Remove address">{{icon "x" 14}}</button>
+        </div></template>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-h"><h3>{{icon "key" 15}}SSH logins</h3><span class="muted small">port defaults to 22 · passwords stay in Vaultwarden</span>
+        <div class="actions"><button class="btn sm" type="button" data-add-row="sshRows">{{icon "plus" 14}}Add login</button></div></div>
+      <div class="card-b rows" id="sshRows" data-next="{{len .SSHSlots | inc}}">
+        {{range .SSHSlots}}
+        <div class="row-item" data-row-item>
+          <input class="input" name="ssh_user_{{.N}}" value="{{.User}}" placeholder="user, e.g. deploy" aria-label="SSH user">
+          <input class="input" name="ssh_port_{{.N}}" value="{{if .Port}}{{.Port}}{{end}}" placeholder="22" inputmode="numeric" style="max-width:80px;flex:none" aria-label="Port">
+          <input class="input" name="ssh_vault_{{.N}}" value="{{.Vault}}" placeholder="Vaultwarden item URL (optional)" style="flex:1.4" aria-label="Vaultwarden item">
+          <button class="btn ghost sm icon" type="button" data-remove-row data-tip="Remove" aria-label="Remove login">{{icon "x" 14}}</button>
+        </div>
+        {{end}}
+        <template><div class="row-item" data-row-item>
+          <input class="input" name="ssh_user___N__" placeholder="user, e.g. deploy" aria-label="SSH user">
+          <input class="input" name="ssh_port___N__" placeholder="22" inputmode="numeric" style="max-width:80px;flex:none" aria-label="Port">
+          <input class="input" name="ssh_vault___N__" placeholder="Vaultwarden item URL (optional)" style="flex:1.4" aria-label="Vaultwarden item">
+          <button class="btn ghost sm icon" type="button" data-remove-row data-tip="Remove" aria-label="Remove login">{{icon "x" 14}}</button>
+        </div></template>
+      </div>
+    </section>
+  </div>
+
+  <div class="stack">
+    <section class="card">
+      <div class="card-h"><h3>{{icon "info" 15}}Notes</h3></div>
+      <div class="card-b">
+        <div class="field"><label for="description">Description</label>
+          <textarea class="input" id="description" name="description" rows="5" placeholder="What runs here, anything future-you should know">{{.Host.Description}}</textarea>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-b row" style="gap:8px">
+        <button class="btn primary" type="submit">{{icon "check" 15}} {{if .IsNew}}Create host{{else}}Save changes{{end}}</button>
+        <a class="btn ghost" href="{{if .IsNew}}/hosts{{else}}/hosts/{{.Host.ID}}{{end}}">Cancel</a>
+      </div>
+    </section>
+  </div>
+</div>
+</form>
+
+{{if not .IsNew}}
+<section class="card" style="margin-top:16px">
+  <div class="card-b row">
+    <span class="muted small" style="margin-right:auto">Deleting is reversible from the hosts list (undo toast).</span>
+    <form method="post" action="/hosts/{{.Host.ID}}/delete" onsubmit="return confirm('Delete {{.Host.Name}}?')">
+      <button class="btn danger">{{icon "trash" 15}} Delete host</button>
+    </form>
+  </div>
+</section>
+{{end}}
+{{end}}
+{{define "errtoast"}}{{end}}

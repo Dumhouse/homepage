@@ -1,0 +1,121 @@
+{{define "content"}}
+<div class="page-head">
+  <div>
+    <h1>Discovery</h1>
+    <div class="sub">Scans your subnets for hosts and open ports you haven't registered yet · ports checked: <button type="button" class="linkish mono" data-drawer="scan-settings" data-tip="Change in Scan settings">{{.Ports}}</button></div>
+  </div>
+  <div class="actions">
+    <button class="btn" type="button" data-drawer="scan-settings">{{icon "sliders" 16}}Scan settings</button>
+    <form method="post" action="/discovery/scan" class="inline">
+      <button class="btn primary" {{if .Status.Running}}disabled{{end}}>{{icon "radar" 16}}{{if .Status.Running}}Scanning…{{else}}Scan now{{end}}</button>
+    </form>
+  </div>
+</div>
+
+<div class="card scan-prog" id="scanProgress" data-running="{{if .Status.Running}}1{{end}}" {{if not .Status.Running}}hidden{{end}}>
+  <div class="row small"><span class="spin"></span><b data-scan-text>Scanning {{.Status.Subnet}} · {{.Status.Percent}}%</b><span class="spacer"></span><span class="muted xs">runs in the background — you can leave this page</span></div>
+  <div class="bar"><i style="width:{{.Status.Percent}}%"></i></div>
+</div>
+{{if and (not .Status.Running) .Status.Error}}<div class="alert warn" style="margin-bottom:16px">{{icon "alert" 16}}<div class="body">Last scan had problems: {{.Status.Error}}</div></div>{{end}}
+
+<div class="subnets">
+  {{range .Subnets}}
+  <div class="card subnet">
+    <div class="row"><b class="mono">{{.CIDR}}</b><span class="spacer"></span><span class="badge {{if .New}}warn{{else}}ok{{end}}">{{.New}} new</span>
+      <form method="post" action="/discovery/scan" class="inline"><input type="hidden" name="only" value="{{.CIDR}}"><button class="btn sm ghost icon" data-tip="Scan only this subnet" aria-label="Scan {{.CIDR}}" {{if $.Status.Running}}disabled{{end}}>{{icon "radar" 14}}</button></form>
+      <form method="post" action="/discovery/subnets" class="inline" onsubmit="return confirm('Stop scanning {{.CIDR}}? Hosts already found stay.')"><input type="hidden" name="remove" value="{{.CIDR}}"><button class="btn sm ghost icon" data-tip="Remove subnet" aria-label="Remove {{.CIDR}}">{{icon "x" 14}}</button></form></div>
+    <div class="row small muted">{{icon "clock" 14}}{{if $.LastScan}}Last scan {{fmtDate $.LastScan}}{{else}}Not scanned yet{{end}}<span class="spacer"></span>{{if ne $.EveryH "0"}}every {{$.EveryH}} h{{else}}manual only{{end}}</div>
+    <div class="bar"><i style="width:{{.Pct}}%"></i></div>
+    <div class="xs muted">{{.Seen}} of {{.Size}} addresses have open ports</div>
+  </div>
+  {{end}}
+  <button type="button" class="card subnet add-subnet" data-drawer="add-subnet">
+    {{icon "plus" 16}}<span>Add subnet</span><small class="muted">Tailscale, a VLAN, a VPS network…</small>
+  </button>
+</div>
+
+<div class="group-h"><h2>Inbox · unregistered</h2><span class="line"></span>
+  <div class="chips"><a class="chip {{if eq .Show "new"}}on{{end}}" href="/discovery">New <span class="n">{{.NewN}}</span></a><a class="chip {{if eq .Show "ignored"}}on{{end}}" href="/discovery?show=ignored">Ignored <span class="n">{{.IgnoredN}}</span></a></div></div>
+<div class="card">
+  {{if .Hosts}}
+  <table class="table">
+    <thead><tr><th>Address</th><th>Looks like</th><th>Open ports</th><th>SSH offers</th><th class="hide-sm">First seen</th><th style="text-align:right">Action</th></tr></thead>
+    <tbody>
+    {{range .Hosts}}
+      {{$h := .}}
+      <tr>
+        <td><span class="copy" data-copy="{{.Address}}">{{.Address}}</span></td>
+        <td><div class="name"><span class="ico sm" style="--c:{{if .Hostname}}{{colorFor .Hostname}}{{else}}#475569{{end}}">{{if .Hostname}}{{initial .Hostname}}{{else}}?{{end}}</span><span><b>{{if .Hostname}}{{.Hostname}}{{else}}Unknown{{end}}</b><small>{{range $i, $p := .Ports}}{{if $p.Title}}:{{$p.Port}} “{{$p.Title}}” {{end}}{{end}}</small></span></div></td>
+        <td><div class="ports">{{range .Ports}}{{$u := portURL $h.Address .Port .ServiceGuess .Title}}{{if $u}}<a class="port web" href="{{$u}}" target="_blank" rel="noopener" data-tip="Open {{$u}}{{if .ServiceGuess}} · {{.ServiceGuess}}{{end}}">{{.Port}}{{icon "ext" 10}}</a>{{else}}<span class="port {{if or (eq .Port 22) (eq .Port 53)}}known{{end}}" data-tip="{{if .ServiceGuess}}{{.ServiceGuess}}{{else}}open TCP port{{end}}{{if .Banner}} · {{.Banner}}{{end}}">{{.Port}}</span>{{end}}{{end}}</div></td>
+        <td>{{$ssh := ""}}{{range .Ports}}{{if eq .Port 22}}{{$ssh = "yes"}}{{end}}{{end}}{{if $ssh}}<span class="badge">{{icon "key" 12}}open · check after register</span>{{else}}<span class="muted">—</span>{{end}}</td>
+        <td class="hide-sm muted small">{{fmtDate .FirstSeenAt}}</td>
+        <td><div class="row" style="justify-content:flex-end;gap:6px">
+          {{if eq .Status "new"}}
+          <button class="btn sm primary" type="button" data-drawer="register" data-action="/discovery/{{.ID}}/register" data-set-name="{{if .Hostname}}{{.Hostname}}{{else}}{{.Address}}{{end}}" data-set-address="{{.Address}}">{{icon "plus" 14}}Register</button>
+          <form method="post" action="/discovery/{{.ID}}/ignore" class="inline"><button class="btn sm ghost icon" data-tip="Ignore" aria-label="Ignore">{{icon "eyeoff" 14}}</button></form>
+          {{else}}<span class="badge">ignored</span>{{end}}
+        </div></td>
+      </tr>
+    {{end}}
+    </tbody>
+  </table>
+  {{else}}
+  <div class="card-b muted small">{{if eq .Show "ignored"}}Nothing ignored.{{else}}Inbox is empty. Run a scan or wait for the next scheduled one.{{end}}</div>
+  {{end}}
+  <div class="card-f row">{{icon "info" 14}}<span>Recognition uses ports, banners and page titles. Nothing is sent outside your network.</span></div>
+</div>
+
+<template id="drawer-add-subnet">
+  <form method="post" action="/discovery/subnets">
+    <div class="drawer-h">
+      <span class="ico" style="--c:#0ea5a4">{{icon "network" 16}}</span>
+      <div><h2>Add subnet</h2><div class="sub">It is added to the list — existing subnets stay.</div></div>
+      <button class="btn ghost sm icon close" type="button" data-close aria-label="Close">{{icon "x" 16}}</button>
+    </div>
+    <div class="drawer-b">
+      <div class="field"><label for="sn-add">Subnet (CIDR)</label><input class="input mono" id="sn-add" name="add" required placeholder="192.168.2.0/24"><span class="hint">Up to /22 (1024 addresses). TCP connect only, no logins.</span></div>
+      <label class="check"><input type="checkbox" name="scan" value="1" checked> Scan it right away</label>
+    </div>
+    <div class="drawer-f"><button class="btn ghost" type="button" data-close>Cancel</button><button class="btn primary">Add subnet</button></div>
+  </form>
+</template>
+
+<template id="drawer-scan-settings">
+  <form method="post" action="/discovery/subnets">
+    <div class="drawer-h">
+      <span class="ico" style="--c:#475569">{{icon "sliders" 16}}</span>
+      <div><h2>Scan settings</h2><div class="sub">Which networks to sweep and how often. Scans run in the background.</div></div>
+      <button class="btn ghost sm icon close" type="button" data-close aria-label="Close">{{icon "x" 16}}</button>
+    </div>
+    <div class="drawer-b">
+      <div class="field"><label for="sn-list">Subnets — one per line</label><textarea class="input mono" id="sn-list" name="list" rows="5">{{range .Subnets}}{{.CIDR}}
+{{end}}</textarea></div>
+      <div class="field"><label for="sn-every">Scan automatically</label>
+        <select class="input" id="sn-every" name="every_h">
+          <option value="0" {{if eq .EveryH "0"}}selected{{end}}>Never — only when I press Scan now</option>
+          <option value="1" {{if eq .EveryH "1"}}selected{{end}}>Every hour</option>
+          <option value="6" {{if eq .EveryH "6"}}selected{{end}}>Every 6 hours</option>
+          <option value="12" {{if eq .EveryH "12"}}selected{{end}}>Every 12 hours</option>
+          <option value="24" {{if eq .EveryH "24"}}selected{{end}}>Every day</option>
+          <option value="168" {{if eq .EveryH "168"}}selected{{end}}>Every week</option>
+        </select></div>
+      <div class="field"><label for="sn-ports">Ports to check</label><input class="input mono" id="sn-ports" name="ports" value="{{.Ports}}"><span class="hint">Comma-separated, ranges allowed (8000-8010), up to 64. Empty resets to the defaults. Each port is one TCP connect per address — no logins, nothing sent.</span></div>
+    </div>
+    <div class="drawer-f"><button class="btn ghost" type="button" data-close>Cancel</button><button class="btn primary">Save</button></div>
+  </form>
+</template>
+
+<template id="drawer-register">
+  <form method="post" action="/discovery">
+    <div class="drawer-h">
+      <span class="ico" style="--c:#16a34a">{{icon "server" 16}}</span>
+      <div><h2>Register <span data-fill="address"></span></h2><div class="sub">Creates a host with this address. Open ports become services.</div></div>
+      <button class="btn ghost sm icon close" type="button" data-close aria-label="Close">{{icon "x" 16}}</button>
+    </div>
+    <div class="drawer-b">
+      <div class="field"><label for="rg-name">Host name</label><input class="input" id="rg-name" name="name" required></div>
+    </div>
+    <div class="drawer-f"><button class="btn ghost" type="button" data-close>Cancel</button><button class="btn primary">Register host</button></div>
+  </form>
+</template>
+{{end}}

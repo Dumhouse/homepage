@@ -1,0 +1,55 @@
+{{define "content"}}
+<div class="page-head">
+  <div>
+    <h1>Edit {{.Access.Label}}</h1>
+    <div class="sub">Login for {{.Target}} · {{.Access.TargetEntity}} #{{.Access.TargetID}}</div>
+  </div>
+  <div class="actions"><a class="btn ghost" href="{{.Back}}">Cancel</a></div>
+</div>
+
+{{if .Error}}<div class="card err" style="margin-bottom:16px"><div class="card-b">{{icon "alert" 15}} {{.Error}}</div></div>{{end}}
+
+<form method="post" action="/access/{{.Access.ID}}">
+  <section class="card">
+    <div class="card-h"><h3>{{icon "lock" 15}}Login (never a password)</h3></div>
+    <div class="card-b form-grid">
+      <div class="field"><label>Label *</label><input class="input" name="label" required value="{{.Access.Label}}"></div>
+      <div class="field"><label>Method</label>
+        <select class="input" name="method">
+          {{range $m := (list "password" "google_sso" "github_sso" "oidc" "ssh_key" "token" "passkey" "none")}}
+          <option value="{{$m}}" {{if eq $m $.Access.Method}}selected{{end}}>{{$m}}</option>
+          {{end}}
+        </select>
+      </div>
+      <div class="field"><label>Account</label><input class="input" name="account" value="{{.Access.Account}}"></div>
+      <div class="field"><label>2FA</label>
+        <select class="input" name="twofa">
+          <option value="none" {{if eq .Access.TwoFA "none"}}selected{{end}}>none</option>
+          <option value="totp" {{if eq .Access.TwoFA "totp"}}selected{{end}}>totp</option>
+          <option value="hardware" {{if eq .Access.TwoFA "hardware"}}selected{{end}}>hardware</option>
+          <option value="sms" {{if eq .Access.TwoFA "sms"}}selected{{end}}>sms</option>
+          <option value="provider" {{if eq .Access.TwoFA "provider"}}selected{{end}}>provider</option>
+        </select>
+      </div>
+      <div class="field wide"><label>URL</label><input class="input" name="url" value="{{.Access.URL}}" placeholder="https://…"></div>
+      <div class="field wide"><label>Vaultwarden item URL</label><input class="input" name="vault_item_url" value="{{.Access.VaultItemURL}}" placeholder="https://vault.example.com/item/…"></div>
+      <div class="field wide"><label>Notes</label><input class="input" name="notes" value="{{.Access.Notes}}"></div>
+    </div>
+    <div class="card-f row" style="gap:8px">
+      <button class="btn primary">{{icon "check" 15}} Save changes</button>
+      <a class="btn ghost" href="{{.Back}}">Cancel</a>
+    </div>
+  </section>
+</form>
+
+<section class="card" style="margin-top:16px">
+  <div class="card-b row">
+    <span class="muted small" style="margin-right:auto">Delete this login if the account is gone.</span>
+    <form method="post" action="/access/{{.Access.ID}}/delete">
+      <input type="hidden" name="back" value="{{.Back}}">
+      <button class="btn danger">{{icon "trash" 15}} Delete login</button>
+    </form>
+  </div>
+</section>
+{{end}}
+{{define "errtoast"}}{{end}}

@@ -1,0 +1,89 @@
+{{define "content"}}
+<div class="page-head">
+  <div><h1>Alerts</h1><div class="sub">What’s wrong now, what went wrong before, and when to stay quiet</div></div>
+  <div class="actions">
+    <a class="btn" href="/maintenance">{{icon "sliders" 16}}Maintenance</a>
+    <details class="add-pop">
+      <summary class="btn">{{icon "clock" 16}}Pause alerts…</summary>
+      <div class="card pop">
+        <form method="post" action="/maintenance" class="stack" style="gap:12px">
+          <div><b>Pause alerts</b><div class="muted small">Checks keep running and are recorded; you just won’t be notified.</div></div>
+          <input type="hidden" name="back" value="/problems">
+          <div class="field"><label>How long</label>
+            <select class="input" name="duration_min"><option value="30">30 min</option><option value="60" selected>1 hour</option><option value="240">4 hours</option><option value="1440">24 hours</option></select></div>
+          <div class="field"><label>Reason <span class="muted">(optional)</span></label><input class="input" name="reason" placeholder="e.g. upgrading Postgres"></div>
+          <div class="row"><span class="muted xs">Applies to everything. Pause one host from its page.</span><span class="spacer"></span><button class="btn primary sm">Pause</button></div>
+        </form>
+      </div>
+    </details>
+  </div>
+</div>
+
+<div class="tabs" data-tabs="#probTabs">
+  <a class="active" href="#open" data-tab-link="open">Open <span class="count">{{len .Rows}}</span></a>
+  <a href="#history" data-tab-link="history">History <span class="count">{{len .Incidents}}</span></a>
+  <a href="#maintenance" data-tab-link="maintenance">Maintenance <span class="count">{{len .Windows}}</span></a>
+</div>
+
+<div id="probTabs">
+<div class="stack" data-tab="open" style="gap:10px">
+  {{range .Rows}}
+  <div class="card" style="padding:16px">
+    <div class="row gap-12" style="align-items:flex-start">
+      <span class="score {{if eq .State "down"}}c{{else}}b{{end}}" style="width:40px;height:40px;font-size:16px">{{icon .Icon 18}}</span>
+      <div style="flex:1;min-width:0">
+        <div class="row wrap"><b>{{.Title}} {{if eq .State "down"}}is down{{else}}is failing{{end}}</b><span class="badge {{if eq .State "down"}}bad{{else}}warn{{end}}">{{.Severity}}</span><span class="muted small">{{.Kind}} check{{if .Since}} · last run {{.Since}}{{end}}</span></div>
+        <p class="text-2 small mt-8">{{if .LastError}}{{.LastError}}{{else}}The last check did not succeed.{{end}}</p>
+        <div class="row wrap mt-8">
+          <a class="btn sm primary" href="{{.Href}}">Open</a>
+          <form method="post" action="/checks/{{.CheckID}}/run" data-async class="inline"><input type="hidden" name="back" value="/problems"><button class="btn sm">{{icon "refresh" 14}}Check now</button></form>
+          <form method="post" action="/maintenance" class="inline">
+            <input type="hidden" name="target_entity" value="{{.TargetEntity}}"><input type="hidden" name="target_id" value="{{.TargetID}}">
+            <input type="hidden" name="duration_min" value="1440"><input type="hidden" name="reason" value="Snoozed from Alerts"><input type="hidden" name="back" value="/problems">
+            <button class="btn sm ghost">Snooze 24 h</button></form>
+          <form method="post" action="/checks/{{.CheckID}}/toggle" class="inline"><input type="hidden" name="back" value="/problems"><button class="btn sm ghost" data-tip="Stop running this check">Pause check</button></form>
+        </div>
+      </div>
+    </div>
+  </div>
+  {{else}}
+  <div class="card" style="padding:16px"><div class="row gap-12">
+    <span class="score a" style="width:40px;height:40px;font-size:16px">{{icon "check" 18}}</span>
+    <div><b>All clear</b><div class="muted small">No failing checks right now. Checks refresh every few minutes, or press Check now on a host.</div></div>
+  </div></div>
+  {{end}}
+</div>
+
+<div data-tab="history" hidden>
+<div class="group-h"><h2>History · incidents</h2><span class="help" data-tip="Each time something went down and came back is one incident.">?</span><span class="line"></span><span class="muted">last 7 days</span></div>
+<div class="card">
+  {{if .Incidents}}
+  <table class="table">
+    <thead><tr><th>What</th><th>When</th><th>Down for</th><th>Message</th></tr></thead>
+    <tbody>
+    {{range .Incidents}}
+      <tr><td><div class="name"><span class="dot {{if .Ongoing}}bad{{else}}ok{{end}}"></span><span><a href="{{.Href}}"><b>{{.Title}}</b></a><small>{{.What}}</small></span></div></td>
+        <td class="small">{{.Start}}</td>
+        <td>{{if .Ongoing}}<span class="badge bad">ongoing</span>{{else}}<span class="small">{{.Duration}}</span>{{end}}</td>
+        <td class="small text-2" style="white-space:normal">{{if .Note}}{{.Note}}{{else}}<span class="muted">—</span>{{end}}</td></tr>
+    {{end}}
+    </tbody>
+  </table>
+  {{else}}<div class="card-b muted small">Nothing went down in the last 7 days.</div>{{end}}
+</div>
+
+</div>
+<div data-tab="maintenance" hidden>
+<div class="group-h"><h2>Maintenance windows</h2><span class="line"></span><a class="btn sm" href="/maintenance">{{icon "plus" 14}}Add</a></div>
+<div class="card">
+  {{range .Windows}}
+  <div class="setting-row"><div class="txt"><b>{{if .Reason}}{{.Reason}}{{else}}Maintenance{{end}}</b><small>{{if .TargetEntity}}{{.TargetEntity}}{{if .TargetID}} #{{.TargetID}}{{end}}{{else}}everything{{end}} · {{fmtDate .StartsAt}} → {{fmtDate .EndsAt}} · alerts muted, checks still recorded</small></div>
+    {{if .Active}}<span class="badge ok">active</span>{{else}}<span class="badge">planned</span>{{end}}
+    <form method="post" action="/maintenance/{{.ID}}/delete" class="inline"><button class="btn sm ghost icon" data-tip="Remove window" aria-label="Remove window">{{icon "trash" 14}}</button></form></div>
+  {{else}}
+  <div class="card-b muted small">No maintenance windows. Use “Pause alerts…” before planned work.</div>
+  {{end}}
+</div>
+</div>
+</div>
+{{end}}

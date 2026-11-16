@@ -1,0 +1,177 @@
+{{define "content"}}
+{{$back := printf "/projects/%s?env=%s" .Project.Slug .EnvName}}
+<div class="page-head">
+  <div class="row gap-12" style="align-items:center">
+    <span class="ico xl" style="--c:{{colorFor .Project.Name}}">{{initial .Project.Name}}</span>
+    <div>
+      <div class="row"><h1>{{.Project.Name}}</h1>{{if .Project.Group}}<span class="badge outline" style="margin-left:6px">{{.Project.Group}}</span>{{end}}{{if eq .Project.Status "archived"}}<span class="badge" style="margin-left:6px">archived</span>{{end}}</div>
+      {{if .Project.Description}}<div class="sub" style="max-width:640px">{{.Project.Description}}</div>{{end}}
+      <div class="row wrap mt-8"><span class="tag mono">{{.Project.Slug}}</span>{{if .Project.OpenSource}}<span class="tag" style="color:var(--accent)">open source</span>{{end}}</div>
+    </div>
+  </div>
+  <div class="actions">
+    {{if and .Env .Env.BaseURL}}<span class="openbtns"><a class="btn primary" href="{{.Env.BaseURL}}" target="_blank" rel="noopener" data-tip="{{.Env.Name}} · {{.Env.BaseURL}}">{{icon "home" 16}}Open {{.Env.Name}}</a></span>{{end}}
+    {{if .RepoURL}}<a class="btn" href="{{.RepoURL}}" target="_blank" rel="noopener">{{icon "git" 16}}Code</a>{{end}}
+    <a class="btn" href="/projects/{{.Project.Slug}}/edit">{{icon "edit" 16}}Edit</a>
+  </div>
+</div>
+
+<div class="tabs">
+  {{range .Project.Envs}}<a class="{{if eq .Name $.EnvName}}active{{end}}" href="/projects/{{$.Project.Slug}}?env={{.Name}}">{{title .Name}} <span class="count">{{len .Links}}</span></a>{{end}}
+  <details class="add-pop" style="align-self:center"><summary class="btn ghost sm">{{icon "plus" 14}}Environment</summary>
+    <form method="post" action="/projects/{{.Project.Slug}}/envs" class="card form-grid pop" style="left:0;right:auto">
+      <div class="field"><label>Name *</label><input class="input" name="name" required placeholder="staging"></div>
+      <div class="field"><label>Base URL</label><input class="input" name="base_url" placeholder="https://staging.acme.example.com"></div>
+      <div class="wide"><button class="btn primary sm">Add environment</button></div>
+    </form></details>
+</div>
+
+{{if .FormError}}<div class="card err" style="margin-bottom:16px"><div class="card-b">{{icon "alert" 15}} {{.FormError}}</div></div>{{end}}
+
+<div class="grid-2">
+  <div class="stack">
+    <div class="card" id="app-links">
+      <div class="card-h"><h3>{{icon "link" 16}}App links</h3><span class="help" data-tip="Pages inside the app — admin, Sidekiq, MCP… Paths are added to the environment’s address, so one list works for staging and production.">?</span>
+        <div class="actions">
+          {{if gt (len .Project.Envs) 1}}<div class="seg env-seg">{{range .Project.Envs}}<a class="{{if eq .Name $.EnvName}}on{{end}}" href="/projects/{{$.Project.Slug}}?env={{.Name}}#app-links">{{title .Name}}</a>{{end}}</div>{{end}}
+          {{if .Env}}<details class="add-pop"><summary class="btn sm">{{icon "plus" 16}}Add link</summary>
+            <form method="post" action="/projects/{{.Project.Slug}}/app-links" class="card form-grid pop">
+              <input type="hidden" name="env" value="{{.EnvName}}">
+              <div class="field"><label>Label *</label><input class="input" name="label" required placeholder="Sidekiq"></div>
+              <div class="field"><label>Kind</label>
+                <select class="input" name="kind"><option value="page">page</option><option value="admin">admin</option><option value="jobs">jobs</option><option value="db">db</option><option value="docs">docs</option><option value="health">health</option><option value="mcp">mcp</option><option value="other">other</option></select>
+              </div>
+              <div class="field"><label>Path</label><input class="input" name="path" placeholder="/sidekiq"></div>
+              <div class="field"><label>Or absolute URL</label><input class="input" name="url" placeholder="https://…"></div>
+              <div class="field"><label>Only in env</label><input class="input" name="only_env" placeholder="empty = every env"></div>
+              <div class="field" style="align-self:end"><label class="row" style="gap:8px"><input type="checkbox" name="health_check"> Health check</label></div>
+              <div class="wide"><button class="btn primary sm">Add app link</button></div>
+            </form></details>{{end}}
+        </div></div>
+      <div class="card-b al-list">
+        {{if .Env}}
+        {{if .Env.BaseURL}}<div class="al-base muted small">{{icon "globe" 13}}Base: <span class="mono al-base-u">{{.Env.BaseURL}}</span></div>{{end}}
+        {{range .EnvLinks}}
+        {{$acc := accessOf $.Access .AccessID}}
+        <div class="al-row">
+          <span class="al-ic" style="--c:{{linkColor .Kind}}">{{icon (linkIcon .Kind) 15}}</span>
+          <div class="al-main"><b>{{.Label}}</b>{{if .URL}}<span class="copy al-u mono xs" data-copy="{{.URL}}">{{if .Path}}{{.Path}}{{else}}{{hostOf .URL}}{{end}}{{icon "copy" 13}}</span>{{end}}
+            {{with index $.LinkCheck .ID}}<span class="badge xs {{stateClass .State}}" data-tip="{{if .LastError}}{{.LastError}}{{else}}health check{{end}}">{{.State}}{{if .LastLatencyMS}} · {{.LastLatencyMS}} ms{{end}}</span>{{end}}
+            {{if .OnlyEnv}}<span class="badge xs outline">only {{.OnlyEnv}}</span>{{end}}</div>
+          <div class="al-login">{{with $acc}}<span class="badge xs">{{methodLabel .Method}}</span>{{if .Account}}<span class="acc-acc">{{.Account}}</span>{{end}}{{if .VaultItemURL}}<a class="vw-link sm" href="{{.VaultItemURL}}" target="_blank" rel="noopener" data-tip="Open in Vaultwarden — password is not stored here">{{icon "lock" 12}}{{.Label}}</a>{{end}}{{else}}{{if eq .Kind "page"}}<span class="badge xs ok">public</span>{{else}}<span class="badge xs">login not set</span>{{end}}{{end}}</div>
+          <div class="row-actions">
+            <a class="btn ghost sm icon" href="/app-links/{{.ID}}/edit" data-tip="Edit">{{icon "edit" 14}}</a>
+            <form method="post" action="/app-links/{{.ID}}/delete"><input type="hidden" name="back" value="{{$back}}"><button class="btn ghost sm icon" data-tip="Delete">{{icon "trash" 14}}</button></form>
+          </div>
+          {{if .URL}}<a class="btn sm al-open" href="{{.URL}}" target="_blank" rel="noopener">{{icon "ext" 14}}<span class="hide-sm">Open</span></a>{{else}}<span class="muted xs">no base URL</span>{{end}}
+        </div>
+        {{else}}
+        <p class="muted small" style="margin:8px 0">No app links for {{.EnvName}} yet — add <span class="mono">/admin</span>, <span class="mono">/sidekiq</span>, <span class="mono">/mcp</span>…</p>
+        {{end}}
+        {{else}}
+        <p class="muted small" style="margin:8px 0">No environments yet. Add one (production, staging…) with its base URL, then app links work for each.</p>
+        {{end}}
+      </div>
+      <div class="card-f row wrap" style="gap:8px"><span class="spacer"></span><span class="muted xs">AI agents see these links and login methods — not the passwords.</span></div>
+    </div>
+
+    <div class="card" id="connected">
+      <div class="card-h"><h3>{{icon "zap" 16}}Connected services</h3><span class="muted small">what {{.Project.Name}} uses outside its own containers</span></div>
+      <div class="card-b">
+        {{if .Project.Connections}}
+        <div class="cs-grid">
+          {{range .Project.Connections}}
+          {{$name := .Detail}}{{if .URL}}{{$name = hostOf .URL}}{{end}}
+          <div class="cs" {{if .URL}}data-url="{{.URL}}" tabindex="0" role="link"{{end}}>
+            <span class="ico" style="--c:{{colorFor $name}}">{{initial $name}}</span>
+            <div class="cs-t"><div class="row"><b>{{$name}}</b></div><span class="cs-role">{{title .Role}}</span>
+              {{if .Detail}}<span class="cs-d">{{.Detail}}</span>{{end}}</div>
+            {{if .ImpactNote}}<span class="help cs-imp" data-tip="If it is down: {{.ImpactNote}}">!</span>{{end}}
+          </div>
+          {{end}}
+        </div>
+        {{else}}
+        <span class="muted small">Nothing recorded — e.g. the git server, registry, secrets store or alerts it depends on. Agents can add these through MCP (<span class="mono">connect_service</span>).</span>
+        {{end}}
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-h"><h3>{{icon "server" 16}}Runs on</h3>{{if .Env}}<span class="muted small">{{.EnvName}}</span>{{end}}</div>
+      <div class="card-b stack" style="gap:6px">
+        {{if .Env}}
+        {{range .Env.Hosts}}
+        <a class="row" href="/hosts/{{.ID}}" style="padding:4px 0">
+          <span class="ico" style="--c:{{colorFor .Name}}">{{initial .Name}}</span>
+          <div><b>{{.Name}}</b><div class="muted small">{{upper .Kind}}</div></div>
+          <span class="spacer"></span>
+          {{with index $.SvcUp .ID}}<span class="badge">{{.}}</span>{{end}}
+        </a>
+        {{end}}
+        {{range .Env.Services}}
+        <div class="row small"><span class="ico sm" style="--c:{{colorFor .Name}}">{{initial .Name}}</span><b>{{.Name}}</b>{{if .Port}}<span class="mono muted">:{{.Port}}</span>{{end}}</div>
+        {{end}}
+        {{if and (not .Env.Hosts) (not .Env.Services)}}<span class="muted small">Nothing linked to {{.EnvName}} yet.</span>{{end}}
+        {{else}}<span class="muted small">No environments yet.</span>{{end}}
+      </div>
+    </div>
+
+    {{if .Project.Runbook}}
+    <div class="card" id="runbook">
+      <div class="card-h"><h3>{{icon "book" 16}}Runbook</h3><div class="actions"><a class="btn sm" href="/projects/{{.Project.Slug}}/edit">{{icon "edit" 16}}Edit</a></div></div>
+      <div class="card-b md">{{markdown .Project.Runbook}}</div>
+    </div>
+    {{end}}
+  </div>
+
+  <div class="stack">
+    <div class="card">
+      <div class="card-h"><h3>{{icon "link" 16}}Links</h3></div>
+      <div class="card-b">
+        {{if .Project.Links}}
+        <dl class="kv">
+          {{range .Project.Links}}<dt>{{if .Label}}{{.Label}}{{else}}{{title .Kind}}{{end}}</dt><dd><a href="{{.URL}}" target="_blank" rel="noopener" class="mono small">{{hostOf .URL}}</a> {{icon "ext" 12}}</dd>{{end}}
+        </dl>
+        {{else}}<span class="muted small">No repo, docs or public page yet.</span>{{end}}
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-h"><h3>{{icon "key" 16}}Access</h3><span class="help" data-tip="How to log in to each part. Passwords stay in Vaultwarden; this card only links to the item.">?</span>
+        <div class="actions"><details class="add-pop"><summary class="btn sm ghost icon" data-tip="Add login">{{icon "plus" 16}}</summary>
+          <form method="post" action="/projects/{{.Project.Slug}}/access" class="card form-grid pop">
+            <input type="hidden" name="target_entity" value="project">
+            <input type="hidden" name="target_id" value="{{.Project.ID}}">
+            <input type="hidden" name="back" value="/projects/{{.Project.Slug}}">
+            <div class="field"><label>Label *</label><input class="input" name="label" required placeholder="Admin / Sidekiq"></div>
+            <div class="field"><label>Method</label>
+              <select class="input" name="method"><option value="password">password</option><option value="google_sso">google_sso</option><option value="github_sso">github_sso</option><option value="oidc">oidc</option><option value="token">token</option><option value="passkey">passkey</option><option value="none">none</option></select>
+            </div>
+            <div class="field"><label>Account</label><input class="input" name="account" placeholder="admin@example.com"></div>
+            <div class="field"><label>2FA</label><select class="input" name="twofa"><option value="none">none</option><option value="totp">totp</option><option value="hardware">hardware</option></select></div>
+            <div class="field wide"><label>URL</label><input class="input" name="url" placeholder="https://…"></div>
+            <div class="field wide"><label>Vaultwarden item URL</label><input class="input" name="vault_item_url" placeholder="https://vault.example.com/item/…"></div>
+            <div class="wide"><button class="btn primary sm">Add login</button></div>
+          </form></details></div></div>
+      <div class="card-b acc-list" style="padding-top:4px;padding-bottom:4px">
+        {{range .Project.Access}}
+        <div class="acc-row">
+          <span class="acc-ic">{{icon (accessIcon .Method) 16}}</span>
+          <div class="acc-txt"><b>{{.Label}}</b>{{if .URL}}<a class="mono xs muted" href="{{.URL}}" target="_blank" rel="noopener">{{hostOf .URL}}</a>{{end}}
+            <div class="acc-meta"><span class="badge xs {{if eq .Method "none"}}warn{{end}}">{{methodLabel .Method}}</span>{{if .Account}}<span class="acc-acc">{{.Account}}</span>{{end}}{{if and .TwoFA (ne .TwoFA "none")}}<span class="badge xs ok">2FA · {{upper .TwoFA}}</span>{{end}}</div></div>
+          <div class="acc-sec">
+            {{if .VaultItemURL}}<a class="vw-link" href="{{.VaultItemURL}}" target="_blank" rel="noopener" data-tip="Opens the item in Vaultwarden — the password is never stored in Home Services">{{icon "lock" 13}}Vaultwarden{{icon "ext" 12}}</a>{{else}}<span class="muted xs">nothing to store</span>{{end}}
+            <a class="btn ghost sm icon" href="/access/{{.ID}}/edit" data-tip="Edit">{{icon "edit" 14}}</a>
+            <form method="post" action="/access/{{.ID}}/delete"><input type="hidden" name="back" value="/projects/{{$.Project.Slug}}"><button class="btn ghost sm icon" data-tip="Delete">{{icon "trash" 14}}</button></form>
+          </div>
+        </div>
+        {{else}}
+        <p class="muted small" style="margin:10px 0">No logins recorded. Home Services never stores passwords.</p>
+        {{end}}
+      </div>
+      <div class="card-f row" style="gap:6px">{{icon "bot" 14}}<span>AI agents see the method, account and item name — never the password.</span></div>
+    </div>
+  </div>
+</div>
+{{end}}
+{{define "errtoast"}}{{end}}

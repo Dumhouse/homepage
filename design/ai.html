@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI changes · Home Services</title>
+<script src="assets/boot.js?v=30"></script>
+<link rel="icon" href="assets/favicon.svg"><link rel="stylesheet" href="assets/app.css?v=32">
+<script src="assets/app.js?v=32" defer></script>
+</head>
+<body data-page="ai" data-crumbs="AI changes">
+<div class="app">
+<aside class="sidebar" id="sidebar"></aside>
+<div class="main">
+<header class="topbar" id="topbar"></header>
+<main class="content">
+
+  <div class="page-head">
+    <div><h1>AI changes</h1><div class="sub">Let an AI agent document your setup — you review every change before it’s saved</div></div>
+    <div class="actions">
+      <span class="muted small">Agents can</span>
+      <div class="seg" data-tip="Applies to all MCP tokens unless set per token in Settings"><button>Only read</button><button class="on">Propose</button><button>Write directly</button></div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="stack">
+
+      <!-- pending changeset -->
+      <div class="card cs-set">
+        <div class="card-h">
+          <span class="ico sm" style="--c:#d97706"><i data-i="bot" data-s="14"></i></span>
+          <div style="min-width:0"><b>Document acme-staging from its compose file and Caddy</b><div class="muted xs">claude-code · token “laptop” · 4 min ago · asked by you: “document acme staging”</div></div>
+          <span class="badge warn" style="margin-left:auto">6 changes</span>
+        </div>
+        <div class="card-b chg-list">
+          <label class="chg add"><input type="checkbox" checked><span class="chg-op">+</span>
+            <div class="chg-t"><b>Service <span class="mono">mailpit</span> on acme-staging · :8025, :1025</b><small>Evidence: <span class="mono">compose.yaml</span> service “mailpit” · port open in scan</small></div></label>
+          <label class="chg mod"><input type="checkbox" checked><span class="chg-op">~</span>
+            <div class="chg-t"><b>Service <span class="mono">web</span>: version <s>Next 15.3</s> → Next 15.4</b><small>Evidence: <span class="mono">package.json</span> on main · image label</small></div></label>
+          <label class="chg add"><input type="checkbox" checked><span class="chg-op">+</span>
+            <div class="chg-t"><b>App link <span class="mono">/sidekiq</span> · basic auth · user “sidekiq”</b><small>Evidence: <span class="mono">config/routes.rb</span> line 41 · password not read — you pick the Vaultwarden item</small></div>
+            <button class="btn sm" type="button" data-todo>Pick item…</button></label>
+          <label class="chg add"><input type="checkbox" checked><span class="chg-op">+</span>
+            <div class="chg-t"><b>Connected service: Docker registry · <span class="mono">192.168.10.40:5000/acme</span></b><small>Evidence: <span class="mono">.forgejo/workflows/deploy.yml</span> “docker push”</small></div></label>
+          <label class="chg add"><input type="checkbox"><span class="chg-op">+</span>
+            <div class="chg-t"><b>Tag hosts <span class="mono">staging</span>: acme-staging, telegram</b><small>Guess from names — unticked because it’s not certain</small></div></label>
+          <div class="chg need"><span class="chg-op"><i data-i="key" data-s="13"></i></span>
+            <div class="chg-t"><b>Connect plugin MikroTik at 192.168.2.1</b><small>Needs a token. The agent can’t see or pass tokens — you paste it here.</small></div>
+            <button class="btn sm" type="button" data-todo>Paste token</button></div>
+        </div>
+        <div class="card-f row wrap" style="gap:8px">
+          <span class="muted small">Nothing is saved yet. Approved changes can be undone from the history.</span><span class="spacer"></span>
+          <button class="btn ghost" data-say="Rejected — the agent sees why if you add a note">Reject all</button>
+          <button class="btn" data-todo>Comment…</button>
+          <button class="btn primary" data-say="Applied 4 changes · Undo available">Apply 4 selected</button>
+        </div>
+      </div>
+
+      <!-- history -->
+      <div class="card">
+        <div class="card-h"><h3><i data-i="clock"></i>History</h3></div>
+        <ul class="hist-list">
+          <li><span class="badge ok xs">applied</span><div><b>Imported 12 LXC containers from Proxmox</b><small>claude-code · yesterday · 12 changes</small></div><button class="btn sm ghost" data-say="Reverted 12 changes">Undo</button></li>
+          <li><span class="badge ok xs">applied</span><div><b>Linked 4 tunnel hostnames to hosts</b><small>claude-code · Nov 14 · 4 changes</small></div><button class="btn sm ghost" data-say="Reverted">Undo</button></li>
+          <li><span class="badge xs">rejected</span><div><b>Delete host “adguard”</b><small>claude-code · Nov 13 · your note: “keep, will start it again”</small></div></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="stack">
+      <div class="card">
+        <div class="card-h"><h3><i data-i="bot"></i>Let an agent set things up</h3></div>
+        <div class="card-b stack" style="gap:12px">
+          <div class="small text-2">1 · Connect it (once). Token from Settings › MCP — create one per agent.</div>
+          <div class="codebox"><code>claude mcp add --transport http homeservices http://192.168.10.101:8080/mcp --header "Authorization: Bearer $HS_TOKEN"</code></div><p class="muted xs">Using Codex, Gemini, Cursor or VS Code? <button class="linklike" style="color:var(--accent)" data-drawer="mcp-connect">See their setup</button></p>
+          <div class="small text-2">2 · Ask it. Copy a starter:</div>
+          <div class="prompt" data-copy="Use the homeservices MCP. Scan what is registered, run discovery, and propose everything that is missing: hosts, services, ports, app links and plugins to connect. Show evidence for each change.">
+            <b>Inventory my network</b><small>hosts, services, ports, plugins to connect</small><i data-i="copy" data-s="14"></i></div>
+          <div class="prompt" data-copy="Use the homeservices MCP and the Forgejo repo of project Acme. Read compose, routes and CI files and propose services, app links, connected services and the deploy pipeline.">
+            <b>Document a project from its repo</b><small>compose, routes, CI → services, links, pipeline</small><i data-i="copy" data-s="14"></i></div>
+          <div class="prompt" data-copy="Use the homeservices MCP. Find gaps: hosts without SSH key-only, services without health checks, domains without expiry dates, projects without runbooks. Propose fixes.">
+            <b>Find what’s missing</b><small>no checks, no expiry, no runbook…</small><i data-i="copy" data-s="14"></i></div>
+          <div class="prompt" data-copy="Use the homeservices MCP. I want to add a new service: [name]. Suggest a free IP and port, the host to put it on, a domain, and the plugin to connect. Propose it as a change.">
+            <b>Plan a new service</b><small>free IP/port, host, domain, plugin</small><i data-i="copy" data-s="14"></i></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-h"><h3><i data-i="shield"></i>What agents can and can’t do</h3></div>
+        <div class="card-b">
+          <ul class="checks">
+            <li><span class="ok-t"><i data-i="check" data-s="15"></i></span>Read the inventory, run scans and health checks</li>
+            <li><span class="ok-t"><i data-i="check" data-s="15"></i></span>Propose hosts, services, links, tags, plugins</li>
+            <li><span class="ok-t"><i data-i="check" data-s="15"></i></span>Recognise products and suggest plugins</li>
+            <li><span class="bad-t"><i data-i="x" data-s="15"></i></span>See passwords or tokens — never</li>
+            <li><span class="bad-t"><i data-i="x" data-s="15"></i></span>Change your servers — Home Services never runs commands on them; it gives the agent the context and fix guides</li>
+            <li><span class="bad-t"><i data-i="x" data-s="15"></i></span>Hard-delete — deletes are soft and need your approval</li>
+          </ul>
+        </div>
+        <div class="card-f">Every agent action is in the Audit log with its token name.</div>
+      </div>
+    </div>
+  </div>
+
+</main>
+</div>
+</div>
+</body>
+</html>

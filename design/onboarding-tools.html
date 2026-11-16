@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Setup · Home Services</title>
+<script src="assets/boot.js?v=30"></script>
+<link rel="icon" href="assets/favicon.svg"><link rel="stylesheet" href="assets/app.css?v=32">
+<script src="assets/app.js?v=32" defer></script>
+<style>.mobile-nav { display: none !important; }</style>
+</head>
+<body data-page="setup">
+<main class="content wizard" style="padding-top:40px">
+
+  <div class="row gap-12" style="margin-bottom:8px">
+    <span class="ico" style="background:linear-gradient(135deg,var(--accent),#8b5cf6)"><i data-i="server" data-s="16"></i></span>
+    <div><b>Home Services</b><div class="muted small">First-time setup · about 3 minutes</div></div>
+    <span class="spacer"></span>
+    <a class="btn ghost sm" href="dashboard.html">Skip for now</a>
+  </div>
+
+  <div class="wsteps">
+    <div class="wstep done"><span class="n">1</span><span>Account</span></div>
+    <div class="wstep on"><span class="n">2</span><span>Your tools</span></div>
+    <div class="wstep"><span class="n">3</span><span>Your network</span></div>
+    <div class="wstep"><span class="n">4</span><span>Alerts</span></div>
+    <div class="wstep"><span class="n">5</span><span>AI access</span></div>
+  </div>
+
+  <h1 style="font-size:26px">What do you already use?</h1>
+  <p class="text-2 mt-8" style="max-width:640px">Tap the tools you run. We’ll only ask for the ones you pick, and import what we can. <b>Pick nothing</b> and you can still add everything by hand or paste it — nothing here is required.</p>
+
+  <div class="cat-list mt-24">
+          <div class="cat">
+            <div class="cat-h"><span class="cat-ic"><i data-i="server" data-s="16"></i></span><div><b>Servers & containers</b><small>Imports VMs, containers and their IPs</small></div><span class="spacer"></span></div>
+            <div class="pchips"><button class="pchip pick">Proxmox VE</button><button class="pchip pick">Docker</button><button class="pchip pick">Incus / LXD</button><button class="pchip pick">Portainer</button><button class="pchip pick">TrueNAS</button><button class="pchip pick">Unraid</button><button class="pchip pick">libvirt</button><button class="pchip more" data-todo>Other…</button></div>
+          </div>
+          <div class="cat">
+            <div class="cat-h"><span class="cat-ic"><i data-i="network" data-s="16"></i></span><div><b>Router & DHCP</b><small>Device names, DHCP leases, MAC addresses</small></div><span class="spacer"></span></div>
+            <div class="pchips"><button class="pchip pick">MikroTik</button><button class="pchip pick">OpenWrt</button><button class="pchip pick">OPNsense</button><button class="pchip pick">pfSense</button><button class="pchip pick">UniFi</button><button class="pchip pick">Pi-hole</button><button class="pchip pick">AdGuard Home</button><button class="pchip pick">Fritz!Box</button><button class="pchip more" data-todo>Other…</button></div>
+          </div>
+          <div class="cat">
+            <div class="cat-h"><span class="cat-ic"><i data-i="globe" data-s="16"></i></span><div><b>Reverse proxy</b><small>Which domain goes to which host:port</small></div><span class="spacer"></span></div>
+            <div class="pchips"><button class="pchip pick">Caddy</button><button class="pchip pick">Traefik</button><button class="pchip pick">Nginx Proxy Manager</button><button class="pchip pick">nginx (config files)</button><button class="pchip pick">HAProxy</button><button class="pchip more" data-todo>Other…</button></div>
+          </div>
+          <div class="cat">
+            <div class="cat-h"><span class="cat-ic"><i data-i="cloud" data-s="16"></i></span><div><b>DNS & domains</b><small>Records, tunnels, expiry dates, prices</small></div><span class="spacer"></span></div>
+            <div class="pchips"><button class="pchip pick">Cloudflare</button><button class="pchip pick">OVH</button><button class="pchip pick">Porkbun</button><button class="pchip pick">Namecheap</button><button class="pchip pick">Hetzner DNS</button><button class="pchip pick">Route 53</button><button class="pchip pick">deSEC</button><button class="pchip more" data-todo>Other…</button></div>
+          </div>
+          <div class="cat">
+            <div class="cat-h"><span class="cat-ic"><i data-i="git" data-s="16"></i></span><div><b>Code & CI</b><small>Commits, CI status, releases, deploy pipeline</small></div><span class="spacer"></span></div>
+            <div class="pchips"><button class="pchip pick">Forgejo / Gitea</button><button class="pchip pick">GitHub</button><button class="pchip pick">GitLab</button><button class="pchip pick">Woodpecker</button><button class="pchip pick">Drone</button><button class="pchip more" data-todo>Other…</button></div>
+          </div>
+          <div class="cat">
+            <div class="cat-h"><span class="cat-ic"><i data-i="bell" data-s="16"></i></span><div><b>Notifications</b><small>Where alerts and reminders go</small></div><span class="spacer"></span></div>
+            <div class="pchips"><button class="pchip pick">ntfy</button><button class="pchip pick">Gotify</button><button class="pchip pick">Pushover</button><button class="pchip pick">Telegram</button><button class="pchip pick">Discord</button><button class="pchip pick">Slack</button><button class="pchip pick">Email (SMTP)</button><button class="pchip pick">Webhook</button><button class="pchip pick">Apprise</button><button class="pchip more" data-todo>Other…</button></div>
+          </div>
+          <div class="cat">
+            <div class="cat-h"><span class="cat-ic"><i data-i="lock" data-s="16"></i></span><div><b>Password manager</b><small>Only links to items — passwords are never copied</small></div><span class="spacer"></span></div>
+            <div class="pchips"><button class="pchip pick">Bitwarden / Vaultwarden</button><button class="pchip pick">1Password</button><button class="pchip pick">KeePassXC</button><button class="pchip pick">Proton Pass</button><button class="pchip pick">Passbolt</button><button class="pchip more" data-todo>Other…</button></div>
+          </div>
+          <div class="cat">
+            <div class="cat-h"><span class="cat-ic"><i data-i="key" data-s="16"></i></span><div><b>Secret store</b><small>Where Home Services keeps its own tokens</small></div><span class="spacer"></span></div>
+            <div class="pchips"><button class="pchip pick">Built-in (encrypted file)</button><button class="pchip pick">Environment variables</button><button class="pchip pick">OpenBao / Vault</button><button class="pchip pick">Infisical</button><button class="pchip pick">Clavis</button><button class="pchip pick">SOPS</button><button class="pchip pick">Doppler</button><button class="pchip more" data-todo>Other…</button></div>
+          </div>
+          <div class="cat">
+            <div class="cat-h"><span class="cat-ic"><i data-i="activity" data-s="16"></i></span><div><b>Monitoring</b><small>Import existing checks instead of re-creating them</small></div><span class="spacer"></span></div>
+            <div class="pchips"><button class="pchip pick">Uptime Kuma</button><button class="pchip pick">Gatus</button><button class="pchip pick">Prometheus</button><button class="pchip pick">Healthchecks</button><button class="pchip pick">Zabbix</button><button class="pchip more" data-todo>Other…</button></div>
+          </div>
+          <div class="cat">
+            <div class="cat-h"><span class="cat-ic"><i data-i="cloud" data-s="16"></i></span><div><b>Cloud & VPS</b><small>Servers, IPs and monthly cost from your provider</small></div><span class="spacer"></span></div>
+            <div class="pchips"><button class="pchip pick">Hetzner Cloud</button><button class="pchip pick">OVH</button><button class="pchip pick">DigitalOcean</button><button class="pchip pick">Linode / Akamai</button><button class="pchip pick">Scaleway</button><button class="pchip pick">AWS Lightsail</button><button class="pchip pick">Oracle Cloud</button><button class="pchip more" data-todo>Other…</button></div>
+          </div>
+          <div class="cat">
+            <div class="cat-h"><span class="cat-ic"><i data-i="db" data-s="16"></i></span><div><b>Backups</b><small>Last good backup per host, size, failures, restore test date</small></div><span class="spacer"></span></div>
+            <div class="pchips"><button class="pchip pick">Proxmox Backup Server</button><button class="pchip pick">restic</button><button class="pchip pick">Borg / Borgmatic</button><button class="pchip pick">Kopia</button><button class="pchip pick">Backrest</button><button class="pchip pick">Duplicati</button><button class="pchip more" data-todo>Other…</button></div>
+          </div>
+          <div class="cat">
+            <div class="cat-h"><span class="cat-ic"><i data-i="refresh" data-s="16"></i></span><div><b>Updates</b><small>Pending OS updates, newer container images, end-of-life versions</small></div><span class="spacer"></span></div>
+            <div class="pchips"><button class="pchip pick">apt / dnf / apk (SSH)</button><button class="pchip pick">Docker image tags</button><button class="pchip pick">Diun</button><button class="pchip pick">What’s Up Docker</button><button class="pchip pick">Renovate</button><button class="pchip pick">endoflife.date</button><button class="pchip more" data-todo>Other…</button></div>
+          </div>
+          <div class="cat">
+            <div class="cat-h"><span class="cat-ic"><i data-i="shield" data-s="16"></i></span><div><b>VPN & remote access</b><small>Remote addresses and who can reach what from outside</small></div><span class="spacer"></span></div>
+            <div class="pchips"><button class="pchip pick">Tailscale</button><button class="pchip pick">Headscale</button><button class="pchip pick">WireGuard</button><button class="pchip pick">NetBird</button><button class="pchip pick">ZeroTier</button><button class="pchip pick">Cloudflare Tunnel</button><button class="pchip more" data-todo>Other…</button></div>
+          </div>
+          <div class="cat">
+            <div class="cat-h"><span class="cat-ic"><i data-i="key" data-s="16"></i></span><div><b>Login / SSO</b><small>Which apps use single sign-on — fills the Access cards</small></div><span class="spacer"></span></div>
+            <div class="pchips"><button class="pchip pick">Authentik</button><button class="pchip pick">Authelia</button><button class="pchip pick">Keycloak</button><button class="pchip pick">Pocket ID</button><button class="pchip pick">Zitadel</button><button class="pchip more" data-todo>Other…</button></div>
+          </div>
+          <div class="cat">
+            <div class="cat-h"><span class="cat-ic"><i data-i="cpu" data-s="16"></i></span><div><b>Metrics & logs</b><small>CPU, RAM, disk on host pages; one-click log links</small></div><span class="spacer"></span></div>
+            <div class="pchips"><button class="pchip pick">Prometheus</button><button class="pchip pick">Netdata</button><button class="pchip pick">Beszel</button><button class="pchip pick">Glances</button><button class="pchip pick">Loki</button><button class="pchip pick">Dozzle</button><button class="pchip more" data-todo>Other…</button></div>
+          </div>
+          <div class="cat">
+            <div class="cat-h"><span class="cat-ic"><i data-i="db" data-s="16"></i></span><div><b>Storage & hardware</b><small>Disk health, pool usage, UPS battery, out-of-band access</small></div><span class="spacer"></span></div>
+            <div class="pchips"><button class="pchip pick">TrueNAS</button><button class="pchip pick">Synology</button><button class="pchip pick">ZFS (SSH)</button><button class="pchip pick">SMART</button><button class="pchip pick">NUT (UPS)</button><button class="pchip pick">IPMI / iDRAC / iLO</button><button class="pchip more" data-todo>Other…</button></div>
+          </div>
+          <div class="cat">
+            <div class="cat-h"><span class="cat-ic"><i data-i="zap" data-s="16"></i></span><div><b>Power plugin</b><small>Optional · electricity cost on Costs, live watts on hosts</small></div><span class="spacer"></span></div>
+            <div class="pchips"><button class="pchip pick">Home Assistant</button><button class="pchip pick">Shelly</button><button class="pchip pick">Tasmota</button><button class="pchip pick">TP-Link Kasa</button><button class="pchip pick">NUT (UPS)</button><button class="pchip pick">Estimate / manual</button><button class="pchip more" data-todo>Other…</button></div>
+          </div>
+          <div class="cat">
+            <div class="cat-h"><span class="cat-ic"><i data-i="upload" data-s="16"></i></span><div><b>Export & sync to other tools</b><small>Keep other tools updated from one source of truth</small></div><span class="spacer"></span></div>
+            <div class="pchips"><button class="pchip pick">Homepage</button><button class="pchip pick">Homarr</button><button class="pchip pick">Dashy</button><button class="pchip pick">Ansible inventory</button><button class="pchip pick">~/.ssh/config</button><button class="pchip pick">NetBox</button><button class="pchip pick">Uptime Kuma monitors</button><button class="pchip more" data-todo>Other…</button></div>
+          </div>
+  </div>
+
+  <div class="row mt-24" style="justify-content:space-between">
+    <a class="btn ghost" href="#" data-say="Back to account">← Back</a>
+    <div class="row"><span class="muted small" id="pickCount">Nothing picked — that’s fine</span><a class="btn primary" href="onboarding.html">Continue →</a></div>
+  </div>
+
+</main>
+<script>
+document.addEventListener('click', e => {
+  const c = e.target.closest('.pchip.pick'); if (!c) return;
+  c.classList.toggle('on');
+  const n = document.querySelectorAll('.pchip.pick.on').length;
+  document.getElementById('pickCount').textContent = n ? n + ' picked — we’ll connect them next' : 'Nothing picked — that’s fine';
+});
+</script>
+</body>
+</html>

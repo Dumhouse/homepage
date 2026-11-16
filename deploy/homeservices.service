@@ -1,0 +1,37 @@
+[Unit]
+Description=Home Services inventory, checks and MCP
+Documentation=https://github.com/dawidof/home-services
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=homeservices
+Group=homeservices
+StateDirectory=homeservices
+StateDirectoryMode=0750
+WorkingDirectory=/var/lib/homeservices
+Environment=HS_ADDR=:8080
+Environment=HS_DATA=/var/lib/homeservices
+EnvironmentFile=-/etc/homeservices/env
+ExecStart=/usr/local/bin/homeservices -addr ${HS_ADDR} -data ${HS_DATA}
+Restart=on-failure
+RestartSec=3
+TimeoutStopSec=10
+
+# Hardening: the app only needs its state dir and the network.
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+RestrictNamespaces=true
+LockPersonality=true
+ReadWritePaths=/var/lib/homeservices
+
+[Install]
+WantedBy=multi-user.target

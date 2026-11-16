@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Setup · Home Services</title>
+<script src="assets/boot.js?v=30"></script>
+<link rel="icon" href="assets/favicon.svg"><link rel="stylesheet" href="assets/app.css?v=32">
+<script src="assets/app.js?v=32" defer></script>
+<style>.mobile-nav { display: none !important; }</style>
+</head>
+<body data-page="setup">
+<main class="content wizard" style="padding-top:40px">
+
+  <div class="row gap-12" style="margin-bottom:8px">
+    <span class="ico" style="background:linear-gradient(135deg,var(--accent),#8b5cf6)"><i data-i="server" data-s="16"></i></span>
+    <div><b>Home Services</b><div class="muted small">First-time setup · about 3 minutes</div></div>
+    <span class="spacer"></span>
+    <a class="btn ghost sm" href="dashboard.html">Skip for now</a>
+  </div>
+
+  <div class="wsteps">
+    <div class="wstep done"><span class="n">1</span><span>Account</span></div>
+    <div class="wstep done"><span class="n">2</span><span>Your tools</span></div>
+    <div class="wstep on"><span class="n">3</span><span>Your network</span></div>
+    <div class="wstep"><span class="n">4</span><span>Alerts</span></div>
+    <div class="wstep"><span class="n">5</span><span>AI access</span></div>
+  </div>
+
+  <h1 style="font-size:26px">Here’s what we found</h1>
+  <p class="text-2 mt-8" style="max-width:620px">We imported <b>20 guests from Proxmox</b> and scanned <b>192.168.10.0/24</b> and <b>192.168.2.0/24</b>. Untick anything you don’t want to track. You can change all of this later.</p>
+
+  <div class="card mt-24">
+    <div class="card-h"><h3><span class="ico sm" style="--c:#e57000">P</span>From Proxmox</h3><span class="muted small">12 containers · 8 VMs</span><div class="actions"><button class="btn sm ghost" data-say="All selected">Select all</button></div></div>
+    <div class="card-b">
+      <div class="found">
+        <label><input type="checkbox" checked><span><b>edge</b><small>CT · .254</small></span></label>
+        <label><input type="checkbox" checked><span><b>forgejo</b><small>CT · .247</small></span></label>
+        <label><input type="checkbox" checked><span><b>ntfy</b><small>CT · .252</small></span></label>
+        <label><input type="checkbox" checked><span><b>vaultwarden</b><small>CT · .253</small></span></label>
+        <label><input type="checkbox" checked><span><b>clavis</b><small>CT · .234</small></span></label>
+        <label><input type="checkbox" checked><span><b>acme-staging</b><small>CT</small></span></label>
+        <label><input type="checkbox" checked><span><b>telegram</b><small>CT</small></span></label>
+        <label><input type="checkbox" checked><span><b>homepage</b><small>CT</small></span></label>
+        <label><input type="checkbox" checked><span><b>haos</b><small>VM</small></span></label>
+        <label><input type="checkbox" checked><span><b>registry-alpine</b><small>VM · .40</small></span></label>
+        <label><input type="checkbox"><span><b>simple-notes</b><small>VM · stopped</small></span></label>
+        <label><input type="checkbox"><span><b>gitea</b><small>VM · stopped</small></span></label>
+      </div>
+      <div class="small muted mt-8">+ 8 more · stopped guests are unticked; they’ll be imported as “deprecated” if you tick them.</div>
+    </div>
+  </div>
+
+  <div class="card mt-16">
+    <div class="card-h"><h3><i data-i="radar"></i>Found on the network</h3><span class="muted small">not in Proxmox</span></div>
+    <div class="card-b">
+      <div class="found">
+        <label><input type="checkbox" checked><span><b>MikroTik router</b><small>192.168.2.1</small></span></label>
+        <label><input type="checkbox" checked><span><b>statusboard</b><small>192.168.2.250</small></span></label>
+        <label><input type="checkbox"><span><b>Unknown · Debian</b><small>192.168.2.251</small></span></label>
+        <label><input type="checkbox"><span><b>Unknown · Debian</b><small>192.168.2.254</small></span></label>
+      </div>
+      <div class="small muted mt-8">Unticked devices stay in the Discovery inbox — nothing is lost.</div>
+    </div>
+  </div>
+
+  <div class="card mt-16">
+    <div class="card-h"><h3><i data-i="key"></i>SSH check</h3><span class="help" data-tip="We only ask each server which login methods it allows. No password is ever sent.">?</span></div>
+    <div class="card-b row wrap gap-12">
+      <span class="badge ok"><i data-i="key"></i>13 key-only</span>
+      <span class="badge warn"><i data-i="unlock"></i>3 accept passwords</span>
+      <span class="muted small">We’ll show you how to fix those after setup.</span>
+    </div>
+  </div>
+
+  <div class="row mt-24" style="justify-content:space-between">
+    <a class="btn ghost" href="onboarding-tools.html">← Back</a>
+    <div class="row"><span class="muted small">Next: where to send alerts</span><a class="btn primary" href="#" data-say="Imported 16 hosts · next: alerts">Import 16 hosts &amp; continue →</a></div>
+  </div>
+
+</main>
+</body>
+</html>

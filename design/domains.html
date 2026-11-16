@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Domains · Home Services</title>
+<script src="assets/boot.js?v=30"></script>
+<link rel="icon" href="assets/favicon.svg"><link rel="stylesheet" href="assets/app.css?v=32">
+<script src="assets/app.js?v=32" defer></script>
+</head>
+<body data-page="domains" data-crumbs="Domains">
+<div class="app">
+<aside class="sidebar" id="sidebar"></aside>
+<div class="main">
+<header class="topbar" id="topbar"></header>
+<main class="content">
+
+  <div class="page-head">
+    <div><h1>Domains</h1><div class="sub">3 domains · 2 providers · 9 DNS records · imported automatically</div></div>
+    <div class="actions">
+      <button class="btn" data-say="Synced Cloudflare: 1 zone, 6 records, 1 tunnel · OVH: 2 domains"><i data-i="refresh"></i>Sync now</button>
+      <button class="btn primary" data-todo><i data-i="plus"></i>Add by hand</button>
+    </div>
+  </div>
+
+  <!-- connected providers: one token per account imports everything -->
+  <div class="prov-strip">
+    <div class="card prov">
+      <span class="ico" style="--c:#f38020">C</span>
+      <div class="prov-t"><b>Cloudflare</b><small>1 zone · 6 records · tunnel <span class="mono">edge</span> · synced 4 min ago</small></div>
+      <span class="badge ok xs">read-only</span>
+      <a class="btn sm ghost icon" href="https://dash.cloudflare.com" target="_blank" rel="noopener" data-tip="Open Cloudflare dashboard"><i data-i="ext" data-s="14"></i></a>
+    </div>
+    <div class="card prov">
+      <span class="ico" style="--c:#123f6d">O</span>
+      <div class="prov-t"><b>OVH</b><small>2 domains · renewals · prices</small></div>
+      <span class="badge xs">example</span>
+      <a class="btn sm ghost icon" href="https://www.ovh.com/manager/" target="_blank" rel="noopener" data-tip="Open OVH manager"><i data-i="ext" data-s="14"></i></a>
+    </div>
+    <button class="card prov add" data-drawer="cf-connect">
+      <span class="ico" style="--c:#334155"><i data-i="plus" data-s="16"></i></span>
+      <div class="prov-t"><b>Connect another account</b><small>Cloudflare, OVH — read-only token</small></div>
+    </button>
+  </div>
+
+  <div class="grid-2">
+    <div class="stack">
+
+      <div class="card">
+        <div class="card-h"><h3><i data-i="globe"></i>Registered domains</h3><span class="muted small">where bought, who owns it, when it renews</span></div>
+        <table class="table">
+          <thead><tr><th>Domain</th><th>Bought at · account</th><th>Renews</th><th class="r">Per year</th></tr></thead>
+          <tbody>
+            <tr class="link-row" data-href="domain.html">
+              <td><a href="domain.html"><b>home.example</b></a><div class="muted xs">5 records · tunnel</div></td>
+              <td><span class="row"><span class="ico sm" style="--c:#f38020">C</span><span>Cloudflare Registrar<div class="muted xs">Google sign-in · d•••@gmail.com</div></span></span></td>
+              <td><span>Apr 2, 2027</span><div class="xs"><span class="badge ok xs">auto-renew</span></div></td>
+              <td class="r mono">$10.44</td>
+            </tr>
+            <tr class="link-row" data-href="domain.html">
+              <td><a href="domain.html"><b>acme-app.com</b></a><div class="muted xs">project Acme · example</div></td>
+              <td><span class="row"><span class="ico sm" style="--c:#123f6d">O</span><span>OVH<div class="muted xs">nic dw1234-ovh · example</div></span></span></td>
+              <td><span>Aug 14, 2027</span><div class="xs"><span class="badge ok xs">auto-renew</span></div></td>
+              <td class="r mono">€11.99</td>
+            </tr>
+            <tr class="link-row" data-href="domain.html">
+              <td><a href="domain.html"><b>old-blog.net</b></a><div class="muted xs">0 records in use · example</div></td>
+              <td><span class="row"><span class="ico sm" style="--c:#123f6d">O</span><span>OVH<div class="muted xs">nic dw1234-ovh · example</div></span></span></td>
+              <td><span class="warn-t">Dec 10, 2026 · 24 days</span><div class="xs"><span class="badge warn xs">auto-renew off</span></div></td>
+              <td class="r mono">€14.49</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="card-f row"><i data-i="info" data-s="14"></i><span><b>old-blog.net</b> isn’t used by anything and won’t renew. Let it expire, or turn auto-renew on in OVH.</span><span class="spacer"></span><button class="btn sm" data-say="Marked: let it expire — no more reminders">Let it go</button></div>
+      </div>
+
+      <div class="card">
+        <div class="card-h"><h3><i data-i="network"></i>DNS records</h3><span class="muted small">matched to your hosts automatically</span>
+          <div class="actions"><div class="seg"><button class="on">All</button><button>Unmatched · 2</button></div></div></div>
+        <table class="table">
+          <thead><tr><th>Name</th><th>How</th><th>Goes to</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td><span class="copy">ntfy.home.example</span></td><td><span class="badge xs info">tunnel</span></td><td class="small"><span class="row"><span class="ico sm" style="--c:#317f6f">N</span>ntfy <span class="muted mono">.252:80</span></span></td><td><span class="badge ok">200</span></td></tr>
+            <tr><td><span class="copy">vault.home.example</span></td><td><span class="badge xs info">tunnel</span></td><td class="small"><span class="row"><span class="ico sm" style="--c:#175ddc">V</span>vaultwarden <span class="muted mono">.253:80</span></span></td><td><span class="badge ok">200</span></td></tr>
+            <tr><td><span class="copy">home.home.example</span></td><td><span class="badge xs info">tunnel</span></td><td class="small"><span class="row"><span class="ico sm" style="--c:#16a34a" data-fav="http://192.168.10.246:8080/favicon.ico">G</span>ops · Gatus <span class="muted mono">.246:8080</span></span></td><td><span class="badge ok">401 login</span></td></tr>
+            <tr><td><span class="copy">tools.home.example</span></td><td><span class="badge xs info">tunnel</span></td><td class="small"><span class="row"><span class="ico sm" style="--c:#22b8cf">E</span>edge <span class="muted mono">static files</span></span></td><td><span class="badge ok">200</span></td></tr>
+            <tr><td><span class="copy">acme-app.com</span></td><td><span class="badge xs">A</span></td><td class="small"><span class="row"><span class="ico sm" style="--c:#123f6d">O</span>ovh-web-1 <span class="muted mono">51.68.x.x</span></span></td><td><span class="badge ok">200</span></td></tr>
+            <tr class="unmatched"><td><span class="mono small">bao.home.example</span></td><td><span class="badge xs info">tunnel</span></td><td class="small muted">nothing — host deleted</td><td><a class="badge warn" href="decommission.html">stale · clean up</a></td></tr>
+            <tr class="unmatched"><td><span class="mono small">test.home.example</span></td><td><span class="badge xs">CNAME</span></td><td class="small muted">no host matches</td><td><button class="badge info" style="border:0;cursor:pointer" data-todo>link to host…</button></td></tr>
+          </tbody>
+        </table>
+        <div class="card-f"><b>How matching works:</b> tunnel routes are read from Cloudflare (hostname → <span class="mono">192.168.10.x:port</span>), A records by IP, CNAMEs by following them. Anything that matches nothing shows up under <i>Unmatched</i>.</div>
+      </div>
+    </div>
+
+    <div class="stack">
+      <div class="card">
+        <div class="card-h"><h3><i data-i="clock"></i>Coming up</h3><span class="muted small" style="margin-left:auto">next 6 months</span></div>
+        <ul class="exp-list">
+          <li class="month-h">December 2026</li>
+          <li><div class="datebox warn"><small>Dec</small><b>3</b></div><div class="txt"><b>Forgejo token “ci-runner”</b><small>Token expires · 17 days</small></div><span class="badge warn">soon</span></li>
+          <li><div class="datebox warn"><small>Dec</small><b>10</b></div><div class="txt"><b>old-blog.net</b><small>Domain · auto-renew off · €14.49</small></div><span class="badge warn">decide</span></li>
+          <li><div class="datebox"><small>Dec</small><b>18</b></div><div class="txt"><b>ovh-web-1</b><small>OVH VPS · monthly · €5.99</small></div><span class="badge">auto-renew</span></li>
+          <li class="month-h">January 2027</li>
+          <li><div class="datebox"><small>Jan</small><b>16</b></div><div class="txt"><b>staging.acme.lan</b><small>TLS certificate · 61 days</small></div><span class="badge ok">auto-renew</span></li>
+          <li class="month-h">April 2027</li>
+          <li><div class="datebox"><small>Apr</small><b>2</b></div><div class="txt"><b>home.example</b><small>Domain · Cloudflare · $10.44</small></div><span class="badge ok">auto-renew</span></li>
+        </ul>
+        <div class="card-f row"><span>Reminders go to ntfy.</span><span class="spacer"></span><button class="btn sm ghost" data-say="Calendar link copied (.ics)"><i data-i="link" data-s="14"></i>Subscribe in calendar</button></div>
+      </div>
+      <a class="card mini-link" href="costs.html"><i data-i="coin" data-s="18"></i><div><b>Domains cost €36.90 / year</b><div class="muted small">See all costs →</div></div></a>
+    </div>
+  </div>
+
+</main>
+</div>
+</div>
+</body>
+</html>

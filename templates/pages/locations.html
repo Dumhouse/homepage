@@ -1,0 +1,39 @@
+{{define "content"}}
+<div class="page-head">
+  <div>
+    <h1>Locations</h1>
+    <div class="sub">{{len .Locations}} place{{if ne (len .Locations) 1}}s{{end}} hosts live in</div>
+  </div>
+  <div class="actions"><a class="btn primary" href="/locations/new">{{icon "plus" 15}} New location</a></div>
+</div>
+
+{{if .Locations}}
+<div class="card">
+<table class="table">
+  <thead><tr><th>Name</th><th>Kind</th><th>Hosts</th><th>URL</th><th>Notes</th><th></th></tr></thead>
+  <tbody>
+  {{range .Locations}}
+    <tr>
+      <td class="name"><a href="/locations/{{.ID}}/edit"><b>{{.Name}}</b></a></td>
+      <td><span class="badge outline">{{.Kind}}</span></td>
+      <td><a href="/hosts?loc={{.Name | urlquery}}">{{.HostCount}} host{{if ne .HostCount 1}}s{{end}}</a></td>
+      <td>{{if .URL}}<a href="{{.URL}}" target="_blank" rel="noopener"><code>{{.URL}}</code></a>{{else}}<span class="muted">—</span>{{end}}</td>
+      <td>{{if .Notes}}{{.Notes}}{{else}}<span class="muted">—</span>{{end}}</td>
+      <td style="text-align:right;white-space:nowrap">
+        <a class="btn sm icon" href="/locations/{{.ID}}/edit" data-tip="Edit">{{icon "edit" 14}}</a>
+        <form method="post" action="/locations/{{.ID}}/delete" style="display:inline">
+          <button class="btn sm icon danger" data-tip="Delete location">{{icon "trash" 14}}</button>
+        </form>
+      </td>
+    </tr>
+  {{end}}
+  </tbody>
+</table>
+</div>
+{{else}}
+<div class="card"><div class="card-b">
+  <p class="muted" style="margin:0 0 10px">No locations yet. A location is a Proxmox node, a VPS provider or a shelf.</p>
+  <a class="btn primary" href="/locations/new">{{icon "plus" 15}} New location</a>
+</div></div>
+{{end}}
+{{end}}

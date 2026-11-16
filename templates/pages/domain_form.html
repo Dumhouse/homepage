@@ -1,0 +1,51 @@
+{{define "content"}}
+<div class="page-head">
+  <div>
+    <h1>{{if .IsNew}}New domain{{else}}Edit {{.Domain.Name}}{{end}}</h1>
+    <div class="sub">Registration, expiry and cost. DNS records are added on the domain page.</div>
+  </div>
+  <div class="actions"><a class="btn ghost" href="{{if .IsNew}}/domains{{else}}/domains/{{.Domain.ID}}{{end}}">Cancel</a></div>
+</div>
+
+{{if .Error}}<div class="card err" style="margin-bottom:16px"><div class="card-b">{{icon "alert" 15}} {{.Error}}</div></div>{{end}}
+
+<form method="post" action="{{.Action}}">
+<div class="grid-2">
+  <div class="stack">
+    <section class="card">
+      <div class="card-h"><h3>{{icon "globe" 15}}Basics</h3></div>
+      <div class="card-b form-grid">
+        <div class="field"><label for="name">Domain *</label><input class="input" id="name" name="name" required value="{{.Domain.Name}}" placeholder="example.com"></div>
+        <div class="field"><label for="registrar">Registrar</label><input class="input" id="registrar" name="registrar" value="{{.Domain.Registrar}}" placeholder="OVH, Cloudflare, Namecheap"></div>
+        <div class="field"><label for="account">Account</label><input class="input" id="account" name="account" value="{{.Domain.Account}}" placeholder="billing email or label"></div>
+        <div class="field"><label for="expires_at">Expires</label><input class="input" id="expires_at" type="date" name="expires_at" value="{{.Domain.ExpiresAt}}"></div>
+        <div class="field"><label for="price">Price per renewal</label><input class="input" id="price" name="price" inputmode="decimal" value="{{priceValue .Domain.PriceCents}}" placeholder="12.99"></div>
+        <div class="field"><label for="currency">Currency</label><input class="input" id="currency" name="currency" value="{{.Domain.Currency}}" placeholder="EUR" maxlength="3"></div>
+        <div class="field wide"><label class="check"><input type="checkbox" name="lookup" value="1" {{if .IsNew}}checked{{end}}> Fill registrar and expiry from public registration data (RDAP)</label><span class="hint">Asks the domain's registry once when you save; empty fields above get filled, nothing you typed is overwritten. You can repeat it from the domain page.</span></div>
+      </div>
+    </section>
+    <section class="card">
+      <div class="card-h"><h3>{{icon "info" 15}}Notes</h3></div>
+      <div class="card-b"><textarea class="input" name="notes" rows="4" placeholder="Who uses it, transfer notes">{{.Domain.Notes}}</textarea></div>
+    </section>
+  </div>
+
+  <div class="stack">
+    <section class="card">
+      <div class="card-h"><h3>{{icon "refresh" 15}}Renewal</h3></div>
+      <div class="card-b stack" style="gap:10px">
+        <label class="row" style="gap:8px"><input type="checkbox" name="auto_renew" {{if .Domain.AutoRenew}}checked{{end}}> Auto-renew is on at the registrar</label>
+        <span class="hint">Only changes the wording and reminders here (“renews” vs “expires”). Expiry reminders show on the calendar either way.</span>
+      </div>
+    </section>
+    <section class="card">
+      <div class="card-b row" style="gap:8px">
+        <button class="btn primary" type="submit">{{icon "check" 15}} {{if .IsNew}}Create domain{{else}}Save changes{{end}}</button>
+        <a class="btn ghost" href="{{if .IsNew}}/domains{{else}}/domains/{{.Domain.ID}}{{end}}">Cancel</a>
+      </div>
+    </section>
+  </div>
+</div>
+</form>
+{{end}}
+{{define "errtoast"}}{{end}}

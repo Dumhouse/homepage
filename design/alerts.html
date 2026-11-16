@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Alerts · Home Services</title>
+<script src="assets/boot.js?v=30"></script>
+<link rel="icon" href="assets/favicon.svg"><link rel="stylesheet" href="assets/app.css?v=32">
+<script src="assets/app.js?v=32" defer></script>
+</head>
+<body data-page="alerts" data-crumbs="Alerts">
+<div class="app">
+<aside class="sidebar" id="sidebar"></aside>
+<div class="main">
+<header class="topbar" id="topbar"></header>
+<main class="content">
+
+  <div class="page-head">
+    <div><h1>Alerts</h1><div class="sub">What’s wrong now, what went wrong before, and when to stay quiet</div></div>
+    <div class="actions">
+      <a class="btn" href="settings.html#notifications"><i data-i="sliders"></i>Alert settings</a>
+      <button class="btn" data-drawer="maintenance"><i data-i="clock"></i>Pause alerts…</button>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <a class="active" href="#">Open <span class="count">3</span></a>
+    <a href="#history">History</a>
+    <a href="#maintenance">Maintenance</a>
+  </div>
+
+  <!-- open -->
+  <div class="stack" style="gap:10px">
+    <div class="card" style="padding:16px">
+      <div class="row gap-12" style="align-items:flex-start">
+        <span class="score c" style="width:40px;height:40px;font-size:16px"><i data-i="db" data-s="18"></i></span>
+        <div style="flex:1;min-width:0">
+          <div class="row wrap"><b>Proxmox storage proxthin is 89% full</b><span class="badge bad">high</span><span class="muted small">since 2 h · sent to ntfy</span></div>
+          <p class="text-2 small mt-8">When a thin pool fills up, VMs on it can freeze. <b>local-zfs</b> has 100 GB free — moving the biggest disks there fixes this.</p>
+          <div class="row wrap mt-8">
+            <a class="btn sm primary" href="network.html">See biggest disks</a>
+            <button class="btn sm" data-say="Acknowledged — no more reminders until it changes">Acknowledge</button>
+            <button class="btn sm ghost" data-say="Snoozed for 24 h" data-undo>Snooze 24 h</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="padding:16px">
+      <div class="row gap-12" style="align-items:flex-start">
+        <span class="score b" style="width:40px;height:40px;font-size:16px"><i data-i="unlock" data-s="18"></i></span>
+        <div style="flex:1;min-width:0">
+          <div class="row wrap"><b>3 hosts accept SSH passwords</b><span class="badge warn">medium</span><span class="muted small">since today 09:12</span></div>
+          <p class="text-2 small mt-8">192.168.2.1 (MikroTik), 192.168.2.251 and 192.168.2.254 allow logging in with a password. Switching to keys takes about 2 minutes per host.</p>
+          <div class="row wrap mt-8">
+            <button class="btn sm primary" data-drawer="ssh-fix"><i data-i="key" data-s="14"></i>Fix step by step</button>
+            <button class="btn sm ghost" data-say="Snoozed for 7 days" data-undo>Snooze 7 days</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="padding:16px">
+      <div class="row gap-12" style="align-items:flex-start">
+        <span class="score b" style="width:40px;height:40px;font-size:16px"><i data-i="activity" data-s="18"></i></span>
+        <div style="flex:1;min-width:0">
+          <div class="row wrap"><b>mailpit on acme-staging is down</b><span class="badge warn">medium</span><span class="muted small">14 min · staging only</span></div>
+          <p class="text-2 small mt-8">Port 8025 stopped answering. Container <code>acme-staging-mailpit-1</code>.</p>
+          <div class="row wrap mt-8">
+            <span class="copy" data-copy="ssh root@192.168.10.240 'docker restart acme-staging-mailpit-1'">restart command</span>
+            <a class="btn sm" href="host.html">Open host</a>
+            <button class="btn sm ghost" data-say="Note added">Add note</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- history -->
+  <div class="group-h" id="history"><h2>History · incidents</h2><span class="help" data-tip="Each time something went down and came back is one incident. Add a note so future-you knows what happened.">?</span><span class="line"></span><span class="muted">last 30 days</span></div>
+  <div class="card">
+    <table class="table">
+      <thead><tr><th>What</th><th>When</th><th>Down for</th><th>Note</th><th></th></tr></thead>
+      <tbody>
+        <tr><td><div class="name"><span class="dot bad"></span><span><b>mailpit · acme-staging</b><small>port 8025</small></span></div></td><td class="small">today 10:12</td><td><span class="badge bad">ongoing</span></td><td class="muted small">—</td><td><button class="btn sm ghost" data-say="Note added">Add note</button></td></tr>
+        <tr><td><div class="name"><span class="dot ok"></span><span><b>BookStack</b><small>http slow &gt; 2 s</small></span></div></td><td class="small">Nov 12, 14:03</td><td class="small">3 min</td><td class="small text-2" style="white-space:normal">Backup job running at the same time — moved backup to 03:00.</td><td></td></tr>
+        <tr><td><div class="name"><span class="dot ok"></span><span><b>Forgejo</b><small>:3000</small></span></div></td><td class="small">Nov 9, 21:40</td><td class="small">2 min</td><td class="small text-2" style="white-space:normal">Planned upgrade to 11.0 <span class="badge outline xs">maintenance</span></td><td></td></tr>
+        <tr><td><div class="name"><span class="dot ok"></span><span><b>edge · Caddy</b><small>4 domains</small></span></div></td><td class="small">Nov 5, 21:57</td><td class="small">20 s</td><td class="small text-2" style="white-space:normal">Config reload after adding CaddyUI.</td><td></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- maintenance -->
+  <div class="group-h" id="maintenance"><h2>Maintenance windows</h2><span class="line"></span><button class="btn sm" data-drawer="maintenance"><i data-i="plus" data-s="14"></i>Add</button></div>
+  <div class="card">
+    <div class="setting-row"><div class="txt"><b>acme-staging · nightly deploys</b><small>Every day 03:00–03:30 · alerts muted, checks still recorded</small></div><label class="switch"><input type="checkbox" checked><span></span></label></div>
+    <div class="setting-row"><div class="txt"><b>Proxmox backups</b><small>Sunday 02:00–04:00 · all hosts on proxmox</small></div><label class="switch"><input type="checkbox" checked><span></span></label></div>
+  </div>
+
+  <template id="drawer-maintenance">
+    <div class="drawer-h">
+      <span class="ico" style="--c:#475569"><i data-i="clock" data-s="16"></i></span>
+      <div><h2>Pause alerts</h2><div class="sub">Checks keep running and are recorded; you just won’t be notified.</div></div>
+      <button class="btn ghost sm icon close" data-close><i data-i="x"></i></button>
+    </div>
+    <div class="drawer-b">
+      <div class="field"><label>For what</label>
+        <div class="combo"><input class="input" value="acme-staging"><div class="combo-list">
+          <div class="combo-opt" data-v="Everything">Everything</div>
+          <div class="combo-opt" data-v="acme-staging"><span class="ico sm" style="--c:#7c3aed">N</span>acme-staging</div>
+          <div class="combo-opt" data-v="proxmox (all guests)"><span class="ico sm" style="--c:#e57000">P</span>proxmox (all guests)</div>
+        </div></div>
+      </div>
+      <div class="field"><label>How long</label>
+        <div class="chips" data-single><button class="chip">30 min</button><button class="chip on">1 hour</button><button class="chip">Until tomorrow</button><button class="chip">Every night…</button></div>
+      </div>
+      <div class="field"><label>Reason <span class="muted">(optional)</span></label><input class="input" placeholder="e.g. upgrading Postgres"></div>
+    </div>
+    <div class="drawer-f"><button class="btn ghost" data-close>Cancel</button><button class="btn primary" data-close data-say="Alerts paused for acme-staging · 1 hour" data-undo>Pause</button></div>
+  </template>
+
+</main>
+</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,41 @@
+{{define "content"}}
+<div class="page-head">
+  <div>
+    <h1>Services</h1>
+    <div class="sub">{{len .Rows}} of {{.Total}} services{{if .Q}} matching “{{.Q}}”{{end}}</div>
+  </div>
+  <div class="actions">
+    {{if .Q}}<a class="btn ghost" href="/services">Clear filter</a>{{end}}
+    <a class="btn" href="/hosts">{{icon "server" 15}} Hosts</a>
+  </div>
+</div>
+
+{{if .Rows}}
+<div class="card">
+<table class="table">
+  <thead><tr><th>Service</th><th>Host</th><th>Port</th><th>Protocol</th><th>Domain</th><th>Tags</th><th>Check</th></tr></thead>
+  <tbody>
+  {{range .Rows}}
+    <tr>
+      <td class="name">
+        {{if .Icon}}<img class="favicon" src="{{.Icon}}" alt="" width="16" height="16">{{end}}
+        <a href="/services/{{.ID}}/edit"><b>{{.Name}}</b>{{if .Type}}<small>{{.Type}}</small>{{end}}</a>
+      </td>
+      <td class="name"><a href="/hosts/{{.HostID}}"><b>{{.HostName}}</b>{{if .Address}}<small>{{.Address}}</small>{{end}}</a></td>
+      <td>{{if .Port}}{{.Port}}{{else}}<span class="muted">—</span>{{end}}</td>
+      <td><span class="badge outline">{{.Protocol}}</span></td>
+      <td>{{if .Domain}}<code>{{.Domain}}</code>{{else}}<span class="muted">—</span>{{end}}</td>
+      <td>{{range .Tags}}<span class="tag">{{.}}</span>{{end}}</td>
+      <td>{{if .State}}<span class="dot {{stateClass .State}}" data-tip="{{.State}}"></span>{{else}}<span class="muted">—</span>{{end}}</td>
+    </tr>
+  {{end}}
+  </tbody>
+</table>
+</div>
+{{else}}
+<div class="card"><div class="card-b">
+  <p class="muted" style="margin:0 0 10px">No services match{{if .Q}} “{{.Q}}”{{end}}.</p>
+  <a class="btn" href="/hosts">{{icon "server" 15}} Add a service on a host</a>
+</div></div>
+{{end}}
+{{end}}

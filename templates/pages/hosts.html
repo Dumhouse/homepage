@@ -1,0 +1,84 @@
+{{define "content"}}
+<div class="page-head">
+  <div>
+    <h1>Hosts</h1>
+    <div class="sub">Machines, VMs and containers across all locations</div>
+  </div>
+  <div class="actions">
+    <button class="btn" type="button" data-drawer="sshcfg">{{icon "terminal" 16}}SSH config</button>
+    <a class="btn primary" href="/hosts/new">{{icon "plus" 16}}Add host</a>
+  </div>
+</div>
+
+<div class="toolbar">
+  <form class="search-input" method="get" action="/hosts">{{icon "search" 14}}<input name="q" value="{{.Q}}" placeholder="Filter by name, IP, tag…" data-filter="#hostRows" aria-label="Filter hosts"></form>
+  <div class="chips">
+    {{range .LocChips}}<a class="chip {{if .On}}on{{end}}" href="{{.Href}}">{{if .Initial}}<span class="ico sm" style="--c:{{.Color}}">{{.Initial}}</span>{{end}}{{.Label}} <span class="n">{{.Count}}</span></a>{{end}}
+  </div>
+  <span class="spacer"></span>
+  <div class="chips">
+    {{range .LifeChips}}<a class="chip {{if .On}}on{{end}}" href="{{.Href}}">{{if .Warn}}<span class="dot warn"></span>{{end}}{{.Label}} <span class="n">{{.Count}}</span></a>{{end}}
+  </div>
+</div>
+
+<div class="card">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Host</th>
+        <th>Address</th>
+        <th class="hide-sm">Location</th>
+        <th>SSH access <span class="help" data-tip="Green key = this login accepts keys only (safe). Amber lock = the server still accepts passwords. Grey = not checked yet.">?</span></th>
+        <th>Services</th>
+        <th class="hide-md">Tags</th>
+        <th class="hide-sm">Status</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody id="hostRows">
+      {{range .Rows}}
+      <tr class="{{if ne .Lifecycle "active"}}dim{{end}}" data-name="{{.Name}} {{.Hostname}} {{range .Addresses}}{{.Address}} {{end}}{{range .Tags}}{{.}} {{end}}">
+        <td><a class="name" href="/hosts/{{.ID}}"><span class="ico" style="--c:{{colorFor .Name}}">{{initial .Name}}</span><span><b>{{.Name}}</b><small>{{upper .Kind}}{{if .OS}} · {{.OS}}{{end}}</small></span></a></td>
+        <td>{{if .Addresses}}<span class="copy" data-copy="{{(index .Addresses 0).Address}}">{{(index .Addresses 0).Address}}{{icon "copy" 13}}</span>{{else}}<span class="muted">—</span>{{end}}</td>
+        <td class="hide-sm text-2">{{if .Location}}{{.Location.Name}}{{else}}<span class="muted">—</span>{{end}}</td>
+        <td><div class="row wrap gap-4">
+          {{range .SSH}}
+          {{if eq .Status "key_only"}}<span class="badge ok" data-tip="Key-only login">{{icon "key" 16}}{{.User}}</span>
+          {{else if eq .Status "password_allowed"}}<span class="badge warn" data-tip="Server still accepts passwords">{{icon "unlock" 16}}{{.User}}</span>
+          {{else if eq .Status "unreachable"}}<span class="badge bad" data-tip="SSH did not answer">{{icon "x" 16}}{{.User}}</span>
+          {{else}}<span class="badge" data-tip="Not checked yet">{{icon "info" 16}}{{.User}} · unknown</span>{{end}}
+          {{else}}<span class="badge">no SSH</span>{{end}}
+        </div></td>
+        <td><span class="row">{{if .ServiceDot}}<span class="dot {{.ServiceDot}}"></span>{{end}}{{if and .ServiceDot (ne .ServicesUp .ServiceCount)}}{{.ServicesUp}}/{{end}}{{.ServiceCount}}</span></td>
+        <td class="hide-md">{{range .Tags}}<span class="tag">{{.}}</span> {{end}}</td>
+        <td class="hide-sm"><span class="lc {{lcClass .Lifecycle}}">{{.Lifecycle}}</span></td>
+        <td><div class="row-actions">
+          {{if .SSHCopy}}<span class="copy" data-copy="{{.SSHCopy}}" data-tip="Copy: {{.SSHCopy}}" style="padding:4px 6px">{{icon "copy" 13}}</span>
+          <a class="btn ghost sm icon" href="{{.SSHURL}}" data-tip="Open in terminal">{{icon "terminal" 14}}</a>{{end}}
+          <a class="btn ghost sm icon" href="/hosts/{{.ID}}/edit" data-tip="Edit">{{icon "edit" 14}}</a>
+        </div></td>
+      </tr>
+      {{else}}
+      <tr><td colspan="8" class="muted" style="padding:18px 16px">No hosts here{{if .Q}} matching “{{.Q}}”{{end}}. <a href="/hosts/new">Add one</a> or let an agent do it through MCP.</td></tr>
+      {{end}}
+    </tbody>
+  </table>
+</div>
+
+<template id="drawer-sshcfg">
+  <div class="drawer-h">
+    <span class="ico" style="--c:#334155">{{icon "terminal" 16}}</span>
+    <div><h2>~/.ssh/config</h2><div class="sub">One block per SSH login, using each host's primary address. Logins only — no keys or passwords. Decommissioned hosts are left out.</div></div>
+    <button class="btn ghost sm icon close" type="button" data-close aria-label="Close">{{icon "x" 16}}</button>
+  </div>
+  <div class="drawer-b">
+    <pre class="sshcfg" data-src="/export/ssh-config?inline=1">Loading…</pre>
+    <p class="muted small" style="margin:0">Append it to <code>~/.ssh/config</code>, then connect with <code>ssh &lt;host-name&gt;</code>.</p>
+  </div>
+  <div class="drawer-f">
+    <button class="btn ghost" type="button" data-close>Close</button>
+    <button class="btn" type="button" data-copy="" data-copy-src>{{icon "copy" 15}}Copy</button>
+    <a class="btn primary" href="/export/ssh-config" download>{{icon "download" 15}}Download</a>
+  </div>
+</template>
+{{end}}

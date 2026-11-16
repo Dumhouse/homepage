@@ -1,0 +1,102 @@
+{{define "content"}}
+<div class="page-head">
+  <div><h1>Settings</h1><div class="sub">Connections, AI access, notifications and scanning</div></div>
+</div>
+<div class="settings">
+{{template "settingsnav" .}}
+<div class="stack" style="gap:16px;min-width:0">
+<div class="row"><h2>Integrations</h2><span class="muted small">Plugins — all optional. Tokens are stored encrypted, never in SQLite.</span></div>
+{{if .Suggested}}
+<div class="card" style="padding:14px">
+  <div class="row" style="gap:8px;margin-bottom:8px"><b>Suggested for your inventory</b><span class="badge outline">{{len .Suggested}}</span></div>
+  <div class="stack" style="gap:10px">
+    {{range .Suggested}}
+    <div class="row" style="gap:10px">
+      <div style="min-width:0"><b>{{.Name}}</b><div class="muted xs">{{.Reason}}</div></div>
+      <a class="btn sm" style="margin-left:auto" href="{{.Href}}">Set up</a>
+    </div>
+    {{end}}
+  </div>
+</div>
+{{end}}
+{{if .States}}
+<div class="card" style="padding:14px">
+  <div class="intg-groups">
+    <div><div class="muted xs" style="margin-bottom:6px">IMPORT · read inventory, propose changes</div>
+      <div class="pchips">{{range .States}}{{if ne .Plugin.Kind "notify"}}<a class="pchip {{if .Working}}on{{end}} {{if eq .ID $.Selected}}sel{{end}}" href="?p={{.ID}}"><span class="pc-state">{{if .Working}}✓{{else if .LastError}}!{{else}}+{{end}}</span>{{.Name}}</a>{{end}}{{end}}</div></div>
+    <div><div class="muted xs" style="margin-bottom:6px">NOTIFY · where alerts go</div>
+      <div class="pchips">{{range .States}}{{if eq .Plugin.Kind "notify"}}<a class="pchip {{if and (index .Config "url") (not .LastError)}}on{{end}} {{if eq .ID $.Selected}}sel{{end}}" href="?p={{.ID}}"><span class="pc-state">{{if .LastError}}!{{else if index .Config "url"}}✓{{else}}+{{end}}</span>{{.Name}}</a>{{end}}{{end}}</div></div>
+    <div><div class="muted xs" style="margin-bottom:6px">LOGIN</div>
+      <div class="pchips"><span class="pchip on" data-tip="Chosen with HS_AUTH on the server: none (default, put it behind your VPN/proxy), password, or proxy (trust the auth header of a reverse proxy)."><span class="pc-state">✓</span>{{.Auth}}</span></div></div>
+  </div>
+</div>
+{{end}}
+
+{{if .States}}
+{{range .States}}
+{{$st := .}}
+{{if eq .ID $.Selected}}
+<section class="card" id="int-{{.ID}}">
+  <div class="card-h">
+    <h3>{{icon "box" 15}}{{.Name}}</h3>
+    {{if .LastError}}<span class="badge bad">last attempt failed</span>{{else if .LastTestAt}}<span class="badge ok">works</span>{{else if not .Configured}}<span class="badge">not set up</span>{{end}}
+    {{if .LastSyncAt}}<span class="badge info">synced {{fmtDate .LastSyncAt}}</span>{{end}}
+    <span class="muted small" style="margin-left:auto">{{.ID}}</span>
+  </div>
+  <form method="post" action="/settings/integrations/{{.ID}}" class="card-b">
+    <div class="form-grid">
+      {{range $f := .Fields}}
+      <div class="field">
+        {{if eq $f.Kind "bool"}}{{if eq $f.Key "on_down"}}<label>Send when…</label>{{else}}<label>&nbsp;</label>{{end}}{{else}}<label for="{{$st.ID}}-{{$f.Key}}">{{$f.Label}}{{if $f.Required}} *{{end}}</label>{{end}}
+        {{if eq $f.Kind "password"}}
+          <input class="input" id="{{$st.ID}}-{{$f.Key}}" type="password" name="{{$f.Key}}" autocomplete="new-password"
+                 placeholder="{{if index $st.HasSecret $f.Key}}saved — leave blank to keep{{else}}not set{{end}}">
+        {{else if eq $f.Kind "bool"}}
+          <label class="check"><input type="checkbox" name="{{$f.Key}}" value="1" {{if truthy (index $st.Config $f.Key)}}checked{{end}}> {{$f.Label}}</label>
+        {{else}}
+          <input class="input" id="{{$st.ID}}-{{$f.Key}}" name="{{$f.Key}}" type="{{if eq $f.Kind "url"}}url{{else if eq $f.Kind "int"}}number{{else}}text{{end}}"
+                 value="{{index $st.Config $f.Key}}" {{if $f.Required}}required{{end}}>
+        {{end}}
+        {{if $f.Help}}<span class="hint">{{$f.Help}}</span>{{end}}
+      </div>
+      {{end}}
+    </div>
+    <div class="row wrap" style="gap:8px;margin-top:12px">
+      <button class="btn primary">{{icon "check" 15}} Save</button>
+      <button class="btn" formaction="/settings/integrations/{{.ID}}/test" formnovalidate>{{icon "zap" 15}} Test</button>
+      {{if eq .Plugin.Kind "notify"}}<span class="muted small" style="align-self:center">Test saves the form and sends a test message.</span>
+      {{else if eq .Plugin.Kind "power"}}<span class="muted small" style="align-self:center">Test checks the price and Home Assistant. Set watts or a plug on each host's page (Facts tab → Power).</span>
+      {{else}}<button class="btn" formaction="/settings/integrations/{{.ID}}/sync" formnovalidate data-tip="Reads {{.Name}} and puts everything new into one changeset for you to review and apply">{{icon "refresh" 15}} Sync now</button>
+      <span class="muted small" style="align-self:center">Nothing is added until you approve it in AI changes.</span>{{end}}
+      {{if .Configured}}<span class="spacer"></span><button class="btn ghost" formaction="/settings/integrations/{{.ID}}/reset" formnovalidate onclick="return confirm('Disconnect {{.Name}}? Its settings and token are removed. Nothing in the inventory changes.')">{{icon "x" 15}} Disconnect</button>{{end}}
+    </div>
+  </form>
+  {{if .LastError}}<div class="card-b" style="border-top:1px solid var(--border)"><div class="row" style="gap:8px;align-items:flex-start;color:var(--bad)">{{icon "alert" 14}}<div style="white-space:normal">{{.LastError}}</div></div><div class="muted xs mt-8">From the last Test or Sync{{if .LastTestAt}} ({{fmtDate .LastTestAt}}){{end}}. Fix the settings and press Test again, or Disconnect if you don't use {{.Name}}.</div></div>{{end}}
+  {{if .Ops}}
+  <div class="card-b" style="border-top:1px solid var(--border)">
+    <div class="row" style="margin-bottom:8px"><b>Last sync found</b><span class="muted small">{{len .Ops}}</span><span class="muted small" style="margin-left:auto">New items went to <a href="/changesets">AI changes</a> for review</span></div>
+    <table class="table compact">
+      <thead><tr><th>Action</th><th>Entity</th><th>Ref</th><th>Data</th><th>Note</th></tr></thead>
+      <tbody>
+      {{range .Ops}}
+        <tr>
+          <td><span class="badge outline">{{.Action}}</span></td>
+          <td>{{.Entity}}</td>
+          <td><code>{{.Ref}}</code></td>
+          <td class="muted small">{{range $k,$v := .Data}}{{$k}}={{$v}} {{end}}</td>
+          <td class="muted small">{{.Note}}</td>
+        </tr>
+      {{end}}
+      </tbody>
+    </table>
+  </div>
+  {{end}}
+</section>
+{{end}}
+{{end}}
+{{else}}
+<div class="card"><div class="card-b muted">No plugins registered.</div></div>
+{{end}}
+</div>
+</div>
+{{end}}

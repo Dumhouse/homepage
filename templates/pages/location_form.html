@@ -1,0 +1,32 @@
+{{define "content"}}
+<div class="page-head">
+  <div><h1>{{if .IsNew}}New location{{else}}Edit {{.Location.Name}}{{end}}</h1>
+    <div class="sub">Where hosts physically live. Hosts can be moved between locations.</div>
+  </div>
+  <div class="actions"><a class="btn ghost" href="/locations">Cancel</a></div>
+</div>
+
+{{if .Error}}<div class="card err" style="margin-bottom:16px"><div class="card-b">{{icon "alert" 15}} {{.Error}}</div></div>{{end}}
+
+<form method="post" action="{{.Action}}">
+  <section class="card">
+    <div class="card-h"><h3>{{icon "globe" 15}}Location</h3></div>
+    <div class="card-b form-grid">
+      <div class="field"><label for="name">Name *</label><input class="input" id="name" name="name" required value="{{.Location.Name}}" placeholder="Proxmox .250"></div>
+      <div class="field"><label for="kind">Kind</label>
+        <select class="input" id="kind" name="kind">
+          {{range $k := .Kinds}}
+          <option value="{{$k}}" {{if eq $k $.Location.Kind}}selected{{end}}>{{$k}}</option>
+          {{end}}
+        </select>
+      </div>
+      <div class="field wide"><label for="url">URL</label><input class="input" id="url" name="url" type="url" value="{{.Location.URL}}" placeholder="https://192.168.1.250:8006"></div>
+      <div class="field wide"><label for="notes">Notes</label><input class="input" id="notes" name="notes" value="{{.Location.Notes}}"></div>
+    </div>
+    <div class="card-f row" style="gap:8px">
+      <button class="btn primary">{{icon "check" 15}} {{if .IsNew}}Create location{{else}}Save changes{{end}}</button>
+      <a class="btn ghost" href="/locations">Cancel</a>
+    </div>
+  </section>
+</form>
+{{end}}

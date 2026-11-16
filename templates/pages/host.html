@@ -1,0 +1,330 @@
+{{define "content"}}
+{{$addr := ""}}{{if .Host.Addresses}}{{$addr = (index .Host.Addresses 0).Address}}{{end}}
+<div class="page-head">
+  <div class="row gap-12" style="align-items:center">
+    <span class="ico xl" style="--c:{{colorFor .Host.Name}}">{{initial .Host.Name}}</span>
+    <div>
+      <div class="row"><h1>{{.Host.Name}}</h1>{{if .HostState}}<span class="dot {{.HostState}}" style="margin-left:6px"></span>{{end}}</div>
+      <div class="row wrap mt-8">
+        <span class="badge outline">{{upper .Host.Kind}}</span>
+        {{if .Host.OS}}<span class="badge outline">{{.Host.OS}}</span>{{end}}
+        {{if .Host.Location}}<span class="badge outline"><span class="ico sm" style="--c:{{colorFor .Host.Location.Name}};width:14px;height:14px;font-size:8px;border-radius:4px">{{initial .Host.Location.Name}}</span>{{.Host.Location.Name}}</span>{{end}}
+        {{if .Host.Hostname}}<span class="badge outline">{{.Host.Hostname}}</span>{{end}}
+        <span class="lc {{lcClass .Host.Lifecycle}}" data-tip="Lifecycle: planned → active → deprecated → decommissioned">{{.Host.Lifecycle}}</span>
+        {{range .Host.Tags}}<span class="tag">{{.}}</span>{{end}}
+      </div>
+    </div>
+  </div>
+  <div class="actions">
+    {{if .SiteURL}}<span class="openbtns"><a class="btn primary" href="{{.SiteURL}}" target="_blank" rel="noopener" data-tip="{{.SiteURL}}">{{icon "home" 16}}Open site</a>{{if and .PublicURL (ne .PublicURL .SiteURL)}}<a class="btn primary" href="{{.PublicURL}}" target="_blank" rel="noopener" data-tip="Public address · {{.PublicURL}}">{{icon "globe" 16}}</a>{{end}}</span>{{end}}
+    {{if .SSHCmd}}<span class="copy" data-copy="{{.SSHCmd}}">{{.SSHCmd}}{{icon "copy" 13}}</span>
+    <a class="btn" href="{{.SSHURL}}">{{icon "terminal" 16}}Open SSH</a>{{end}}
+    <form method="post" action="/hosts/{{.Host.ID}}/check" data-async><button class="btn" data-tip="Runs every check of this host (services, public URLs, SSH) in the background — no password is ever sent">{{icon "refresh" 16}}Check now</button></form>
+    <a class="btn" href="/hosts/{{.Host.ID}}/edit">{{icon "edit" 16}}Edit</a>
+    <div class="menu-wrap">
+      <button class="btn icon" data-tip="More actions" type="button">{{icon "dots" 16}}</button>
+      <div class="menu">
+        <button type="button" data-drawer="ai">{{icon "bot" 16}}What an AI agent sees…</button>
+        <button type="button" data-drawer="facts">{{icon "cpu" 16}}Edit facts…</button>
+        <a href="/export/ssh-config" download>{{icon "download" 16}}ssh config (all hosts)</a>
+        <hr>
+        <form method="post" action="/hosts/{{.Host.ID}}/delete"><button class="danger" type="submit">{{icon "trash" 16}}Delete host…</button></form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="tabs" data-tabs="#hostTabs">
+  <a class="active" href="#overview" data-tab-link="overview">Overview</a>
+  <a href="#services" data-tab-link="services">Services <span class="count">{{len .Host.Services}}</span></a>
+  <a href="#ssh" data-tab-link="ssh">SSH &amp; access <span class="count">{{len .Host.SSH}}</span></a>
+  <a href="#facts" data-tab-link="facts">Facts</a>
+  <a href="#runbook" data-tab-link="runbook">Runbook</a>
+  <a href="#timeline" data-tab-link="timeline">Timeline <span class="count">{{len .Audit}}</span></a>
+</div>
+
+{{if .FormError}}<div class="card err" style="margin-bottom:16px"><div class="card-b">{{icon "alert" 15}} {{.FormError}}</div></div>{{end}}
+
+<div class="grid-2" id="hostTabs">
+  <!-- left column -->
+  <div class="stack">
+    <div class="card" data-tab="services">
+      <div class="card-h"><h3>{{icon "activity" 16}}Services</h3><span class="muted small">{{if or .SvcUp .SvcDown}}{{.SvcUp}} up{{if .SvcDown}} · {{.SvcDown}} not up{{end}}{{else}}{{len .Host.Services}} recorded{{end}}</span>
+        <div class="actions"><details class="menu-wrap add-pop"><summary class="btn sm">{{icon "plus" 16}}Add service</summary>
+          <form method="post" action="/hosts/{{.Host.ID}}/services" class="card form-grid pop">
+            <div class="field"><label>Name *</label><input class="input" name="name" required placeholder="web"></div>
+            <div class="field"><label>Type</label><input class="input" name="type" placeholder="rails, postgres, caddy"></div>
+            <div class="field"><label>Port</label><input class="input" name="port" inputmode="numeric" placeholder="3000"></div>
+            <div class="field"><label>Protocol</label>
+              <select class="input" name="protocol"><option value="tcp">tcp</option><option value="udp">udp</option><option value="http">http</option><option value="https">https</option></select>
+            </div>
+            <div class="field"><label>Path</label><input class="input" name="path" placeholder="/"></div>
+            <div class="field"><label>Domain</label><input class="input" name="domain" placeholder="acme.example.com"></div>
+            <div class="wide"><button class="btn primary sm">Add service</button></div>
+          </form></details></div></div>
+      {{if .Host.Services}}
+      <table class="table compact">
+        <thead><tr><th>Service</th><th>Port</th><th>Health</th><th class="hide-sm">Last 24 h</th><th class="hide-sm">Version</th><th></th></tr></thead>
+        <tbody>
+        {{range .Host.Services}}
+          <tr>
+            <td><div class="name">{{if .Icon}}<span class="ico sm has-img"><img src="{{.Icon}}" alt=""></span>{{else}}<span class="ico sm" style="--c:{{colorFor .Name}}">{{initial .Name}}</span>{{end}}<span><b>{{.Name}}</b><small class="mono">{{if .Type}}{{.Type}}{{else}}{{.Protocol}}{{end}}{{if .Domain}} · {{.Domain}}{{end}}</small></span></div></td>
+            <td>{{if .Port}}<span class="copy" data-copy="{{$addr}}:{{.Port}}">:{{.Port}}{{icon "copy" 13}}</span>{{else}}<span class="muted">—</span>{{end}}{{with serviceLink $.Host .}}<a class="t-act" href="{{.}}" target="_blank" rel="noopener" data-tip="Open {{.}}" style="display:inline-grid;vertical-align:middle;margin-left:4px">{{icon "ext" 14}}</a>{{end}}</td>
+            <td>{{with index $.ServiceCheck .ID}}<span class="badge {{stateClass .State}}" data-tip="{{.Kind}} check{{if .LastError}} — {{.LastError}}{{end}}">{{.State}}{{if .LastLatencyMS}} · {{.LastLatencyMS}} ms{{end}}</span>{{else}}<span class="badge">no check</span>{{end}}</td>
+            <td class="hide-sm">{{with index $.ServiceBars .ID}}<div class="uptime" style="width:110px;height:14px">{{range .}}<i class="{{barClass .Class}}"></i>{{end}}</div>{{end}}</td>
+            <td class="hide-sm mono small text-2">{{if .Version}}{{.Version}}{{else}}—{{end}}</td>
+            <td><div class="row-actions">
+              {{with index $.ServiceCheck .ID}}<form method="post" action="/checks/{{.ID}}/run" data-async><input type="hidden" name="back" value="/hosts/{{$.Host.ID}}"><button class="btn ghost sm icon" data-tip="Check now">{{icon "refresh" 14}}</button></form>
+              {{else}}<form method="post" action="/services/{{.ID}}/check" data-async><button class="btn ghost sm icon" data-tip="Check now">{{icon "refresh" 14}}</button></form>{{end}}
+              <a class="btn ghost sm icon" href="/services/{{.ID}}/edit" data-tip="Edit">{{icon "edit" 14}}</a>
+              <form method="post" action="/services/{{.ID}}/delete"><button class="btn ghost sm icon" data-tip="Remove">{{icon "trash" 14}}</button></form>
+            </div></td>
+          </tr>
+        {{end}}
+        </tbody>
+      </table>
+      {{else}}<div class="card-b muted">No services recorded.</div>{{end}}
+    </div>
+
+    <div class="card" data-tab="ssh">
+      <div class="card-h"><h3>{{icon "key" 16}}SSH access</h3>
+        <div class="actions"><form method="post" action="/hosts/{{.Host.ID}}/check" data-async><button class="btn sm">{{icon "refresh" 16}}Re-check</button></form><a class="btn sm" href="/hosts/{{.Host.ID}}/edit">{{icon "plus" 16}}Add user</a></div></div>
+      {{if .Host.SSH}}
+      <table class="table compact">
+        <thead><tr><th>Login</th><th>Server allows</th><th class="hide-sm">Credentials</th><th class="hide-sm">Checked</th></tr></thead>
+        <tbody>
+        {{range .Host.SSH}}
+          {{$cmd := printf "ssh %s@%s" .User $addr}}{{if and .Port (ne .Port 22)}}{{$cmd = printf "%s -p %d" $cmd .Port}}{{end}}
+          <tr>
+            <td><span class="copy" data-copy="{{$cmd}}">{{.User}}@{{$addr}}{{if and .Port (ne .Port 22)}}:{{.Port}}{{end}}{{icon "copy" 13}}</span></td>
+            <td>{{if eq .Status "key_only"}}<span class="badge ok">{{icon "key" 16}}publickey only</span>
+              {{else if eq .Status "password_allowed"}}<span class="badge warn">{{icon "unlock" 16}}password allowed</span>
+              {{else if eq .Status "unreachable"}}<span class="badge bad">{{icon "x" 16}}unreachable</span>
+              {{else}}<span class="badge">{{icon "info" 16}}not checked</span>{{end}}</td>
+            <td class="hide-sm">{{if .Vault}}<a class="row small text-2" href="{{.Vault}}" target="_blank" rel="noopener"><span class="ico sm" style="--c:#175ddc">V</span>Vaultwarden item</a>{{else}}<span class="muted small">—</span>{{end}}</td>
+            <td class="hide-sm muted small">{{with index $.SSHCheck .ID}}{{if .LastRunAt}}{{fmtDate (deref .LastRunAt)}}{{else}}never{{end}}{{else}}never{{end}}</td>
+          </tr>
+        {{end}}
+        </tbody>
+      </table>
+      {{else}}<div class="card-b muted">No SSH logins recorded.</div>{{end}}
+      {{if .SSHPassword}}
+      <details class="add-form">
+        <summary class="btn sm warn">{{icon "unlock" 14}} This host accepts SSH passwords — switch to keys</summary>
+        <div class="card-b stack" style="gap:8px">
+          <p class="muted small" style="margin:0">1. Copy your key from the machine you use (never paste a password):</p>
+          {{with .FirstSSH}}<pre class="code">ssh-copy-id {{.User}}@{{$addr}}{{if and .Port (ne .Port 22)}} -p {{.Port}}{{end}}</pre>{{end}}
+          <p class="muted small" style="margin:0">2. On the host, create <code>/etc/ssh/sshd_config.d/99-keys.conf</code>:</p>
+          <pre class="code">PasswordAuthentication no
+KbdInteractiveAuthentication no
+PermitRootLogin prohibit-password</pre>
+          <p class="muted small" style="margin:0">3. Check the config, then reload — keep your current session open until a new key login works:</p>
+          <pre class="code">sudo sshd -t && sudo systemctl reload ssh</pre>
+        </div>
+      </details>
+      {{end}}
+      <div class="card-f">The check asks the server which login methods it offers — no password is ever sent.</div>
+    </div>
+
+    <div class="card" data-tab="runbook">
+      <div class="card-h"><h3>{{icon "book" 16}}Runbook</h3><span class="help" data-tip="Markdown notes from the host's Description field: how to restart it, where data lives, what to check first.">?</span><div class="actions"><a class="btn sm" href="/hosts/{{.Host.ID}}/edit">{{icon "edit" 16}}Edit</a></div></div>
+      <div class="card-b md">{{if .Host.Description}}{{markdown .Host.Description}}{{else}}<p class="muted">Nothing written yet — how to restart it, where its data lives, anything future-you should know.</p>{{end}}</div>
+    </div>
+  </div>
+
+  <!-- right column -->
+  <div class="stack">
+    <div class="card" data-tab="services ssh">
+      <div class="card-h"><h3>{{icon "network" 16}}Addresses</h3></div>
+      <div class="card-b">
+        {{if .Host.Addresses}}
+        <dl class="kv">
+          {{range .Host.Addresses}}<dt>{{if eq .Kind "lan"}}LAN{{else}}{{title .Kind}}{{end}}</dt><dd><span class="copy" data-copy="{{.Address}}">{{.Address}}{{icon "copy" 13}}</span>{{if .IsPrimary}} <span class="badge xs outline">primary</span>{{end}}</dd>{{end}}
+          {{if .Host.Hostname}}<dt>Domain</dt><dd><span class="copy" data-copy="{{.Host.Hostname}}">{{.Host.Hostname}}{{icon "copy" 13}}</span></dd>{{end}}
+        </dl>
+        {{else}}<span class="muted">No addresses.</span>{{end}}
+      </div>
+    </div>
+
+    <div class="card" data-tab="ssh">
+      <div class="card-h"><h3>{{icon "key" 16}}Access</h3><span class="help" data-tip="How to log in to each part. Passwords stay in Vaultwarden; this card only links to the item.">?</span>
+        <div class="actions"><details class="menu-wrap add-pop"><summary class="btn sm ghost icon" data-tip="Add login">{{icon "plus" 16}}</summary>
+          <form method="post" action="/hosts/{{.Host.ID}}/access" class="card form-grid pop">
+            <input type="hidden" name="target_entity" value="host">
+            <input type="hidden" name="target_id" value="{{.Host.ID}}">
+            <input type="hidden" name="back" value="/hosts/{{.Host.ID}}">
+            <div class="field"><label>Label *</label><input class="input" name="label" required placeholder="SSH / web admin"></div>
+            <div class="field"><label>Method</label>
+              <select class="input" name="method"><option value="ssh_key">ssh_key</option><option value="password">password</option><option value="token">token</option><option value="none">none</option></select>
+            </div>
+            <div class="field"><label>Account</label><input class="input" name="account" placeholder="deploy"></div>
+            <div class="field"><label>2FA</label><select class="input" name="twofa"><option value="none">none</option><option value="totp">totp</option><option value="hardware">hardware</option></select></div>
+            <div class="field wide"><label>URL</label><input class="input" name="url" placeholder="https://…"></div>
+            <div class="field wide"><label>Vaultwarden item URL</label><input class="input" name="vault_item_url" placeholder="https://vault.example.com/item/…"></div>
+            <div class="wide"><button class="btn primary sm">Add login</button></div>
+          </form></details></div></div>
+      <div class="card-b acc-list" style="padding-top:4px;padding-bottom:4px">
+        {{range .Host.Access}}
+        <div class="acc-row">
+          <span class="acc-ic">{{icon (accessIcon .Method) 16}}</span>
+          <div class="acc-txt"><b>{{.Label}}</b>{{if .URL}}<a class="mono xs muted" href="{{.URL}}" target="_blank" rel="noopener">{{.URL}}</a>{{end}}
+            <div class="acc-meta"><span class="badge xs {{if eq .Method "none"}}warn{{end}}">{{methodLabel .Method}}</span>{{if .Account}}<span class="acc-acc">{{.Account}}</span>{{end}}{{if and .TwoFA (ne .TwoFA "none")}}<span class="badge xs ok">2FA · {{upper .TwoFA}}</span>{{end}}</div></div>
+          <div class="acc-sec">
+            {{if .VaultItemURL}}<a class="vw-link" href="{{.VaultItemURL}}" target="_blank" rel="noopener" data-tip="Opens the item in Vaultwarden — the password is never stored in Home Services">{{icon "lock" 13}}Vaultwarden{{icon "ext" 12}}</a>{{else}}<span class="muted xs">nothing to store</span>{{end}}
+            <a class="btn ghost sm icon" href="/access/{{.ID}}/edit" data-tip="Edit">{{icon "edit" 14}}</a>
+            <form method="post" action="/access/{{.ID}}/delete" style="display:inline"><input type="hidden" name="back" value="/hosts/{{$.Host.ID}}"><button class="btn ghost sm icon" data-tip="Delete">{{icon "trash" 14}}</button></form>
+          </div>
+        </div>
+        {{else}}
+        <p class="muted small" style="margin:10px 0">No logins recorded. Home Services never stores passwords.</p>
+        {{end}}
+      </div>
+      <div class="card-f row" style="gap:6px">{{icon "bot" 14}}<span>AI agents see the method, account and item name — never the password.</span></div>
+    </div>
+
+    <div class="card" data-tab="ssh facts">
+      <div class="card-h"><h3>{{icon "shield" 16}}Security</h3></div>
+      <div class="card-b">
+        <div class="row gap-12" style="margin-bottom:14px">
+          <span class="score {{.Score}}">{{upper .Score}}</span>
+          <div><b>{{.ScoreText}}</b><div class="muted small">from SSH checks{{if .Host.Facts}} and collected facts{{end}}</div></div>
+        </div>
+        <ul class="checks">
+          {{range .Security}}<li>{{if .OK}}<span class="ok-t">{{icon "check" 15}}</span>{{else}}<span class="warn-t">{{icon "alert" 15}}</span>{{end}}{{.Text}}{{if .Tip}}<span class="help" data-tip="{{.Tip}}">?</span>{{end}}</li>{{end}}
+        </ul>
+      </div>
+    </div>
+
+    <div class="card" data-tab="facts">
+      <div class="card-h"><h3>{{icon "cpu" 16}}Facts</h3><span class="help" data-tip="A snapshot of the machine itself — OS, kernel, disk, uptime, failed systemd units, sshd settings. Collected over SSH with a read-only user, or typed in by hand.">?</span>
+        {{if .Host.Facts}}<span class="muted small" style="margin-left:auto">updated {{fmtDate .Host.Facts.CollectedAt}}</span>{{end}}
+        <div class="actions" {{if not .Host.Facts}}style="margin-left:auto"{{end}}>
+          {{if .FactsSSH}}<form method="post" action="/hosts/{{.Host.ID}}/facts" data-async><button class="btn sm ghost icon" data-tip="Collect now over SSH (read-only commands)">{{icon "refresh" 14}}</button></form>{{end}}
+          <button class="btn sm ghost icon" type="button" data-drawer="facts" data-tip="Edit by hand">{{icon "edit" 14}}</button>
+        </div>
+      </div>
+      <div class="card-b">
+        {{with .Host.Facts}}
+        <dl class="kv">
+          <dt>OS</dt><dd>{{if .OS}}{{.OS}}{{else}}—{{end}}{{if .Kernel}} · kernel {{.Kernel}}{{end}}</dd>
+          <dt>Disk</dt><dd><div class="row"><div class="bar {{if ge .DiskUsedPct 85}}warn{{end}}" style="flex:1"><i style="width:{{.DiskUsedPct}}%"></i></div><span class="small muted">{{.DiskUsedPct}}%</span></div></dd>
+          <dt>Uptime</dt><dd>{{if .Uptime}}{{.Uptime}}{{else}}—{{end}}</dd>
+          <dt>Reboot needed</dt><dd>{{if eq .RebootRequired "yes"}}Yes{{else}}No{{end}}</dd>
+          <dt>Failed units</dt><dd>{{.FailedUnits}}</dd>
+          <dt>SSH passwords</dt><dd>{{if eq .PasswordAuth "yes"}}allowed{{else if eq .PasswordAuth "no"}}disabled{{else}}unknown{{end}}</dd>
+          {{if .KeyFingerprints}}<dt>Keys</dt><dd class="small mono">{{.KeyFingerprints}}</dd>{{end}}
+        </dl>
+        {{if .Error}}<p class="warn-t small" style="margin:10px 0 0">{{.Error}}</p>{{end}}
+        {{else}}
+        <p class="muted small" style="margin:0">Nothing recorded yet. {{if .FactsSSH}}Press {{icon "refresh" 12}} to collect them over SSH as the read-only user <code>{{.FactsUser}}</code>{{else}}Automatic collection is off — start Home Services with <code>HS_SSH_KEY</code> (a key for a read-only user, default <code>inventory</code>) to read them over SSH{{end}}, or {{icon "edit" 12}} type them in.</p>
+        {{end}}
+      </div>
+    </div>
+
+    <div class="card" data-tab="facts">
+      <div class="card-h"><h3>{{icon "zap" 16}}Power</h3><span class="help" data-tip="What this machine draws from the wall. Typed in, or read every 5 minutes from Home Assistant, a Shelly or a Tasmota plug. Costs shows it as Electricity.">?</span>
+        <div class="actions" style="margin-left:auto"><button class="btn sm ghost icon" type="button" data-drawer="power" data-tip="Set up">{{icon "edit" 14}}</button></div>
+      </div>
+      <div class="card-b">
+        {{with .Power}}
+        <dl class="kv">
+          <dt>Average</dt><dd><b>{{printf "%.0f" .Watts}} W</b> · {{printf "%.0f" .MonthlyKWh}} kWh / month</dd>
+          {{if .Live}}<dt>Now</dt><dd>{{printf "%.1f" .LastW}} W{{if .UpdatedAt}} <span class="muted xs">· {{fmtDate .UpdatedAt}}</span>{{end}}</dd>
+          <dt>Source</dt><dd>{{if eq .Source "ha"}}Home Assistant{{else if eq .Source "shelly"}}Shelly{{else}}Tasmota{{end}} <span class="mono small">{{.Ref}}</span></dd>
+          {{else}}<dt>Source</dt><dd>typed in</dd>{{end}}
+          <dt>Cost</dt><dd>{{if $.PowerCostCents}}{{money $.PowerCostCents $.Currency}} / month{{else}}<a href="/settings/integrations?p=power">set a price per kWh</a>{{end}}</dd>
+        </dl>
+        {{if .Error}}<p class="warn-t small" style="margin:10px 0 0">{{.Error}}</p>{{end}}
+        {{else}}
+        <p class="muted small" style="margin:0">No power figure. Press {{icon "edit" 12}} to type the watts or connect a smart plug — the monthly electricity cost then shows on Costs.</p>
+        {{end}}
+      </div>
+    </div>
+
+    <div class="card" data-tab="services">
+      <div class="card-h"><h3>{{icon "folder" 16}}Used by</h3></div>
+      <div class="card-b stack" style="gap:8px">
+        {{range .Host.Projects}}
+        <a class="row" href="/projects/{{.Slug}}"><span class="ico sm" style="--c:{{colorFor .Name}}">{{initial .Name}}</span><b>{{.Name}}</b>{{if .Env}}<span class="badge outline xs">{{.Env}}</span>{{end}}<span class="spacer"></span>{{icon "right" 14}}</a>
+        {{else}}<span class="muted small">Not linked to a project yet.</span>{{end}}
+      </div>
+    </div>
+
+    <div class="card" data-tab="timeline">
+      <div class="card-h"><h3>{{icon "clock" 16}}Timeline</h3></div>
+      <div class="card-b">
+        {{if .Audit}}
+        <ul class="tl">
+          {{range .Audit}}<li class="{{if hasPrefix .Actor "mcp:"}}mcp{{end}}"><div>{{title .Action}} {{.Entity}}</div><div class="when">{{fmtDate .At}} · {{if hasPrefix .Actor "mcp:"}}via MCP ({{trimPrefix .Actor "mcp:"}}){{else}}{{.Actor}}{{end}}</div></li>{{end}}
+        </ul>
+        {{else}}<span class="muted small">No changes yet.</span>{{end}}
+      </div>
+    </div>
+  </div>
+</div>
+
+<template id="drawer-ai">
+  <div class="drawer-h">
+    <span class="ico" style="--c:#7c3aed">{{icon "bot" 16}}</span>
+    <div><h2>What an AI agent sees</h2><div class="sub">Home Services has no AI of its own. Your agent (Claude Code, Cursor, …) connects to it over MCP with a token and reads this — never passwords.</div></div>
+    <button class="btn ghost sm icon close" type="button" data-close aria-label="Close">{{icon "x" 16}}</button>
+  </div>
+  <div class="drawer-b">
+    <pre class="sshcfg" data-src="/hosts/{{.Host.ID}}/context.md">Loading…</pre>
+    <p class="muted small" style="margin:0">Paste it into a chat to give an assistant context, or connect the agent once in <a href="/settings/mcp">Settings → MCP &amp; AI access</a> so it can look things up and propose changes you approve in Changes.</p>
+  </div>
+  <div class="drawer-f">
+    <button class="btn ghost" type="button" data-close>Close</button>
+    <button class="btn primary" type="button" data-copy="" data-copy-src>{{icon "copy" 15}}Copy</button>
+  </div>
+</template>
+
+<template id="drawer-power">
+  <form method="post" action="/hosts/{{.Host.ID}}/power">
+    <div class="drawer-h">
+      <span class="ico" style="--c:#e5a000">{{icon "zap" 16}}</span>
+      <div><h2>Power</h2><div class="sub">Where this host's watts come from</div></div>
+      <button class="btn ghost sm icon close" type="button" data-close aria-label="Close">{{icon "x" 16}}</button>
+    </div>
+    {{$src := ""}}{{$ref := ""}}{{$w := 0.0}}{{with .Power}}{{$src = .Source}}{{$ref = .Ref}}{{$w = .ManualW}}{{end}}
+    <div class="drawer-b form-grid">
+      <div class="field wide"><label for="pw-src">Source</label>
+        <select class="input" id="pw-src" name="source">
+          <option value="">None</option>
+          <option value="manual" {{if eq $src "manual"}}selected{{end}}>Typed in — I know roughly what it draws</option>
+          <option value="shelly" {{if eq $src "shelly"}}selected{{end}}>Shelly plug</option>
+          <option value="tasmota" {{if eq $src "tasmota"}}selected{{end}}>Tasmota plug</option>
+          <option value="ha" {{if eq $src "ha"}}selected{{end}}>Home Assistant sensor{{if not .HAReady}} (set up HA in Integrations first){{end}}</option>
+        </select></div>
+      <div class="field wide"><label for="pw-w">Watts</label><input class="input" id="pw-w" name="manual_w" inputmode="decimal" value="{{if $w}}{{$w}}{{end}}" placeholder="e.g. 35"><span class="hint">Used for "Typed in", and as a fallback before the first reading. A mini PC idles at 6–15 W, a NAS with disks 25–60 W, a tower server 60–150 W.</span></div>
+      <div class="field wide"><label for="pw-shelly">Shelly address</label><input class="input mono" id="pw-shelly" name="ref_shelly" value="{{if eq $src "shelly"}}{{$ref}}{{end}}" placeholder="192.168.1.60"><span class="hint">Gen1 (/status) and Gen2+ (/rpc) both work. No login.</span></div>
+      <div class="field wide"><label for="pw-tas">Tasmota address</label><input class="input mono" id="pw-tas" name="ref_tasmota" value="{{if eq $src "tasmota"}}{{$ref}}{{end}}" placeholder="192.168.1.61"></div>
+      <div class="field wide"><label for="pw-ha">Home Assistant entity</label><input class="input mono" id="pw-ha" name="ref_ha" value="{{if eq $src "ha"}}{{$ref}}{{end}}" placeholder="sensor.server_plug_power"><span class="hint">A sensor in W or kW.</span></div>
+    </div>
+    <div class="drawer-f"><button class="btn ghost" type="button" data-close>Cancel</button><button class="btn primary">Save</button></div>
+  </form>
+</template>
+
+<template id="drawer-facts">
+  <form method="post" action="/hosts/{{.Host.ID}}/facts/edit">
+    <div class="drawer-h">
+      <span class="ico" style="--c:#0ea5a4">{{icon "cpu" 16}}</span>
+      <div><h2>Edit facts</h2><div class="sub">{{if .FactsSSH}}The next SSH collection overwrites these.{{else}}Typed in by hand — SSH collection is off.{{end}}</div></div>
+      <button class="btn ghost sm icon close" type="button" data-close aria-label="Close">{{icon "x" 16}}</button>
+    </div>
+    {{$f := .Host.Facts}}
+    <div class="drawer-b form-grid">
+      <div class="field wide"><label for="f-os">OS</label><input class="input" id="f-os" name="os" value="{{with $f}}{{.OS}}{{end}}" placeholder="Debian 12"></div>
+      <div class="field"><label for="f-kernel">Kernel</label><input class="input mono" id="f-kernel" name="kernel" value="{{with $f}}{{.Kernel}}{{end}}" placeholder="6.8.12"></div>
+      <div class="field"><label for="f-up">Uptime</label><input class="input" id="f-up" name="uptime" value="{{with $f}}{{.Uptime}}{{end}}" placeholder="12 days"></div>
+      <div class="field"><label for="f-disk">Disk used %</label><input class="input" id="f-disk" name="disk_used_pct" inputmode="numeric" value="{{with $f}}{{.DiskUsedPct}}{{end}}"></div>
+      <div class="field"><label for="f-units">Failed units</label><input class="input" id="f-units" name="failed_units" inputmode="numeric" value="{{with $f}}{{.FailedUnits}}{{end}}"></div>
+      <div class="field"><label for="f-reboot">Reboot needed</label><select class="input" id="f-reboot" name="reboot_required"><option value="no">No</option><option value="yes" {{with $f}}{{if eq .RebootRequired "yes"}}selected{{end}}{{end}}>Yes</option></select></div>
+      <div class="field"><label for="f-pw">SSH passwords</label><select class="input" id="f-pw" name="password_auth">{{$pw := ""}}{{with $f}}{{$pw = .PasswordAuth}}{{end}}<option value="unknown">unknown</option><option value="no" {{if eq $pw "no"}}selected{{end}}>disabled</option><option value="yes" {{if eq $pw "yes"}}selected{{end}}>allowed</option></select></div>
+      <div class="field wide"><label for="f-root">PermitRootLogin</label><input class="input mono" id="f-root" name="root_login" value="{{with $f}}{{.RootLogin}}{{end}}" placeholder="prohibit-password"></div>
+    </div>
+    <div class="drawer-f"><button class="btn ghost" type="button" data-close>Cancel</button><button class="btn primary">Save facts</button></div>
+  </form>
+</template>
+{{end}}
+{{define "errtoast"}}{{end}}

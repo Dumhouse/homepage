@@ -1,0 +1,73 @@
+{{define "content"}}
+<div class="page-head">
+  <div>
+    <h1>Calendar</h1>
+    <div class="sub">Renewals and planned maintenance. Alerts go out at 30, 7 and 1 days before expiry.</div>
+  </div>
+  <div class="actions"><a class="btn ghost" href="/domains">{{icon "globe" 15}} Domains</a><a class="btn ghost" href="/maintenance">{{icon "clock" 15}} Maintenance</a></div>
+</div>
+
+<section class="card">
+  <div class="card-h"><h3>{{icon "network" 15}}Domain renewals</h3><span class="muted small">{{len .Domains}}</span></div>
+  {{if .Domains}}
+  <table class="table">
+    <thead><tr><th>Domain</th><th>Expires</th><th>Days</th><th>Auto-renew</th><th>Price</th><th>Registrar</th></tr></thead>
+    <tbody>
+    {{range .Domains}}
+      <tr>
+        <td class="name"><a href="/domains/{{.ID}}"><b>{{.Name}}</b>{{if .Account}}<small>{{.Account}}</small>{{end}}</a></td>
+        <td>{{if .ExpiresAt}}{{day .ExpiresAt}}{{else}}<span class="muted">—</span>{{end}}</td>
+        <td>{{if .ExpiresAt}}<span class="badge {{expiryBadge .DaysLeft}}">{{if lt .DaysLeft 0}}expired{{else}}{{.DaysLeft}} d{{end}}</span>{{else}}<span class="muted">—</span>{{end}}</td>
+        <td>{{if .AutoRenew}}<span class="badge ok">on</span>{{else}}<span class="badge warn">off</span>{{end}}</td>
+        <td>{{money .PriceCents .Currency}}</td>
+        <td>{{if .Registrar}}{{.Registrar}}{{else}}<span class="muted">—</span>{{end}}</td>
+      </tr>
+    {{end}}
+    </tbody>
+  </table>
+  {{else}}
+  <div class="card-b muted">No domains with expiry data yet. <a href="/domains/new">Add one</a>.</div>
+  {{end}}
+</section>
+
+<section class="card" style="margin-top:16px">
+  <div class="card-h"><h3>{{icon "lock" 15}}TLS certificates</h3><span class="muted small">{{len .Certs}}</span></div>
+  {{if .Certs}}
+  <table class="table compact">
+    <thead><tr><th>Target</th><th>Expires</th><th>Issuer</th></tr></thead>
+    <tbody>
+    {{range .Certs}}
+      <tr>
+        <td class="name"><b>{{.Label}}</b></td>
+        <td><span class="badge {{if lt .Days 0}}bad{{else if le .Days 30}}warn{{else}}outline{{end}}">{{if lt .Days 0}}expired{{else}}{{.Days}} days{{end}}</span></td>
+        <td class="muted small">{{if .Issuer}}{{.Issuer}}{{else}}—{{end}}</td>
+      </tr>
+    {{end}}
+    </tbody>
+  </table>
+  {{else}}
+  <div class="card-b muted">No TLS checks have run yet. Add a <code>tls</code> check for a host:443 endpoint to see certificate expiry here.</div>
+  {{end}}
+</section>
+
+<section class="card" style="margin-top:16px">
+  <div class="card-h"><h3>{{icon "clock" 15}}Maintenance windows</h3><a class="btn ghost sm" href="/maintenance">Manage</a></div>
+  {{if .Windows}}
+  <table class="table compact">
+    <tbody>
+    {{range .Windows}}
+      <tr>
+        <td class="name"><b>{{if eq .TargetEntity ""}}Everything{{else}}{{.TargetEntity}}{{if .TargetID}} #{{.TargetID}}{{end}}{{end}}</b><small>{{if .Reason}}{{.Reason}}{{else}}no reason{{end}}</small></td>
+        <td>{{if .Active}}<span class="badge warn">active</span>{{else}}<span class="badge outline">upcoming</span>{{end}}</td>
+        <td class="muted small">{{fmtDate .StartsAt}} → {{fmtDate .EndsAt}}</td>
+      </tr>
+    {{end}}
+    </tbody>
+  </table>
+  {{else}}
+  <div class="card-b muted">No windows planned.</div>
+  {{end}}
+</section>
+
+
+{{end}}

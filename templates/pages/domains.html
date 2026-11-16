@@ -1,0 +1,88 @@
+{{define "content"}}
+<div class="page-head">
+  <div><h1>Domains</h1><div class="sub">{{plural (len .Domains) "domain"}} · {{plural (len .Providers) "provider"}} · {{plural .RecordN "DNS record"}}{{if .Expiring}} · <span class="warn-t">{{.Expiring}} expiring within 30 days</span>{{end}}</div></div>
+  <div class="actions">
+    <a class="btn" href="/settings/integrations">{{icon "refresh" 16}}Sync providers</a>
+    <a class="btn primary" href="/domains/new">{{icon "plus" 16}}Add by hand</a>
+  </div>
+</div>
+
+<div class="prov-strip">
+  {{range .Providers}}
+  <div class="card prov">
+    <span class="ico" style="--c:{{colorFor .Name}}">{{initial .Name}}</span>
+    <div class="prov-t"><b>{{.Name}}</b><small>{{plural .Domains "domain"}} · {{plural .Records "record"}}</small></div>
+    <span class="badge xs {{if ne .Source "manual"}}ok{{end}}">{{if eq .Source "manual"}}by hand{{else}}{{.Source}}{{end}}</span>
+  </div>
+  {{end}}
+  <a class="card prov add" href="/settings/integrations">
+    <span class="ico" style="--c:#334155">{{icon "plus" 16}}</span>
+    <div class="prov-t"><b>Connect an account</b><small>Cloudflare, OVH — read-only token</small></div>
+  </a>
+</div>
+
+<div class="grid-2">
+  <div class="stack">
+    <div class="card">
+      <div class="card-h"><h3>{{icon "globe" 16}}Registered domains</h3><span class="muted small">where bought, who owns it, when it renews</span></div>
+      {{if .Domains}}
+      <table class="table">
+        <thead><tr><th>Domain</th><th>Bought at · account</th><th>Renews</th><th class="r">Per year</th></tr></thead>
+        <tbody>
+        {{range .Domains}}
+          <tr class="link-row" data-href="/domains/{{.ID}}">
+            <td><a href="/domains/{{.ID}}"><b>{{.Name}}</b></a><div class="muted xs">{{plural .RecordCount "record"}}</div></td>
+            <td>{{if .Registrar}}<span class="row"><span class="ico sm" style="--c:{{colorFor .Registrar}}">{{initial .Registrar}}</span><span>{{.Registrar}}{{if .Account}}<div class="muted xs">{{.Account}}</div>{{end}}</span></span>{{else}}<span class="muted">—</span>{{end}}</td>
+            <td>{{if .ExpiresAt}}<span {{if lt .DaysLeft 31}}class="{{if lt .DaysLeft 0}}bad-t{{else}}warn-t{{end}}"{{end}}>{{.Pretty}}{{if lt .DaysLeft 0}} · expired{{else if lt .DaysLeft 61}} · {{.DaysLeft}} days{{end}}</span>{{else}}<span class="muted">—</span>{{end}}
+              <div class="xs">{{if .AutoRenew}}<span class="badge ok xs">auto-renew</span>{{else}}<span class="badge warn xs">auto-renew off</span>{{end}}</div></td>
+            <td class="r mono">{{money .PriceCents .Currency}}</td>
+          </tr>
+        {{end}}
+        </tbody>
+      </table>
+      {{with .Unrenewed}}<div class="card-f row">{{icon "info" 14}}<span><b>{{.Name}}</b> won’t renew by itself. Let it expire, or turn auto-renew on at {{if .Registrar}}{{.Registrar}}{{else}}the registrar{{end}}.</span><span class="spacer"></span><a class="btn sm" href="/domains/{{.ID}}/edit">Edit</a></div>{{end}}
+      {{else}}
+      <div class="card-b"><p class="muted" style="margin:0 0 10px">No domains yet. Add the ones you actually renew — expiry and cost live here.</p>
+        <a class="btn primary" href="/domains/new">{{icon "plus" 15}} New domain</a></div>
+      {{end}}
+    </div>
+
+    <div class="card">
+      <div class="card-h"><h3>{{icon "network" 16}}DNS records</h3><span class="muted small">matched to your hosts automatically</span>
+        <div class="actions"><div class="seg"><a href="/domains" class="{{if ne .DNSFilter "unmatched"}}on{{end}}">All</a><a href="/domains?dns=unmatched" class="{{if eq .DNSFilter "unmatched"}}on{{end}}">Unmatched · {{.Unmatched}}</a></div></div></div>
+      {{if .Records}}
+      <table class="table">
+        <thead><tr><th>Name</th><th>How</th><th>Goes to</th><th>Status</th></tr></thead>
+        <tbody>
+        {{range .Records}}
+          <tr {{if not .Host}}class="unmatched"{{end}}>
+            <td><span class="copy" data-copy="{{.FQDN}}">{{.FQDN}}</span></td>
+            <td><span class="badge xs {{if or .Proxied (eq .Type "tunnel")}}info{{end}}">{{if .Proxied}}proxied {{end}}{{.Type}}</span></td>
+            <td class="small">{{if .Host}}<span class="row"><span class="ico sm" style="--c:{{colorFor .Host.Name}}">{{initial .Host.Name}}</span><a href="/hosts/{{.Host.ID}}">{{.Host.Name}}</a> <span class="muted mono">{{.HostAddr}}</span></span>{{else}}<span class="muted">{{if .Content}}<span class="mono">{{.Content}}</span> · {{end}}no host matches</span>{{end}}</td>
+            <td>{{if .Stale}}<span class="badge warn">stale · clean up</span>{{else if .Host}}<span class="badge ok">matched</span>{{else}}<a class="badge info" href="/domains/{{.DomainID}}">link to host…</a>{{end}}</td>
+          </tr>
+        {{end}}
+        </tbody>
+      </table>
+      {{else}}<div class="card-b muted small">{{if eq .DNSFilter "unmatched"}}Every record points at a known host.{{else}}No DNS records yet. Connect Cloudflare in Integrations, or add records on a domain page.{{end}}</div>{{end}}
+      <div class="card-f"><b>How matching works:</b> A records by IP, CNAMEs by following them, tunnel routes by their target address. Anything that matches nothing shows up under <i>Unmatched</i>.</div>
+    </div>
+  </div>
+
+  <div class="stack">
+    <div class="card">
+      <div class="card-h"><h3>{{icon "clock" 16}}Coming up</h3><span class="muted small" style="margin-left:auto">next 6 months</span></div>
+      {{if .Upcoming}}
+      <ul class="exp-list">
+        {{range .Upcoming}}
+        {{if .MonthHead}}<li class="month-h">{{.MonthHead}}</li>{{end}}
+        <li><div class="datebox {{if .Warn}}warn{{end}}"><small>{{.Mon}}</small><b>{{.Day}}</b></div><div class="txt"><b><a href="{{.Href}}">{{.Title}}</a></b><small>{{.Sub}}</small></div><span class="badge {{.BadgeClass}}">{{.Badge}}</span></li>
+        {{end}}
+      </ul>
+      {{else}}<div class="card-b muted small">Nothing renews or expires in the next 6 months.</div>{{end}}
+      <div class="card-f row"><span>Reminders follow your notification settings.</span><span class="spacer"></span><a class="btn sm ghost" href="/calendar">{{icon "calendar" 14}}Calendar</a></div>
+    </div>
+    {{if .YearCents}}<a class="card mini-link" href="/costs">{{icon "coin" 18}}<div><b>Domains cost {{money .YearCents .YearCur}} / year</b><div class="muted small">See all costs →</div></div></a>{{end}}
+  </div>
+</div>
+{{end}}

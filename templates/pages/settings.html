@@ -1,0 +1,110 @@
+{{define "content"}}
+<div class="page-head">
+  <div><h1>Settings</h1><div class="sub">Connections, AI access, display, notifications and scanning</div></div>
+</div>
+<div class="settings">
+{{template "settingsnav" .}}
+<div class="stack" style="gap:16px;min-width:0">
+
+{{if eq .Section "display"}}
+<div class="row"><h2>Display</h2><span class="muted small">How dates, times and the dashboard look. Applies to every page and date picker.</span></div>
+<form method="post" action="/settings/display" class="card">
+  <div class="setting-row"><div class="txt"><b>Date format</b><small>Example right now: {{.Sample}}</small></div>
+    <select class="input" name="date_format" style="width:220px">
+      {{range .DateFormats}}<option value="{{.Key}}" {{if eq .Key $.DateFormat}}selected{{end}}>{{.Label}}</option>{{end}}
+    </select></div>
+  <div class="setting-row"><div class="txt"><b>Clock</b><small>24-hour (14:30) or 12-hour (2:30 PM)</small></div>
+    <select class="input" name="clock" style="width:220px">
+      <option value="24" {{if eq .ClockFmt "24"}}selected{{end}}>24-hour · 14:30</option>
+      <option value="12" {{if eq .ClockFmt "12"}}selected{{end}}>12-hour · 2:30 PM</option>
+    </select></div>
+  <div class="setting-row"><div class="txt"><b>Dashboard view</b><small>What the Dashboard opens with</small></div>
+    <select class="input" name="home_view" style="width:220px">
+      <option value="launcher" {{if eq .HomeView "launcher"}}selected{{end}}>Launcher — big icons</option>
+      <option value="tiles" {{if eq .HomeView "tiles"}}selected{{end}}>Tiles — status and uptime</option>
+    </select></div>
+  <div class="setting-row"><div class="txt"><b>Clicking a tile</b><small>What a single click on a dashboard tile does</small></div>
+    <select class="input" name="tile_click" style="width:220px">
+      <option value="site" {{if eq .TileClick "site"}}selected{{end}}>Open the site</option>
+      <option value="details" {{if eq .TileClick "details"}}selected{{end}}>Open details in Home Services</option>
+    </select></div>
+  <div class="setting-row"><div class="txt"><b>Theme</b><small>Light or dark — also the moon/sun button at the bottom of the sidebar</small></div>
+    <button class="btn" type="button" onclick="document.getElementById('themeBtn').click()">{{icon "moon" 15}}Switch theme</button></div>
+  <div class="card-f row"><span class="spacer"></span><button class="btn primary">Save</button></div>
+</form>
+{{end}}
+
+{{if eq .Section "scanning"}}
+<div class="row"><h2>Scanning</h2><span class="muted small">Discovery sweeps these networks for open ports. Results land in the Discovery inbox.</span></div>
+<form method="post" action="/discovery/subnets" class="card">
+  <input type="hidden" name="back" value="/settings/scanning">
+  <div class="setting-row" style="flex-direction:column;align-items:stretch;gap:8px">
+    <div class="txt"><b>Subnets</b><small>One CIDR per line, up to /22 each. TCP connect only — no logins, no packets beyond a handshake and an HTTP title.</small></div>
+    <textarea class="input mono" name="list" rows="5" placeholder="192.168.1.0/24">{{range .Subnets}}{{.}}
+{{end}}</textarea></div>
+  <div class="setting-row"><div class="txt"><b>Scan automatically</b><small>{{if .LastScan}}Last scan {{fmtDate .LastScan}}{{else}}Not scanned yet{{end}}</small></div>
+    <select class="input" name="every_h" style="width:260px">
+      <option value="0" {{if eq .EveryH "0"}}selected{{end}}>Never — only Scan now</option>
+      <option value="1" {{if eq .EveryH "1"}}selected{{end}}>Every hour</option>
+      <option value="6" {{if eq .EveryH "6"}}selected{{end}}>Every 6 hours</option>
+      <option value="12" {{if eq .EveryH "12"}}selected{{end}}>Every 12 hours</option>
+      <option value="24" {{if eq .EveryH "24"}}selected{{end}}>Every day</option>
+      <option value="168" {{if eq .EveryH "168"}}selected{{end}}>Every week</option>
+    </select></div>
+  <div class="setting-row"><div class="txt"><b>Ports</b><small>22, 80, 443, 2019, 3000, 5432, 6379, 8006, 8080, 8081, 8443, 9000, 9090, 32400</small></div></div>
+  <div class="card-f row"><label class="row small" style="gap:6px"><input type="checkbox" name="scan" value="1"> Scan after saving</label><span class="spacer"></span><a class="btn ghost" href="/discovery">Open Discovery</a><button class="btn primary">Save</button></div>
+</form>
+{{end}}
+
+{{if eq .Section "currency"}}
+<div class="row"><h2>Currency</h2><span class="muted small">What totals are shown in, and how other currencies are converted</span></div>
+<form method="post" action="/settings/currency" class="card">
+  <div class="setting-row"><div class="txt"><b>Default currency</b><small>Totals on Costs and Domains are shown in it; new costs and domains start with it. Each entry keeps the currency you paid in.</small></div>
+    <select class="input" name="currency" style="width:200px">{{range .Currencies}}<option value="{{.}}" {{if eq . $.Currency}}selected{{end}}>{{.}}</option>{{end}}</select></div>
+  <div class="setting-row"><div class="txt"><b>Exchange rates</b><small>Daily reference rates from the European Central Bank (about 30 currencies), fetched once a day. {{if .RatesDate}}Current: {{.RatesDate}}.{{else}}Not fetched yet.{{end}}</small></div>
+    <select class="input" name="auto" style="width:200px"><option value="on" {{if ne .AutoRates "off"}}selected{{end}}>Fetch from the ECB</option><option value="off" {{if eq .AutoRates "off"}}selected{{end}}>Off — manual rates only</option></select></div>
+  <div class="setting-row" style="align-items:flex-start"><div class="txt"><b>Manual rates</b><small>For currencies the ECB doesn't publish (e.g. UAH), or to pin a rate. One per line: <code>CODE=value of 1 unit in EUR</code>, e.g. <code>UAH=0.0225</code>. Manual rates win over the ECB.</small></div>
+    <textarea class="input mono" name="manual" rows="3" style="width:200px" placeholder="UAH=0.0225">{{.ManualRates}}</textarea></div>
+  <div class="card-f row"><span class="muted small">Conversion uses today's rate, not the rate on the day you paid.</span><span class="spacer"></span><button class="btn primary">Save</button></div>
+</form>
+<form method="post" action="/settings/currency/refresh" class="card" data-async>
+  <div class="setting-row"><div class="txt"><b>Fetch rates now</b><small>{{if .Rates}}1 unit in {{.Currency}}: {{range $i, $r := .Rates}}{{if lt $i 8}}{{if $i}} · {{end}}{{$r.Code}} {{$r.PerOne}}{{if $r.Manual}}*{{end}}{{end}}{{end}}{{if gt (len .Rates) 8}} · …{{end}}{{else}}No rates yet.{{end}}</small></div>
+    <button class="btn">{{icon "refresh" 15}}Fetch</button></div>
+</form>
+{{end}}
+
+{{if eq .Section "notifications"}}
+<div class="row"><h2>Notifications</h2><span class="muted small">Where alerts and expiry reminders go</span></div>
+<div class="card">
+  {{range .Notify}}
+  <div class="setting-row"><div class="txt"><b>{{.Name}}</b><small>{{.Hint}}</small></div>
+    <span class="badge {{if .On}}ok{{end}}">{{.Value}}</span>{{if .Href}}<a class="btn sm" href="{{.Href}}">{{if .On}}Edit{{else}}Set up{{end}}</a>{{end}}</div>
+  {{end}}
+  <div class="card-f">Each notification plugin chooses what it sends: something going down or coming back, a new device found by discovery, expiry reminders and the digest. Tokens are stored encrypted (needs <code>HS_MASTER_KEY</code> to survive a restart).</div>
+</div>
+{{end}}
+
+{{if eq .Section "favicons"}}
+<div class="row"><h2>Favicons</h2><span class="muted small">Site icons on dashboard tiles and service lists</span></div>
+<form method="post" action="/settings/favicons" class="card">
+  <div class="setting-row"><div class="txt"><b>Fetch site icons</b><small>Read the icon of each web service and cache it in <code>data/icons/</code>. {{.IconCount}} of {{plural .ServiceCount "service"}} have one.</small></div>
+    <select class="input" name="favicon_fetch" style="width:240px">
+      <option value="on" {{if eq .FaviconFetch "on"}}selected{{end}}>On</option>
+      <option value="off" {{if eq .FaviconFetch "off"}}selected{{end}}>Off — letters only</option>
+    </select></div>
+  <div class="setting-row"><div class="txt"><b>Also from LAN addresses</b><small>Most home-lab services only answer on 192.168.x.x. Off by default so the fetcher can't be pointed at internal pages by a public domain (SSRF guard). Turn on to get icons for LAN-only services.</small></div>
+    <select class="input" name="favicon_private" style="width:240px">
+      <option value="off" {{if eq .FaviconPrivate "off"}}selected{{end}}>Off — public sites only</option>
+      <option value="on" {{if eq .FaviconPrivate "on"}}selected{{end}}>On — LAN services too</option>
+    </select></div>
+  <div class="card-f row"><span class="muted small">Icons are fetched when a service is added or edited. Images only, max 256 KB.</span><span class="spacer"></span><button class="btn primary">Save</button></div>
+</form>
+<form method="post" action="/settings/favicons/refetch" class="card">
+  <div class="setting-row"><div class="txt"><b>Fetch icons now</b><small>Try every web service again — useful after turning on LAN icons.</small></div>
+    <button class="btn">{{icon "refresh" 15}}Fetch all</button></div>
+</form>
+{{end}}
+
+</div>
+</div>
+{{end}}

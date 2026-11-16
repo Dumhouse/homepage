@@ -1,0 +1,30 @@
+services:
+  homeservices:
+    build:
+      context: .
+      args:
+        VERSION: ${HS_VERSION:-docker}
+    image: homeservices:local
+    container_name: homeservices
+    restart: unless-stopped
+    ports:
+      - "${HS_PORT:-8080}:8080"
+    volumes:
+      - ./data:/data
+    environment:
+      HS_AUTH: ${HS_AUTH:-none}
+      HS_PASSWORD_HASH: ${HS_PASSWORD_HASH:-}
+      HS_SESSION_KEY: ${HS_SESSION_KEY:-}
+      HS_COOKIE_SECURE: ${HS_COOKIE_SECURE:-}
+      HS_NTFY_URL: ${HS_NTFY_URL:-}
+      HS_NTFY_TOKEN: ${HS_NTFY_TOKEN:-}
+      HS_WEBHOOK_URL: ${HS_WEBHOOK_URL:-}
+      HS_MASTER_KEY: ${HS_MASTER_KEY:-}
+      HS_SSH_KEY: ${HS_SSH_KEY:-}
+      HS_SSH_FACTS_USER: ${HS_SSH_FACTS_USER:-inventory}
+      TZ: ${TZ:-UTC}
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/healthz"]
+      interval: 30s
+      timeout: 5s
+      retries: 3

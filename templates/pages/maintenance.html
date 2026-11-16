@@ -1,0 +1,61 @@
+{{define "content"}}
+<div class="page-head">
+  <div>
+    <h1>Maintenance</h1>
+    <div class="sub">Alerts are silenced inside these windows. Checks keep running and history keeps recording.</div>
+  </div>
+  <div class="actions"><a class="btn ghost" href="/problems">{{icon "bell" 15}} Problems</a></div>
+</div>
+
+<div class="grid-2">
+  <section class="card">
+    <div class="card-h"><h3>{{icon "clock" 15}}Windows</h3><span class="muted small">{{len .Windows}}</span></div>
+    {{if .Windows}}
+    <table class="table">
+      <thead><tr><th>Target</th><th>State</th><th>From</th><th>To</th><th>Reason</th><th></th></tr></thead>
+      <tbody>
+      {{range .Windows}}
+        <tr>
+          <td class="name">
+            {{if eq .TargetEntity ""}}<b>Everything</b><small>all checks</small>
+            {{else}}<b>{{.TargetEntity}}{{if .TargetID}} #{{.TargetID}}{{end}}</b><small>{{if .TargetID}}one target{{else}}whole entity type{{end}}</small>{{end}}
+          </td>
+          <td>{{if .Active}}<span class="badge warn">active</span>{{else}}<span class="badge outline">upcoming</span>{{end}}</td>
+          <td class="muted small">{{fmtDate .StartsAt}}</td>
+          <td class="muted small">{{fmtDate .EndsAt}}</td>
+          <td>{{if .Reason}}{{.Reason}}{{else}}<span class="muted">—</span>{{end}}</td>
+          <td style="text-align:right">
+            <form method="post" action="/maintenance/{{.ID}}/delete">
+              <button class="btn sm icon danger" data-tip="Remove window">{{icon "trash" 14}}</button>
+            </form>
+          </td>
+        </tr>
+      {{end}}
+      </tbody>
+    </table>
+    {{else}}
+    <div class="card-b muted">No windows. Alerts are live.</div>
+    {{end}}
+  </section>
+
+  <section class="card">
+    <div class="card-h"><h3>{{icon "plus" 15}}New window</h3></div>
+    <form method="post" action="/maintenance" class="card-b form-grid">
+      <div class="field"><label for="target_entity">Target</label>
+        <select class="input" id="target_entity" name="target_entity">
+          <option value="">Everything</option>
+          <option value="host">Host #</option>
+          <option value="service">Service #</option>
+          <option value="app_link">App link #</option>
+          <option value="ssh_access">SSH login #</option>
+        </select>
+      </div>
+      <div class="field"><label for="target_id">Target id</label><input class="input" id="target_id" name="target_id" inputmode="numeric" placeholder="empty or 0 = whole type"></div>
+      <div class="field"><label for="starts_at">Starts</label><input class="input" id="starts_at" type="datetime-local" data-utc name="starts_at" value="{{.DefaultStart}}"></div>
+      <div class="field"><label for="ends_at">Ends</label><input class="input" id="ends_at" type="datetime-local" data-utc name="ends_at" value="{{.DefaultEnd}}" required></div>
+      <div class="field wide"><label for="reason">Reason</label><input class="input" id="reason" name="reason" placeholder="kernel upgrade on Proxmox"></div>
+      <div class="wide"><button class="btn primary">{{icon "check" 15}} Silence alerts</button></div>
+    </form>
+  </section>
+</div>
+{{end}}

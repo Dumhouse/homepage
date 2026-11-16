@@ -1,0 +1,91 @@
+{{define "content"}}
+<div class="page-head">
+  <div><h1>Settings</h1><div class="sub">Connections, AI access, notifications and scanning</div></div>
+</div>
+<div class="settings">
+{{template "settingsnav" .}}
+<div class="stack" style="gap:16px;min-width:0">
+<div class="row"><h2>MCP &amp; AI access</h2><span class="help" data-tip="MCP lets AI agents read and edit your inventory through a logged API. Tokens are separate from the UI login.">?</span></div>
+
+{{if .Error}}<div class="card" style="border-color:var(--bad);margin-bottom:16px"><div class="card-b">{{icon "alert" 15}} {{.Error}}</div></div>{{end}}
+
+{{if .NewToken}}
+<section class="card" style="border-color:var(--ok);margin-bottom:16px">
+  <div class="card-h"><h3>{{icon "key" 15}}Token created: {{.NewName}}</h3></div>
+  <div class="card-b stack" style="gap:10px">
+    <p class="muted small" style="margin:0">Copy it now — it will not be shown again. Store it in Vaultwarden.</p>
+    <div class="row"><code class="secret" id="newToken">{{.NewToken}}</code><button class="btn sm" data-copy="{{.NewToken}}">{{icon "copy" 14}} Copy</button></div>
+    <pre class="code">claude mcp add --transport http homeservices http://{{.HostLabel}}/mcp \
+  --header "Authorization: Bearer {{.NewToken}}"</pre>
+  </div>
+</section>
+{{end}}
+
+<div class="stack" style="gap:16px">
+  <section class="card">
+    <div class="card-h"><h3>{{icon "key" 15}}Tokens</h3></div>
+    {{if .Tokens}}
+    <table class="table">
+      <thead><tr><th>Name</th><th>Scope</th><th>Created</th><th>Last used</th><th>State</th><th></th></tr></thead>
+      <tbody>
+      {{range .Tokens}}
+        <tr>
+          <td class="name"><b>{{.Name}}</b><small>{{.PublicID}}</small></td>
+          <td><span class="badge {{if eq .Scope "write"}}warn{{else if eq .Scope "propose"}}info{{else}}outline{{end}}">{{.Scope}}</span></td>
+          <td class="muted small">{{fmtDate .CreatedAt}}</td>
+          <td class="muted small">{{if .LastUsedAt}}{{fmtDate .LastUsedAt}}{{else}}never{{end}}</td>
+          <td>{{if .RevokedAt}}<span class="badge bad">revoked</span>{{else}}<span class="badge ok">active</span>{{end}}</td>
+          <td style="text-align:right">
+            {{if not .RevokedAt}}
+            <form method="post" action="/settings/mcp/tokens/revoke" onsubmit="return confirm('Revoke {{.Name}}?')">
+              <input type="hidden" name="name" value="{{.Name}}">
+              <button class="btn sm danger">{{icon "trash" 14}} Revoke</button>
+            </form>
+            {{end}}
+          </td>
+        </tr>
+      {{end}}
+      </tbody>
+    </table>
+    {{else}}
+    <div class="card-b muted">No tokens yet. Create the first one on the right.</div>
+    {{end}}
+  </section>
+
+  <div class="grid-2" style="align-items:start">
+    <section class="card">
+      <div class="card-h"><h3>{{icon "plus" 15}}New token</h3></div>
+      <form class="card-b stack" method="post" action="/settings/mcp/tokens" style="gap:12px">
+        <div class="field">
+          <label for="token-name">Name</label>
+          <input class="input" id="token-name" name="name" placeholder="claude-code" required value="{{.NewName}}">
+          <span class="hint">Shows up as the audit actor, e.g. <code>mcp:claude-code</code>.</span>
+        </div>
+        <div class="field">
+          <label for="token-scope">Scope</label>
+          <select class="input" id="token-scope" name="scope">
+            <option value="read">read — view only</option>
+            <option value="propose">propose — suggests changes, a human applies</option>
+            <option value="write">write — create, update, delete directly</option>
+          </select>
+        </div>
+        <div><button class="btn primary">{{icon "key" 15}} Create token</button></div>
+      </form>
+    </section>
+
+
+    <section class="card">
+      <div class="card-h"><h3>{{icon "bot" 15}}Connect an agent</h3></div>
+      <div class="card-b stack" style="gap:10px">
+        <p class="muted small" style="margin:0">The MCP endpoint is <code>http://{{.HostLabel}}/mcp</code> and always needs a Bearer token. Read tools work with a read token; write tools refuse a read token.</p>
+        <pre class="code">claude mcp add --transport http homeservices http://{{.HostLabel}}/mcp \
+  --header "Authorization: Bearer hs_…"</pre>
+        <p class="muted small" style="margin:0">Without MCP, agents can fetch <a href="/inventory.md"><code>/inventory.md</code></a> with the same token.</p>
+      </div>
+    </section>
+  </div>
+</div>
+</div>
+</div>
+{{end}}
+{{define "errtoast"}}{{end}}

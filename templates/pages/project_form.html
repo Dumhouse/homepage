@@ -1,0 +1,68 @@
+{{define "content"}}
+<div class="page-head">
+  <div>
+    <h1>{{if .IsNew}}New project{{else}}Edit {{.Project.Name}}{{end}}</h1>
+    <div class="sub">A project is an app; environments and app links are added on its page.</div>
+  </div>
+  <div class="actions"><a class="btn ghost" href="{{if .IsNew}}/projects{{else}}/projects/{{.Project.Slug}}{{end}}">Cancel</a></div>
+</div>
+
+{{if .Error}}<div class="card err" style="margin-bottom:16px"><div class="card-b">{{icon "alert" 15}} {{.Error}}</div></div>{{end}}
+
+<form method="post" action="{{.Action}}">
+<div class="grid-2">
+  <div class="stack">
+    <section class="card">
+      <div class="card-h"><h3>{{icon "folder" 15}}Basics</h3></div>
+      <div class="card-b form-grid">
+        <div class="field"><label for="name">Name *</label><input class="input" id="name" name="name" required value="{{.Project.Name}}" placeholder="Acme"></div>
+        <div class="field"><label for="slug">Slug</label><input class="input" id="slug" name="slug" value="{{.Project.Slug}}" placeholder="auto from name"></div>
+        <div class="field"><label for="group">Group</label>
+          <input class="input" id="group" name="group" list="groups" value="{{.Project.Group}}" placeholder="Clients">
+          <datalist id="groups">{{range .Groups}}<option value="{{.Name}}">{{end}}</datalist>
+        </div>
+        <div class="field"><label for="status">Status</label>
+          <select class="input" id="status" name="status">
+            <option value="active" {{if eq .Project.Status "active"}}selected{{end}}>active</option>
+            <option value="archived" {{if eq .Project.Status "archived"}}selected{{end}}>archived</option>
+          </select>
+        </div>
+        <div class="field wide"><label for="description">Description</label><input class="input" id="description" name="description" value="{{.Project.Description}}" placeholder="Rails + Next, run by Forgejo Actions"></div>
+        <label class="row" style="gap:8px"><input type="checkbox" name="is_open_source" {{if .Project.OpenSource}}checked{{end}}> Open source</label>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-h"><h3>{{icon "book" 15}}Runbook</h3><span class="muted small">Markdown, rendered on the project page</span></div>
+      <div class="card-b">
+        <textarea class="input" id="runbook_md" name="runbook_md" rows="12" placeholder="## Deploy&#10;&#10;1. Push to main — Forgejo Actions builds the image.&#10;2. clavis run …">{{.Project.Runbook}}</textarea>
+      </div>
+    </section>
+  </div>
+
+  <div class="stack">
+    <section class="card">
+      <div class="card-b row" style="gap:8px">
+        <button class="btn primary" type="submit">{{icon "check" 15}} {{if .IsNew}}Create project{{else}}Save changes{{end}}</button>
+        <a class="btn ghost" href="{{if .IsNew}}/projects{{else}}/projects/{{.Project.Slug}}{{end}}">Cancel</a>
+      </div>
+    </section>
+    <section class="card">
+      <div class="card-b muted small">Tip: add environments (production, staging) and their app links after saving. Agents can do it too with <code>add_project_env</code> and <code>add_app_link</code>.</div>
+    </section>
+  </div>
+</div>
+</form>
+
+{{if not .IsNew}}
+<section class="card" style="margin-top:16px">
+  <div class="card-b row">
+    <span class="muted small" style="margin-right:auto">Deleting is reversible from the projects list (undo toast).</span>
+    <form method="post" action="/projects/{{.Project.Slug}}/delete" onsubmit="return confirm('Delete {{.Project.Name}}?')">
+      <button class="btn danger">{{icon "trash" 15}} Delete project</button>
+    </form>
+  </div>
+</section>
+{{end}}
+{{end}}
+{{define "errtoast"}}{{end}}

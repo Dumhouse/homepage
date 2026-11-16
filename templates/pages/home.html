@@ -1,0 +1,148 @@
+{{define "homeswitch"}}<form method="post" action="/prefs" class="seg home-switch" role="group" aria-label="Home view">
+  <button name="view" value="tiles" class="{{if eq . "tiles"}}on{{end}}" data-tip="Tiles — details at a glance">{{icon "grid" 14}}Tiles</button>
+  <button name="view" value="launcher" class="{{if eq . "launcher"}}on{{end}}" data-tip="Launcher — big icons, quick open">{{icon "layout" 14}}Launcher</button>
+</form>{{end}}
+
+{{define "content"}}
+{{if eq .View "launcher"}}
+<div class="launcher">
+  <div class="la-top">{{template "homeswitch" .View}}</div>
+
+  <div class="la-hero">
+    <h1>{{.Greeting}}</h1>
+    <button class="la-search" data-open="palette" type="button">{{icon "search" 18}}<span>Open anything — app, host, IP, domain…</span><span class="kbd">⌘K</span></button>
+    <div class="status-line"><span class="dot {{.StatusClass}}"></span><b>{{.StatusWord}}</b>{{.StatusText}}{{if .Problems}} · <a href="#attention">see what</a>{{end}}</div>
+  </div>
+
+  <div class="la-layout">
+    <div class="la-main" id="launcherGrid">
+      {{range .TileGroups}}
+      <section class="la-group">
+        <h2>{{.Name}}</h2>
+        <div class="la-grid">
+          {{range .Tiles}}
+          <div class="la {{.DotClass}}" data-url="{{if .SiteURL}}{{.SiteURL}}{{else}}{{.DetailsURL}}{{end}}" tabindex="0" role="link" data-tip="{{.Meta}}{{if .Tip}} · {{.Tip}}{{end}}">
+            <span class="la-ic">{{if .Icon}}<span class="ico has-img"><img src="{{.Icon}}" alt=""></span>{{else}}<span class="ico" style="--c:{{.Color}}">{{.Initial}}</span>{{end}}{{if .DotClass}}<span class="la-dot"></span>{{end}}{{if .PublicURL}}<span class="la-pub" title="Also public">{{icon "globe" 10}}</span>{{end}}</span>
+            <span class="la-n">{{.Name}}</span>
+            <span class="menu-wrap la-more">
+              <button class="btn ghost icon" type="button" aria-label="Actions for {{.Name}}">{{icon "dots" 14}}</button>
+              <span class="menu">
+                {{if .LocalURL}}<a href="{{.LocalURL}}" target="_blank" rel="noopener">{{icon "home" 15}}Open local</a>{{end}}
+                {{if .PublicURL}}<a href="{{.PublicURL}}" target="_blank" rel="noopener">{{icon "globe" 15}}Open public</a>{{end}}
+                <a href="{{.DetailsURL}}">{{icon "info" 15}}Details</a>
+                {{if .EditURL}}<a href="{{.EditURL}}">{{icon "edit" 15}}Edit</a>{{end}}
+              </span>
+            </span>
+          </div>
+          {{end}}
+        </div>
+      </section>
+      {{else}}
+      <div class="card"><div class="card-b muted">Nothing here yet. <a href="/hosts/new">Add a host</a> or <a href="/projects/new">a project</a>, or let an agent do it through MCP.</div></div>
+      {{end}}
+      <p class="muted small" style="margin-top:6px">Click an icon to open the site in a new tab · hover for details, edit and the address · {{icon "globe" 12}} = also reachable from the internet · the dot is the worst of its LAN and public checks.</p>
+    </div>
+
+    <aside class="la-side" id="attention">
+      <div class="card">
+        <div class="card-h"><h3>{{icon "bell" 16}}Needs a look</h3><a class="muted small" href="/problems" style="margin-left:auto">All</a></div>
+        <div class="la-list">
+          {{range .Problems}}
+          <a class="la-it" href="/problems"><span class="n-ic {{if eq .State "down"}}bad{{else}}warn{{end}}">{{icon "activity" 15}}</span><span><b>{{.Title}} {{.State}}</b><small>{{if .LastError}}{{.LastError}}{{else}}{{.Kind}} check{{end}}</small></span></a>
+          {{else}}
+          <div class="la-it"><span class="n-ic info">{{icon "check" 15}}</span><span><b>Nothing to look at</b><small>all checks are passing</small></span></div>
+          {{end}}
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-h"><h3>{{icon "clock" 16}}Recently</h3></div>
+        <div class="la-list">
+          {{range .Recent}}
+          <div class="la-it"><span class="n-ic info">{{icon (kindIcon .Entity) 15}}</span><span><b>{{.Action}} {{.Entity}}</b><small>{{.Actor}} · {{fmtDate .At}}</small></span></div>
+          {{else}}
+          <div class="la-it"><span class="n-ic info">{{icon "clock" 15}}</span><span><b>Nothing yet</b><small>changes appear here</small></span></div>
+          {{end}}
+        </div>
+      </div>
+      <div class="la-nums">
+        <a href="/hosts"><b>{{.HostsUp}}<small>/{{.Stats.Hosts}}</small></b><span>hosts up</span></a>
+        <a href="/hosts"><b>{{.KeyOnly}}<small>/{{.SSHTotal}}</small></b><span>key-only SSH</span></a>
+        <a href="/calendar"><b>{{.NextExpiry}}</b><span>next expiry</span></a>
+      </div>
+    </aside>
+  </div>
+</div>
+{{else}}
+<div class="home-head">
+  {{template "homeswitch" .View}}
+  <div>
+    <h1>{{.Greeting}}</h1>
+    <div class="status-line"><span class="dot {{.StatusClass}}"></span><b>{{.StatusWord}}</b>{{.StatusText}}</div>
+  </div>
+</div>
+
+{{if .Problems}}
+<div class="attn" id="alerts">
+  <span class="attn-l">{{icon "bell" 15}}<b>{{.ProblemN}}</b> need attention</span>
+  <div class="attn-chips">
+    {{range .Problems}}
+    <a class="attn-chip {{if eq .State "down"}}bad{{else}}warn{{end}}" href="/problems" data-tip="{{.LastError}}">{{icon "activity" 16}}{{.Title}} · {{.State}}</a>
+    {{end}}
+  </div>
+  <a class="btn ghost sm" href="/problems">All alerts</a>
+</div>
+{{end}}
+
+<div class="card numstrip">
+  {{range .Nums}}
+  <a href="{{.Href}}"><span class="ns-l">{{icon .Icon 14}}{{.Label}}</span><span class="ns-v">{{.Value}}{{if .Of}}<small>{{.Of}}</small>{{end}}</span><span class="ns-m {{.MetaClass}}">{{.Meta}}</span></a>
+  {{end}}
+</div>
+
+<div class="tiles-bar">
+  <div class="chips">
+    <a class="chip {{if eq .Group ""}}on{{end}}" href="/">All <span class="n">{{.AllCount}}</span></a>
+    {{range .Groups}}<a class="chip {{if eq . $.Group}}on{{end}}" href="/?group={{.}}">{{.}}</a>{{end}}
+  </div>
+  <span class="spacer"></span>
+  <div class="seg" data-target="#tiles-wrap">
+    <button data-v="tiles" class="on" data-tip="Tiles" type="button">{{icon "grid" 14}}</button>
+    <button data-v="compact" data-tip="Compact list" type="button">{{icon "list" 14}}</button>
+  </div>
+  <div class="menu-wrap">
+    <button class="btn ghost icon" data-tip="Customize" type="button">{{icon "dots" 16}}</button>
+    <form class="menu" method="post" action="/prefs" style="right:0;left:auto">
+      <button name="tile" value="details">{{icon "info" 16}}Click opens details{{if eq .TileClick "details"}} ✓{{end}}</button>
+      <button name="tile" value="site">{{icon "ext" 16}}Click opens the site{{if eq .TileClick "site"}} ✓{{end}}</button>
+    </form>
+  </div>
+</div>
+
+<div id="tiles-wrap">
+{{range .TileGroups}}
+<div class="group-h"><h2>{{.Name}}</h2><span class="line"></span><span class="muted">{{len .Tiles}}</span></div>
+<div class="tiles">
+  {{range .Tiles}}
+  <div class="tile{{if .Off}} off{{end}}" data-url="{{.URL}}" tabindex="0" role="link" aria-label="Open {{.Name}}">
+    {{if .DotClass}}<span class="dot {{.DotClass}}" data-tip="{{.Tip}}"></span>{{end}}
+    <div class="top">{{if .Icon}}<span class="ico has-img"><img src="{{.Icon}}" alt=""></span>{{else}}<span class="ico" style="--c:{{.Color}}">{{.Initial}}</span>{{end}}<div style="min-width:0"><div class="t-name">{{.Name}}</div><div class="t-meta" title="{{.Tip}}">{{.Meta}}</div></div></div>
+    <div class="t-foot">{{if .Bars}}<div class="uptime">{{range .Bars}}<i class="{{barClass .Class}}"></i>{{end}}</div>{{else}}<span class="spacer"></span>{{end}}<span class="ms">{{.Extra}}</span></div>
+    <div class="t-acts">
+      {{if .LocalURL}}<a class="t-act" href="{{.LocalURL}}" target="_blank" rel="noopener" data-tip="Open local · {{.LocalURL}}">{{icon "home" 14}}</a>{{end}}
+      {{if .PublicURL}}<a class="t-act" href="{{.PublicURL}}" target="_blank" rel="noopener" data-tip="Open public · {{.PublicURL}}">{{icon "globe" 14}}</a>{{end}}
+      <a class="t-act" href="{{.DetailsURL}}" data-tip="Details">{{icon "info" 14}}</a>
+      {{if .EditURL}}<a class="t-act" href="{{.EditURL}}" data-tip="Edit">{{icon "edit" 14}}</a>{{end}}
+    </div>
+  </div>
+  {{end}}
+</div>
+{{else}}
+<div class="card" style="margin-top:16px"><div class="card-b">
+  <p class="muted" style="margin:0 0 10px">Nothing on the home page yet. Add a host or a project, or let an agent do it through MCP.</p>
+  <div class="row wrap"><a class="btn primary" href="/hosts/new">{{icon "plus" 15}} New host</a><a class="btn" href="/projects/new">{{icon "plus" 15}} New project</a></div>
+</div></div>
+{{end}}
+</div>
+<p class="muted small mt-24">Tip: click a tile to open {{if eq .TileClick "site"}}the site{{else}}its details{{end}} · {{icon "home" 13}} local address · {{icon "globe" 13}} public address · {{icon "info" 13}} details · {{icon "edit" 13}} edit. The dot is the worst of the LAN and public checks — hover it to see each. Press <span class="kbd">⌘K</span> and type a name to open anything.</p>
+{{end}}
+{{end}}
