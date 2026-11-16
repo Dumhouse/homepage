@@ -102,6 +102,26 @@
       <div class="card-f row" style="gap:6px">{{icon "bot" 14}}<span>AI agents see the method, account and item name — never the password.</span></div>
     </div>
 
+    <div class="card" id="nameservers">
+      <div class="card-h"><h3>{{icon "network" 16}}Nameservers</h3>
+        {{if .NSList}}<a class="btn sm ghost" href="/domains/{{$d.ID}}?ns=check#nameservers" style="margin-left:auto">{{icon "refresh" 14}}Check live</a>{{end}}</div>
+      <div class="card-b">
+        {{if .NSList}}<div class="row wrap gap-4">{{range .NSList}}<span class="tag mono">{{.}}</span>{{end}}</div>{{else}}<span class="muted small">No nameservers recorded. Add them on the edit page or import from the DNS provider.</span>{{end}}
+        <dl class="kv" style="margin-top:12px">
+          <dt>DNSSEC</dt><dd>{{if $d.DNSSEC}}<span class="badge ok">signed</span>{{else}}<span class="muted">not recorded</span>{{end}}</dd>
+          <dt>Transfer lock</dt><dd>{{if $d.TransferLock}}<span class="badge ok">locked</span>{{else}}<span class="muted">not recorded</span>{{end}}</dd>
+        </dl>
+        {{with .NS}}
+          {{if .Err}}<div class="alert warn" style="margin-top:12px">{{icon "alert" 16}}<div class="body">Live DNS lookup failed: {{.Err}}</div></div>
+          {{else if .Match}}<div class="alert info" style="margin-top:12px">{{icon "check" 16}}<div class="body">Live DNS matches the recorded nameservers.</div></div>
+          {{else}}<div class="alert warn" style="margin-top:12px">{{icon "alert" 16}}<div class="body"><b>Live DNS differs.</b>
+            {{if .Missing}}<div class="muted xs">Recorded but not live: {{range .Missing}}<code>{{.}}</code> {{end}}</div>{{end}}
+            {{if .Extra}}<div class="muted xs">Live but not recorded: {{range .Extra}}<code>{{.}}</code> {{end}}</div>{{end}}
+          </div></div>{{end}}
+        {{end}}
+      </div>
+    </div>
+
     <div class="card">
       <div class="card-h"><h3>{{icon "coin" 16}}Cost</h3></div>
       <div class="card-b">

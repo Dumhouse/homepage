@@ -98,7 +98,7 @@ func TestPages(t *testing.T) {
 		t.Errorf("tile click=site should use the env base URL: %d", code)
 	}
 	postForm(t, srv, "/prefs", url.Values{"view": {"launcher"}})
-	code, body = page(t, srv, "/?view=launcher") // ?view= alone no longer saves anything
+	_, body = page(t, srv, "/?view=launcher") // ?view= alone no longer saves anything
 	if !strings.Contains(body, "launcherGrid") {
 		t.Fatal("launcher choice was not saved by POST /prefs")
 	}
@@ -111,7 +111,7 @@ func TestPages(t *testing.T) {
 		t.Error("home view should be remembered")
 	}
 	// back to tiles for the remaining checks
-	_, body = page(t, srv, "/?view=tiles")
+	page(t, srv, "/?view=tiles")
 	code, body = page(t, srv, "/hosts")
 	if code != 200 || !strings.Contains(body, "acme-prod") || !strings.Contains(body, "Lab") {
 		t.Fatalf("hosts: %d", code)
@@ -134,7 +134,7 @@ func TestPages(t *testing.T) {
 	if !strings.Contains(body, "accepts SSH passwords") || !strings.Contains(body, "PasswordAuthentication no") {
 		t.Error("ssh fix guide missing for a password-allowed host")
 	}
-	code, body = page(t, srv, "/hosts/999")
+	code, _ = page(t, srv, "/hosts/999")
 	if code != 404 {
 		t.Errorf("missing host: %d", code)
 	}

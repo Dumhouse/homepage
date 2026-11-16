@@ -141,24 +141,6 @@ func serviceChecks(v inventory.Service, addr string) []autoCheck {
 	return out
 }
 
-func serviceHTTPURL(v inventory.Service, addr string) string {
-	path := v.Path
-	if path != "" && path[0] != '/' {
-		path = "/" + path
-	}
-	if v.Domain != "" {
-		scheme := "https"
-		if v.Protocol == "http" {
-			scheme = "http"
-		}
-		return scheme + "://" + v.Domain + path
-	}
-	if v.Port > 0 && (v.Protocol == "http" || v.Protocol == "https") && addr != "" {
-		return v.Protocol + "://" + net.JoinHostPort(addr, strconv.Itoa(v.Port)) + path
-	}
-	return ""
-}
-
 // upsertAuto creates or refreshes the single auto check for a target. It returns
 // true when something changed.
 func (s *Store) upsertAuto(ctx context.Context, entity string, id int64, kind string, interval int, params map[string]any) (bool, error) {

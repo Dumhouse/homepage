@@ -107,8 +107,12 @@ func (l *loginLimiter) success(key string) {
 }
 
 func clientKey(r *http.Request) string {
-	host, _, err := net.SplitHostPort(r.RemoteAddr)
-	if err != nil || host == "" {
+	host := r.RemoteAddr
+	if h, _, err := net.SplitHostPort(host); err == nil {
+		host = h
+	}
+	host = strings.Trim(host, "[]")
+	if host == "" {
 		return "unknown"
 	}
 	return host

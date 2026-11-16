@@ -35,7 +35,7 @@ func Power() *Plugin {
 				return nil
 			}
 			if cfg["ha_token"] == "" {
-				return errors.New("Home Assistant URL is set but the token is empty")
+				return errors.New("the Home Assistant URL is set but its token is empty")
 			}
 			ctx, cancel := context.WithTimeout(ctx, 8*time.Second)
 			defer cancel()
@@ -46,16 +46,16 @@ func Power() *Plugin {
 			req.Header.Set("Authorization", "Bearer "+cfg["ha_token"])
 			res, err := (&http.Client{Timeout: 8 * time.Second}).Do(req)
 			if err != nil {
-				return fmt.Errorf("Home Assistant: %w", err)
+				return fmt.Errorf("home assistant: %w", err)
 			}
 			res.Body.Close()
 			switch res.StatusCode {
 			case http.StatusOK:
 				return nil
 			case http.StatusUnauthorized:
-				return errors.New("Home Assistant refused the token (HTTP 401) — create a new long-lived token")
+				return errors.New("the Home Assistant token was refused (HTTP 401) — create a new long-lived token")
 			default:
-				return fmt.Errorf("Home Assistant: HTTP %d", res.StatusCode)
+				return fmt.Errorf("home assistant: HTTP %d", res.StatusCode)
 			}
 		},
 	}

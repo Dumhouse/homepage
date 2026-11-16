@@ -99,7 +99,7 @@ func (s *Scanner) Scan(ctx context.Context, subnet string) ([]Result, error) {
 					continue
 				}
 				c.Close()
-				hits <- hit{ip: j.ip, port: j.port}
+				hits <- hit(j)
 			}
 		}()
 	}

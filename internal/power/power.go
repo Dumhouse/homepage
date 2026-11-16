@@ -156,7 +156,7 @@ func Read(ctx context.Context, cfg Config, source, ref string) (float64, error) 
 	switch source {
 	case HA:
 		if cfg.HAURL == "" || cfg.HAToken == "" {
-			return 0, errors.New("Home Assistant isn't set up — add its URL and a long-lived token in Settings → Integrations → Electricity")
+			return 0, errors.New("set up Home Assistant (URL + long-lived token) in Settings → Integrations → Electricity first")
 		}
 		var st struct {
 			State      string         `json:"state"`

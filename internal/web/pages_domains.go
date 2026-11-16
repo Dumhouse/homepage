@@ -327,6 +327,10 @@ func (p *pages) domain(w http.ResponseWriter, r *http.Request) {
 	l.Flash = flash(r)
 	hosts, _ := p.inv.ListHosts(ctx)
 	page := domainPage{Layout: l, Domain: d, Hosts: hosts, FormError: formError(r), Records: recordRows(d, hosts)}
+	page.NSList = splitNS(d.Nameservers)
+	if r.URL.Query().Get("ns") == "check" && len(page.NSList) > 0 {
+		page.NS = lookupNS(ctx, d.Name, page.NSList)
+	}
 	used := map[int64]bool{}
 	for _, rr := range page.Records {
 		if rr.Host != nil {
@@ -395,19 +399,25 @@ func (p *pages) domainSave(w http.ResponseWriter, r *http.Request) {
 		Account: r.FormValue("account"), ExpiresAt: r.FormValue("expires_at"),
 		AutoRenew: r.FormValue("auto_renew") != "", PriceCents: int64(price*100 + 0.5),
 		Currency: r.FormValue("currency"), Notes: r.FormValue("notes"), Source: "manual",
-		PaidAt: strings.TrimSpace(r.FormValue("paid_at")),
+		PaidAt:       strings.TrimSpace(r.FormValue("paid_at")),
+		Nameservers:  strings.TrimSpace(r.FormValue("nameservers")),
+		DNSSEC:       r.FormValue("dnssec") != "",
+		TransferLock: r.FormValue("transfer_lock") != "",
 	}
 	if v := strings.TrimSpace(r.FormValue("charged")); v != "" {
 		if f, err := strconv.ParseFloat(strings.ReplaceAll(v, ",", "."), 64); err == nil && f >= 0 {
 			d.ChargedCents = int64(f*100 + 0.5)
 		}
 	}
-	// Fields no longer on the form (payment, nameservers, DNSSEC, transfer
-	// lock) and the source are kept as they were — an import may have set them.
+	// The payment label is only set by integrations; keep it and the source.
+	// Forms without the DNS section (older pages, API-shaped posts) keep the
+	// imported nameservers/DNSSEC/transfer lock instead of clearing them.
 	if id != 0 {
 		if old, err := p.inv.GetDomain(r.Context(), id); err == nil {
-			d.PaymentLabel, d.Nameservers, d.DNSSEC, d.TransferLock = old.PaymentLabel, old.Nameservers, old.DNSSEC, old.TransferLock
-			d.Source = old.Source
+			d.PaymentLabel, d.Source = old.PaymentLabel, old.Source
+			if r.FormValue("dns") == "" {
+				d.Nameservers, d.DNSSEC, d.TransferLock = old.Nameservers, old.DNSSEC, old.TransferLock
+			}
 		}
 	}
 	lookupNote := ""

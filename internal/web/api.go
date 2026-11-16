@@ -577,7 +577,7 @@ func (a *api) scanDiscovery(w http.ResponseWriter, r *http.Request) {
 		reply(w, 503, map[string]string{"error": "discovery runner is not configured"})
 		return
 	}
-	subnets := []string{}
+	var subnets []string
 	if in.Subnet != "" {
 		subnets = discovery.ParseSubnets(in.Subnet)
 		if len(subnets) == 0 {

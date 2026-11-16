@@ -30,6 +30,8 @@ profile. Please do not file a public issue for an exploitable bug. We aim to rep
 ## Hardening checklist
 
 - Run behind Caddy/nginx with TLS if it leaves the LAN; set `HS_COOKIE_SECURE=1`.
+- Behind a reverse proxy, set `HS_TRUSTED_PROXIES` to the proxy addresses so the login limiter sees real clients.
+  Forwarding headers are ignored unless the direct peer is in that list, which prevents address spoofing.
 - Use `HS_AUTH=password` and a long random password; rotate `HS_SESSION_KEY` to sign out everyone.
 - Give each agent a separate token; use `read` unless it must write; revoke after a test run.
 - Keep `/etc/homeservices/env` mode 0600 and back it up with the database.

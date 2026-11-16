@@ -29,6 +29,7 @@ daily backup timer, then waits for `/healthz`.
 | `HS_PASSWORD_HASH` | — | argon2id hash from `homeservices hash-password` |
 | `HS_SESSION_KEY` | random per restart | 32-byte hex HMAC key for cookies |
 | `HS_COOKIE_SECURE` | unset | set `1` when served over HTTPS |
+| `HS_TRUSTED_PROXIES` | — | proxy IPs/CIDRs allowed to set forwarding headers (needed for per-client login rate limiting behind Caddy) |
 | `HS_NTFY_URL` | — | full ntfy topic URL, e.g. `https://ntfy.example.com/homeservices` |
 | `HS_NTFY_TOKEN` | — | optional Bearer token for a protected ntfy topic |
 | `HS_WEBHOOK_URL` | — | optional JSON webhook for check transitions |

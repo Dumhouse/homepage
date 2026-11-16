@@ -211,6 +211,7 @@ func TestDomainPages(t *testing.T) {
 		"name": {"example.com"}, "registrar": {"OVH"}, "account": {"billing@example.com"},
 		"expires_at": {"2026-12-01"}, "price": {"12.99"}, "currency": {"EUR"},
 		"auto_renew": {"on"}, "source": {"manual"}, "payment_label": {"Revolut"},
+		"dns": {"1"}, "nameservers": {"ns1.example.net, ns2.example.net"}, "dnssec": {"on"}, "transfer_lock": {"on"},
 	}); code != 303 || loc != "/domains?ok=created" {
 		t.Fatalf("create domain: %d %s", code, loc)
 	}
@@ -221,6 +222,10 @@ func TestDomainPages(t *testing.T) {
 	code, body = page(t, srv, "/domains/1")
 	if code != 200 || !strings.Contains(body, "Registration") || !strings.Contains(body, "OVH") {
 		t.Fatalf("domain page: %d", code)
+	}
+	if !strings.Contains(body, "ns1.example.net") || !strings.Contains(body, "ns2.example.net") ||
+		!strings.Contains(body, "signed") || !strings.Contains(body, "locked") {
+		t.Error("nameservers/DNSSEC/transfer lock missing from the domain page")
 	}
 	if code, _ := redirect(t, srv, "/domains/1/records", url.Values{"name": {"www"}, "type": {"A"}, "content": {"10.0.0.5"}}); code != 303 {
 		t.Fatalf("add record: %d", code)

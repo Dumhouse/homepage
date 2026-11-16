@@ -148,7 +148,8 @@ func main() {
 			Message: "Open ports: " + strings.Join(list, ", ") + ". Register or ignore it on the Discovery page.", At: time.Now()})
 	}
 	pw := power.NewStore(d)
-	opts := []web.Option{web.WithPower(pw), web.WithChecker(sched), web.WithDataDir(*data), web.WithIntegrations(im), web.WithScanner(scanner)}
+	opts := []web.Option{web.WithPower(pw), web.WithChecker(sched), web.WithDataDir(*data),
+		web.WithIntegrations(im), web.WithScanner(scanner), web.WithTrustedProxies(os.Getenv("HS_TRUSTED_PROXIES"))}
 	if key := os.Getenv("HS_SSH_KEY"); key != "" {
 		opts = append(opts, web.WithFacts(facts.New(key, env("HS_SSH_FACTS_USER", "inventory"))))
 	}

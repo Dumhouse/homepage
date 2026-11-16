@@ -4,8 +4,8 @@ package web
 import (
 	"context"
 	"database/sql"
-	"github.com/dawidof/home-services/internal/power"
 	"io/fs"
+	"net"
 	"net/http"
 	"path/filepath"
 
@@ -21,6 +21,7 @@ import (
 	"github.com/dawidof/home-services/internal/integrations"
 	"github.com/dawidof/home-services/internal/inventory"
 	hsmcp "github.com/dawidof/home-services/internal/mcp"
+	"github.com/dawidof/home-services/internal/power"
 	"github.com/dawidof/home-services/internal/request"
 	"github.com/dawidof/home-services/internal/settings"
 	"github.com/dawidof/home-services/internal/tokens"
@@ -34,13 +35,21 @@ var Version = "dev"
 type Option func(*options)
 
 type options struct {
-	checker *checks.Scheduler
-	dataDir string
-	fetcher *icons.Fetcher
-	intg    *integrations.Manager
-	facts   FactsCollector
-	scanner *discovery.Runner
-	power   *power.Store
+	checker        *checks.Scheduler
+	dataDir        string
+	fetcher        *icons.Fetcher
+	intg           *integrations.Manager
+	facts          FactsCollector
+	scanner        *discovery.Runner
+	power          *power.Store
+	trustedProxies []*net.IPNet
+}
+
+// WithTrustedProxies trusts forwarding headers only from the given IPs/CIDRs
+// (comma-separated). Without it, RemoteAddr is never rewritten.
+func WithTrustedProxies(spec string) Option {
+	nets := parseTrustedProxies(spec)
+	return func(o *options) { o.trustedProxies = nets }
 }
 
 // WithPower shares the host power store (its poller is started by main).
@@ -86,7 +95,7 @@ func New(db *sql.DB, a auth.Provider, opts ...Option) (http.Handler, error) {
 		o(&cfg)
 	}
 	r := chi.NewRouter()
-	r.Use(middleware.RealIP, middleware.Recoverer, middleware.Logger)
+	r.Use(realIP(cfg.trustedProxies), middleware.Recoverer, middleware.Logger)
 	r.Use(securityHeaders)
 	// CSRF: browsers send Sec-Fetch-Site/Origin; a POST/PUT/PATCH/DELETE from another site is refused
 	// for every route (forms, API, MCP). Non-browser clients (curl, agents) send neither and pass —

@@ -373,6 +373,10 @@ Everything in the plan is implemented, tested, deployed to a Debian LXC and publ
       binary and came back healthy (`updated: ok 1656071`).
 - [x] Fresh-history public repo pushed; GitHub Actions `test` job passed (tidy, vet, race, build, `help`) after
       fixing the `tags` trigger nesting in both workflow copies.
+- [x] `staticcheck` clean: removed dead helpers, fixed an unused slice, lower-cased error strings and replaced the
+      deprecated `middleware.RealIP` with a trusted-proxy-aware middleware (`HS_TRUSTED_PROXIES`).
+- [x] Domain page shows nameservers, DNSSEC and transfer lock, with an on-demand live-DNS comparison; the edit form
+      can set them, while older/API-shaped posts keep imported values.
 
 
 ## Open decisions

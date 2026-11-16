@@ -104,6 +104,7 @@ The image runs as a non-root user with `/data` as the volume.
 | `HS_AUTH` | `none` | `none` (trusted LAN) or `password` |
 | `HS_PASSWORD_HASH` | — | argon2id hash (`homeservices hash-password`) |
 | `HS_SESSION_KEY` | random | HMAC key for cookies |
+| `HS_TRUSTED_PROXIES` | — | comma-separated proxy IPs/CIDRs allowed to set `X-Forwarded-For`/`CF-Connecting-IP`; forwarding headers are ignored when unset |
 | `HS_COOKIE_SECURE` | — | `1` behind HTTPS |
 | `HS_NTFY_URL` / `HS_NTFY_TOKEN` | — | ntfy topic and optional token |
 | `HS_WEBHOOK_URL` | — | JSON webhook for alerts |
