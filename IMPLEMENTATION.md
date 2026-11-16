@@ -39,7 +39,7 @@ Definition of done for any task: code + tests + `go vet` clean + the behaviour c
 | M7 | Discovery & plugins | Plugin framework, subnet scan, Proxmox + Cloudflare import | ✅ done |
 | M8 | Alerts & ops | ntfy alerts, expiry calendar, costs, domains, SSH facts | ✅ done |
 | M9 | AI changesets | `propose_changes` → review queue → apply/undo | ✅ done |
-| M10 | Open-source release | Demo mode, docs, Docker image, fresh public repo | [~] docs/demo/docker done; repo split left |
+| M10 | Open-source release | Demo mode, docs, Docker image, fresh public repo | ✅ done |
 
 **Order change vs `PLAN.md` §11:** MCP moves from M5 to **M3** — it's the cheapest way to fill the inventory
 (an agent documents the network while real pages are being built) and it reuses the store directly.
@@ -327,17 +327,22 @@ Done when: daily flow works without the prototype — add a host, its services, 
       Proxmox LXC helper script is covered by `deploy/install.sh` for now.
 - [x] **M10.5** `internal/themes` validates `themes/*.json` (schema, CSS import/url sanitiser, 4.5:1 contrast);
       `themes/solar.json` example; test runs in CI.
-- [ ] **M10.6** Fresh-history public repo; private `home-services-deploy` keeps PLAN §2/§8/§9/§14.
+- [x] **M10.6** Published a fresh-history public repo at <https://github.com/dawidof/home-services> (one root
+      commit, GitHub noreply author). Environment-specific notes stay in the ignored `.private/PLAN.md` and the
+      private deployment repo. GitHub Actions runs `go mod tidy -diff`, vet, the race suite, a build and the CLI
+      help; the release workflow uploads the Linux binary on `v*` tags.
 
 ---
 
 ## What's left
 
-M0–M9 and M10.1–M10.5 are implemented, tested and deployed to a Debian LXC.
+Everything in the plan is implemented, tested, deployed to a Debian LXC and published at
+<https://github.com/dawidof/home-services>.
 
-1. **M10.6** Fresh-history public repo (needs the repository host and history decision).
-2. Optional polish: favicon-hash/probe-path fingerprints and a recheck of the `propose_changes` handshake in
-   the interactive Claude Code UI.
+1. Optional polish: favicon-hash/probe-path fingerprints.
+2. Recheck the `propose_changes` handshake from the interactive Claude Code UI (the print-mode client did not
+   register the write tool; the same call works over raw JSON-RPC).
+3. Keep the public tree in sync with the private deployment notes in `.private/`.
 
 ### Follow-ups from the 2026-11-16 review
 
@@ -366,6 +371,8 @@ M0–M9 and M10.1–M10.5 are implemented, tested and deployed to a Debian LXC.
       `up`. Access/checks/backups are live; the propose token is staged on the host for Vaultwarden.
 - [x] `deploy/update.sh` exercised on the LXC: it wrote a fresh DB backup, confirmed schema 18 of 18, swapped the
       binary and came back healthy (`updated: ok 1656071`).
+- [x] Fresh-history public repo pushed; GitHub Actions `test` job passed (tidy, vet, race, build, `help`) after
+      fixing the `tags` trigger nesting in both workflow copies.
 
 
 ## Open decisions

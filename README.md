@@ -1,5 +1,7 @@
 # Home Services
 
+[![CI](https://github.com/dawidof/home-services/actions/workflows/ci.yml/badge.svg)](https://github.com/dawidof/home-services/actions/workflows/ci.yml)
+
 A self-hosted inventory for a home lab: hosts, their addresses and SSH logins, services,
 projects with environments and app links, logins (as Vaultwarden links), domains, costs,
 health checks and alerts — in one Go binary with an embedded UI and an MCP server for AI agents.
@@ -138,10 +140,10 @@ soft delete everywhere; migrations are append-only; no secrets in SQLite.
 
 ## Status
 
-The full plan is implemented and running on a Debian LXC: inventory, MCP with read/propose/write
-scopes, every core page, checks and alerts, discovery and integrations, changesets and the
-open-source packaging. Only the fresh-history public repository is left; see
-[`IMPLEMENTATION.md`](IMPLEMENTATION.md) for the task list and `PLAN.md` for the design rationale.
+The full plan is implemented, tested, deployed on a Debian LXC and published here: inventory, MCP
+with read/propose/write scopes, every core page, checks and alerts, discovery and integrations,
+changesets and the open-source packaging. See [`IMPLEMENTATION.md`](IMPLEMENTATION.md) for the
+task list and `PLAN.md` for the design rationale.
 
 `homeservices help` lists every command; `migrate -check`, `backup`, `scan`, `demo` and
 `hash-password` are safe to run before the server starts.
