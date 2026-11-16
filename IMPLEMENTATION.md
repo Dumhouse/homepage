@@ -377,6 +377,9 @@ Everything in the plan is implemented, tested, deployed to a Debian LXC and publ
       deprecated `middleware.RealIP` with a trusted-proxy-aware middleware (`HS_TRUSTED_PROXIES`).
 - [x] Domain page shows nameservers, DNSSEC and transfer lock, with an on-demand live-DNS comparison; the edit form
       can set them, while older/API-shaped posts keep imported values.
+- [x] Tagged **v0.1.0** on both histories; GitHub Actions built the Linux binary and published the
+      [v0.1.0 release](https://github.com/dawidof/home-services/releases/tag/v0.1.0). The deployed LXC runs
+      `v0.1.0` and `/healthz` reports it.
 
 
 ## Open decisions
