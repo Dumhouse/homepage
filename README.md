@@ -143,8 +143,8 @@ soft delete everywhere; migrations are append-only; no secrets in SQLite.
 
 The full plan is implemented, tested, deployed on a Debian LXC and published here: inventory, MCP
 with read/propose/write scopes, every core page, checks and alerts, discovery and integrations,
-changesets and the open-source packaging. See [`IMPLEMENTATION.md`](IMPLEMENTATION.md) for the
-task list and `PLAN.md` for the design rationale.
+changesets and the open-source packaging. See [`CHANGELOG.md`](CHANGELOG.md) for the release notes,
+[`IMPLEMENTATION.md`](IMPLEMENTATION.md) for the task list and `PLAN.md` for the design rationale.
 
 `homeservices help` lists every command; `migrate -check`, `backup`, `scan`, `demo` and
 `hash-password` are safe to run before the server starts.
