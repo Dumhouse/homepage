@@ -246,8 +246,9 @@ Done when: daily flow works without the prototype — add a host, its services, 
       atomic writes, no secrets in SQLite; falls back to in-memory with a warning when no key is configured.
 - [x] **M7.3 Fingerprints** — embedded JSON rules (`discovery/fingerprints.json`) match page titles and TCP banners
       (Proxmox, Caddy, Forgejo/Gitea, Vaultwarden, ntfy, Grafana, Home Assistant, Plex, Jellyfin, Nextcloud, Immich,
-      TrueNAS, Synology, UniFi, Pi-hole, SSH, Postgres, Redis), with the port table as fallback. Favicon-hash and
-      probe-path rules are intentionally omitted for now.
+      TrueNAS, Synology, UniFi, Pi-hole, SSH, Postgres, Redis), with the port table as fallback. When the root page
+      has no identifying title, one bounded probe per known port checks `/api/health`, `/api2/json/version`,
+      `/v1/health` or `/api/status` (Grafana, Proxmox, ntfy, Portainer; 401 bodies included).
 - [x] **M7.4 Subnet scan** — bounded TCP sweep (≤1024 addresses, 96 workers, 400 ms), banner/HTTP-title grab,
       `discovered_hosts`/`discovered_ports` (`0010`), `/discovery` inbox with register (creates host + services) and
       ignore, JSON API and `homeservices scan -subnet …` CLI. Drift detection still todo.

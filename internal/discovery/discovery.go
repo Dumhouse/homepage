@@ -191,8 +191,10 @@ func (s *Scanner) identify(ctx context.Context, ip string, ports []int, tick fun
 		tick()
 		for _, p := range ports {
 			info := inventory.PortInfo{Port: p, Service: portNames[p]}
+			var scheme string
 			if webPorts[p] || (s.WebPorts != nil && s.WebPorts[p]) {
-				title, scheme := fetchTitle(ctx, ip, p)
+				var title string
+				title, scheme = fetchTitle(ctx, ip, p)
 				info.Title = title
 				switch {
 				case scheme == "https" && !strings.HasPrefix(info.Service, "https") && info.Service != "proxmox":
@@ -204,6 +206,8 @@ func (s *Scanner) identify(ctx context.Context, ip string, ports []int, tick fun
 				info.Banner = grabBanner(ip, p, s.Timeout)
 			}
 			if svc := fingerprintService(p, info.Title, info.Banner); svc != "" {
+				info.Service = svc
+			} else if svc := probeFingerprint(ctx, scheme, ip, p); svc != "" {
 				info.Service = svc
 			}
 			res.Ports = append(res.Ports, info)
