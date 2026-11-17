@@ -11,13 +11,13 @@ func (s *Store) ServiceIconStats(ctx context.Context) (total, withIcon int, err 
 	return total, withIcon, err
 }
 
-// ServicesWithDomain lists live services that have a domain, for icon refresh.
+// ServicesWithDomain lists live web services (public domain or LAN address), for icon refresh.
 func (s *Store) ServicesWithDomain(ctx context.Context) ([]Service, error) {
 	rows, err := s.db.QueryContext(ctx,
 		`SELECT s.id,s.host_id,s.name,COALESCE(s.type,''),COALESCE(s.port,0),s.protocol,
 		        COALESCE(s.path,''),s.domain,COALESCE(s.version,''),COALESCE(s.notes,''),COALESCE(s.icon,'')
 		 FROM services s JOIN hosts h ON h.id=s.host_id AND h.deleted_at IS NULL
-		 WHERE s.deleted_at IS NULL AND COALESCE(s.domain,'')<>''
+		 WHERE s.deleted_at IS NULL AND (COALESCE(s.domain,'')<>'' OR (COALESCE(s.port,0)>0 AND s.protocol IN ('http','https')))
 		 ORDER BY s.name`)
 	if err != nil {
 		return nil, err

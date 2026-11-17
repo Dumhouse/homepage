@@ -19,6 +19,10 @@ Restart=on-failure
 RestartSec=3
 TimeoutStopSec=10
 
+# Lets the unprivileged user listen on a port below 1024 (HS_ADDR=:80).
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+CapabilityBoundingSet=CAP_NET_BIND_SERVICE
+
 # Hardening: the app only needs its state dir and the network.
 NoNewPrivileges=true
 ProtectSystem=strict

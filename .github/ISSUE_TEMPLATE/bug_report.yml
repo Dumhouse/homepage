@@ -1,0 +1,28 @@
+name: Bug report
+description: Something does not work as documented
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What you did, what you expected, what you saw. Screenshots help.
+    validations: { required: true }
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Output of `homeservices version` (or the Docker tag).
+    validations: { required: true }
+  - type: dropdown
+    id: install
+    attributes:
+      label: How do you run it?
+      options: [systemd, Docker, from source, other]
+    validations: { required: true }
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: "`journalctl -u homeservices -n 100` or `docker logs homeservices`. Remove tokens and addresses you do not want to share."
+      render: text

@@ -5,6 +5,7 @@ import (
 	"compress/gzip"
 	"context"
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"flag"
 	"fmt"
@@ -65,6 +66,9 @@ func main() {
 		case "demo":
 			demoCmd(os.Args[2:])
 			return
+		case "import":
+			importCmd(os.Args[2:])
+			return
 		case "hash-password":
 			fmt.Fprint(os.Stderr, "Password: ")
 			var pw string
@@ -124,6 +128,29 @@ func main() {
 	im.Register(integrations.Proxmox())
 	im.Register(integrations.Cloudflare())
 	im.Register(integrations.Docker())
+	im.Register(integrations.Hetzner())
+	im.Register(integrations.DigitalOcean())
+	im.Register(integrations.OVH())
+	im.Register(integrations.Tailscale())
+	im.Register(integrations.Headscale())
+	im.Register(integrations.Prometheus())
+	im.Register(integrations.Netdata())
+	im.Register(integrations.Beszel())
+	im.Register(integrations.Glances())
+	im.Register(integrations.TrueNAS())
+	im.Register(integrations.Synology())
+	im.Register(integrations.OpenMediaVault())
+	im.Register(integrations.NUT())
+	im.Register(integrations.Redfish())
+	im.Register(integrations.Scrutiny())
+	im.Register(integrations.UniFi())
+	im.Register(integrations.OPNsense())
+	im.Register(integrations.MikroTik())
+	im.Register(integrations.OpenWrt())
+	im.Register(integrations.PiHole())
+	im.Register(integrations.AdGuard())
+	im.Register(integrations.NginxProxyManager())
+	im.Register(integrations.Traefik())
 	im.Register(integrations.Power())
 	im.Register(integrations.Ntfy())
 	im.Register(integrations.Gotify())
@@ -199,6 +226,7 @@ usage:
   homeservices backup [-keep 14] [-data dir]
   homeservices scan -subnet 192.168.1.0/24 [-ports 22,80,443] [-data dir]
   homeservices demo [-data dir]
+  homeservices import [-apply] [-mode merge|replace] [-data dir] file.json
   homeservices token create --name <name> [--scope read|propose|write] [-data dir]
   homeservices token list|revoke <name> [-data dir]
   homeservices hash-password
@@ -546,4 +574,38 @@ func env(k, def string) string {
 		return v
 	}
 	return def
+}
+
+// importCmd loads an export document (the same JSON as /export/inventory.json
+// and /api/v1/import) straight into the database, for seeding a fresh install
+// from a file without creating an API token. Dry run unless -apply is given.
+func importCmd(args []string) {
+	fs := flag.NewFlagSet("import", flag.ExitOnError)
+	dataDir := dataFlag(fs)
+	apply := fs.Bool("apply", false, "write the changes (default: only print what would change)")
+	mode := fs.String("mode", "merge", "merge (match by name/slug, add the rest) or replace (wipe the inventory first)")
+	fs.Parse(args)
+	if fs.NArg() != 1 {
+		fmt.Fprintln(os.Stderr, "usage: homeservices import [-apply] [-mode merge|replace] [-data dir] file.json")
+		os.Exit(2)
+	}
+	b, err := os.ReadFile(fs.Arg(0))
+	if err != nil {
+		log.Fatal(err)
+	}
+	var in inventory.ExportData
+	if err := json.Unmarshal(b, &in); err != nil {
+		log.Fatalf("%s: %v", fs.Arg(0), err)
+	}
+	d := openDB(*dataDir)
+	defer d.Close()
+	sum, err := inventory.New(d).Import(context.Background(), "cli:import", &in, *mode, !*apply)
+	if err != nil {
+		log.Fatal(err)
+	}
+	out, _ := json.MarshalIndent(sum, "", "  ")
+	fmt.Println(string(out))
+	if !*apply {
+		fmt.Fprintln(os.Stderr, "dry run — nothing written; add -apply to import")
+	}
 }

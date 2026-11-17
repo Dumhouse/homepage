@@ -200,5 +200,5 @@ func (p *pages) discoveryIgnore(w http.ResponseWriter, r *http.Request) {
 		p.fail(w, r, err)
 		return
 	}
-	http.Redirect(w, r, "/discovery", http.StatusSeeOther)
+	http.Redirect(w, r, "/discovery?ok=ignored", http.StatusSeeOther)
 }

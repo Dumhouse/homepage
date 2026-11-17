@@ -395,3 +395,51 @@ func TestDockerPlugin(t *testing.T) {
 		t.Error("missing key should fail")
 	}
 }
+
+// A second copy of a plugin keeps its own settings and secrets.
+func TestInstances(t *testing.T) {
+	d, err := db.Open(t.TempDir() + "/t.db")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer d.Close()
+	m := integrations.NewManager(d, integrations.NewMemorySecrets())
+	m.Register(&integrations.Plugin{ID: "fake", Name: "Fake",
+		Fields: []integrations.Field{{Key: "url", Label: "URL", Kind: "url", Required: true}, {Key: "token", Label: "Token", Kind: "password", Secret: true}},
+		Test: func(ctx context.Context, c integrations.Config) error {
+			if c["token"] == "" {
+				return errors.New("no token")
+			}
+			return nil
+		}})
+	ctx := context.Background()
+	if err := m.Save(ctx, "t", "fake", map[string]string{"url": "http://a", "token": "A"}); err != nil {
+		t.Fatal(err)
+	}
+	id, err := m.AddInstance(ctx, "t", "fake", "lab")
+	if err != nil || id != "fake~2" {
+		t.Fatalf("%q %v", id, err)
+	}
+	if err := m.Test(ctx, id); err == nil {
+		t.Fatal("the copy must not inherit the first one's token")
+	}
+	if err := m.Save(ctx, "t", id, map[string]string{"url": "http://b", "token": "B", "_label": "lab"}); err != nil {
+		t.Fatal(err)
+	}
+	if err := m.Test(ctx, id); err != nil {
+		t.Fatal(err)
+	}
+	states, _ := m.List(ctx)
+	if len(states) != 2 || states[0].Name != "Fake" || states[1].Name != "Fake · lab" || states[1].Config["url"] != "http://b" || states[0].Config["url"] != "http://a" {
+		t.Fatalf("%+v", states)
+	}
+	if _, err := m.AddInstance(ctx, "t", "nope", ""); err == nil {
+		t.Fatal("unknown plugin")
+	}
+	if err := m.Reset(ctx, "t", id); err != nil {
+		t.Fatal(err)
+	}
+	if states, _ := m.List(ctx); len(states) != 1 {
+		t.Fatalf("copy should be gone: %+v", states)
+	}
+}

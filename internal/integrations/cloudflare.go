@@ -15,6 +15,7 @@ import (
 func Cloudflare() *Plugin {
 	return &Plugin{
 		ID:          "cloudflare",
+		Category:    CatNetwork,
 		Name:        "Cloudflare",
 		Description: "Read zones and DNS records; propose domains and record entries.",
 		Fields: []Field{

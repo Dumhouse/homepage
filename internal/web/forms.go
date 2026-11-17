@@ -446,11 +446,15 @@ func (p *pages) appLinkDelete(w http.ResponseWriter, r *http.Request) {
 
 func (p *pages) accessDelete(w http.ResponseWriter, r *http.Request) {
 	id, _ := strconv.ParseInt(chi.URLParam(r, "id"), 10, 64)
+	owner := "/"
+	if a, err := p.inv.GetAccess(r.Context(), id); err == nil {
+		owner, _ = p.accessTarget(r.Context(), a)
+	}
 	if err := p.inv.DeleteAccess(r.Context(), actorOf(r), id); err != nil {
 		p.fail(w, r, err)
 		return
 	}
-	http.Redirect(w, r, safeBack(r.FormValue("back"), "/"), http.StatusSeeOther)
+	http.Redirect(w, r, withQuery(safeBack(r.FormValue("back"), owner), "ok=access-deleted"), http.StatusSeeOther)
 }
 
 // safeBack only allows local paths, so a form cannot bounce users off-site.

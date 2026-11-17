@@ -17,6 +17,7 @@ import (
 func Docker() *Plugin {
 	return &Plugin{
 		ID:          "docker",
+		Category:    CatServers,
 		Name:        "Docker",
 		Description: "Read running containers over SSH and propose a service per published port.",
 		Fields: []Field{

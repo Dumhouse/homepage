@@ -19,7 +19,7 @@ func TestHealthzAndPrototype(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for path, want := range map[string]int{"/healthz": 200, "/design/dashboard.html": 200, "/assets/app.css": 200, "/nope": 404, "/dashboard.html": 404} {
+	for path, want := range map[string]int{"/healthz": 200, "/design/dashboard.html": 404, "/assets/app.css": 200, "/nope": 404, "/dashboard.html": 404} {
 		rec := httptest.NewRecorder()
 		h.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, path, nil))
 		if rec.Code != want {

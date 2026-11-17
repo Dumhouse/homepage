@@ -58,7 +58,7 @@
         <div class="card-h"><h3>{{icon "clock" 16}}Recently</h3></div>
         <div class="la-list">
           {{range .Recent}}
-          <{{if .Href}}a href="{{.Href}}"{{else}}div{{end}} class="la-it"><span class="n-ic info">{{icon (kindIcon .Entity) 15}}</span><span><b>{{.Title}}{{if gt .Times 1}} <span class="muted">×{{.Times}}</span>{{end}}</b><small>{{.Actor}} · {{fmtDate .At}}</small></span></{{if .Href}}a{{else}}div{{end}}>
+          {{if .Href}}<a href="{{.Href}}" class="la-it">{{else}}<div class="la-it">{{end}}<span class="n-ic info">{{icon (kindIcon .Entity) 15}}</span><span><b>{{.Title}}{{if gt .Times 1}} <span class="muted">×{{.Times}}</span>{{end}}</b><small>{{.Actor}} · {{fmtDate .At}}</small></span>{{if .Href}}</a>{{else}}</div>{{end}}
           {{else}}
           <div class="la-it"><span class="n-ic info">{{icon "clock" 15}}</span><span><b>Nothing yet</b><small>changes appear here</small></span></div>
           {{end}}
@@ -101,8 +101,13 @@
 
 <div class="tiles-bar">
   <div class="chips">
-    <a class="chip {{if eq .Group ""}}on{{end}}" href="/">All <span class="n">{{.AllCount}}</span></a>
-    {{range .Groups}}<a class="chip {{if eq . $.Group}}on{{end}}" href="/?group={{.}}">{{.}}</a>{{end}}
+    <a class="chip {{if eq .Group ""}}on{{end}}" href="/{{if .Status}}?status={{.Status}}{{end}}">All <span class="n">{{.AllCount}}</span></a>
+    {{range .Groups}}<a class="chip {{if eq . $.Group}}on{{end}}" href="/?group={{.}}{{if $.Status}}&amp;status={{$.Status}}{{end}}">{{.}}</a>{{end}}
+  </div>
+  <div class="chips" data-tip="Active = running. Inactive = down, or planned / deprecated / decommissioned.">
+    <a class="chip {{if eq .Status ""}}on{{end}}" href="/{{if .Group}}?group={{.Group}}{{end}}">Any status</a>
+    <a class="chip {{if eq .Status "active"}}on{{end}}" href="/?status=active{{if .Group}}&amp;group={{.Group}}{{end}}">Active</a>
+    <a class="chip {{if eq .Status "inactive"}}on{{end}}" href="/?status=inactive{{if .Group}}&amp;group={{.Group}}{{end}}">Inactive</a>
   </div>
   <span class="spacer"></span>
   <div class="seg" data-target="#tiles-wrap">
@@ -118,22 +123,18 @@
   </div>
 </div>
 
+{{if .Favs}}
+<details class="favs card" style="margin:0 0 16px">
+  <summary class="row" style="padding:12px 16px;cursor:pointer;gap:8px">{{icon "star" 16}}<b>Favourites</b><span class="badge outline">{{len .Favs}}</span><span class="muted xs">click to show</span></summary>
+  <div class="tiles" style="padding:0 16px 16px">{{range .Favs}}{{template "tile" .}}{{end}}</div>
+</details>
+{{end}}
 <div id="tiles-wrap">
 {{range .TileGroups}}
 <div class="group-h"><h2>{{.Name}}</h2><span class="line"></span><span class="muted">{{len .Tiles}}</span></div>
 <div class="tiles">
   {{range .Tiles}}
-  <div class="tile{{if .Off}} off{{end}}" data-url="{{.URL}}" tabindex="0" role="link" aria-label="Open {{.Name}}">
-    {{if .DotClass}}<span class="dot {{.DotClass}}" data-tip="{{.Tip}}"></span>{{end}}
-    <div class="top">{{if .Icon}}<span class="ico has-img"><img src="{{.Icon}}" alt=""></span>{{else}}<span class="ico" style="--c:{{.Color}}">{{.Initial}}</span>{{end}}<div style="min-width:0"><div class="t-name">{{.Name}}</div><div class="t-meta" title="{{.Tip}}">{{.Meta}}</div></div></div>
-    <div class="t-foot">{{if .Bars}}<div class="uptime">{{range .Bars}}<i class="{{barClass .Class}}"></i>{{end}}</div>{{else}}<span class="spacer"></span>{{end}}<span class="ms">{{.Extra}}</span></div>
-    <div class="t-acts">
-      {{if .LocalURL}}<a class="t-act" href="{{.LocalURL}}" target="_blank" rel="noopener" data-tip="Open local · {{.LocalURL}}">{{icon "home" 14}}</a>{{end}}
-      {{if .PublicURL}}<a class="t-act" href="{{.PublicURL}}" target="_blank" rel="noopener" data-tip="Open public · {{.PublicURL}}">{{icon "globe" 14}}</a>{{end}}
-      <a class="t-act" href="{{.DetailsURL}}" data-tip="Details">{{icon "info" 14}}</a>
-      {{if .EditURL}}<a class="t-act" href="{{.EditURL}}" data-tip="Edit">{{icon "edit" 14}}</a>{{end}}
-    </div>
-  </div>
+  {{template "tile" .}}
   {{end}}
 </div>
 {{else}}
@@ -145,4 +146,19 @@
 </div>
 <p class="muted small mt-24">Tip: click a tile to open {{if eq .TileClick "site"}}the site{{else}}its details{{end}} · {{icon "home" 13}} local address · {{icon "globe" 13}} public address · {{icon "info" 13}} details · {{icon "edit" 13}} edit. The dot is the worst of the LAN and public checks — hover it to see each. Press <span class="kbd">⌘K</span> and type a name to open anything.</p>
 {{end}}
+{{end}}
+
+{{define "tile"}}
+  <div class="tile{{if .Off}} off{{end}}" data-url="{{.URL}}" tabindex="0" role="link" aria-label="Open {{.Name}}">
+  {{if .DotClass}}<span class="dot {{.DotClass}}" data-tip="{{.Tip}}"></span>{{end}}
+    <div class="top">{{if .Icon}}<span class="ico has-img"><img src="{{.Icon}}" alt=""></span>{{else}}<span class="ico" style="--c:{{.Color}}">{{.Initial}}</span>{{end}}<div style="min-width:0"><div class="t-name">{{.Name}}</div><div class="t-meta" title="{{.Tip}}">{{.Meta}}</div></div></div>
+    <div class="t-foot">{{if .Bars}}<div class="uptime">{{range .Bars}}<i class="{{barClass .Class}}"></i>{{end}}</div>{{else}}<span class="spacer"></span>{{end}}<span class="ms">{{.Extra}}</span></div>
+    <form class="t-acts" method="post" action="/favorites">
+      <button class="t-act fav{{if .Fav}} on{{end}}" name="key" value="{{.FavKey}}" data-tip="{{if .Fav}}Remove from favourites{{else}}Add to favourites{{end}}" aria-label="Favourite {{.Name}}">{{icon "star" 14}}</button>
+      {{if .LocalURL}}<a class="t-act" href="{{.LocalURL}}" target="_blank" rel="noopener" data-tip="Open local · {{.LocalURL}}">{{icon "home" 14}}</a>{{end}}
+      {{if .PublicURL}}<a class="t-act" href="{{.PublicURL}}" target="_blank" rel="noopener" data-tip="Open public · {{.PublicURL}}">{{icon "globe" 14}}</a>{{end}}
+      <a class="t-act" href="{{.DetailsURL}}" data-tip="Details">{{icon "info" 14}}</a>
+      {{if .EditURL}}<a class="t-act" href="{{.EditURL}}" data-tip="Edit">{{icon "edit" 14}}</a>{{end}}
+    </form>
+  </div>
 {{end}}

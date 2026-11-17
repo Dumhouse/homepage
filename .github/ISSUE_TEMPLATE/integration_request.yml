@@ -1,0 +1,20 @@
+name: Integration request
+description: Ask for a new read-only plugin
+labels: [integration]
+body:
+  - type: input
+    id: system
+    attributes:
+      label: Which system?
+      placeholder: e.g. Zabbix, Unraid, pfSense
+    validations: { required: true }
+  - type: input
+    id: api
+    attributes:
+      label: Link to its API documentation
+    validations: { required: true }
+  - type: textarea
+    id: want
+    attributes:
+      label: What should be imported?
+      description: Hosts, services, addresses, health facts, costs…

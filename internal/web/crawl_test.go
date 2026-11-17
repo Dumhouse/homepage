@@ -68,7 +68,7 @@ func TestCrawlAllPages(t *testing.T) {
 }
 
 func skipCrawl(p string) bool {
-	for _, pre := range []string{"/assets/", "/static/", "/design", "/icons/", "/favicon", "/logout"} {
+	for _, pre := range []string{"/assets/", "/static/", "/icons/", "/favicon", "/logout"} {
 		if strings.HasPrefix(p, pre) {
 			return true
 		}

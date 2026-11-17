@@ -51,7 +51,8 @@
       <option value="24" {{if eq .EveryH "24"}}selected{{end}}>Every day</option>
       <option value="168" {{if eq .EveryH "168"}}selected{{end}}>Every week</option>
     </select></div>
-  <div class="setting-row"><div class="txt"><b>Ports</b><small>22, 80, 443, 2019, 3000, 5432, 6379, 8006, 8080, 8081, 8443, 9000, 9090, 32400</small></div></div>
+  <div class="setting-row"><div class="txt"><b>Ports</b><small>Comma-separated, ranges allowed (8000-8010), up to 64. Empty resets to the defaults. Same list as Scan settings on the Discovery page.</small></div>
+    <input class="input mono" name="ports" value="{{.ScanPorts}}" style="width:320px"></div>
   <div class="card-f row"><label class="row small" style="gap:6px"><input type="checkbox" name="scan" value="1"> Scan after saving</label><span class="spacer"></span><a class="btn ghost" href="/discovery">Open Discovery</a><button class="btn primary">Save</button></div>
 </form>
 {{end}}

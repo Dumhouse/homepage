@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+	"net/url"
 	"sort"
 	"strconv"
 	"strings"
@@ -34,6 +35,8 @@ type homeTile struct {
 	Bars       []checks.Bar
 	Extra      string // right side of the tile foot: latency or environments
 	Off        bool   // planned / deprecated / decommissioned
+	Fav        bool
+	FavKey     string // entity:id, what POST /favorites toggles
 	EditURL    string
 	Tip        string // hover text: where it lives and what each check says
 }
@@ -78,6 +81,8 @@ type homePage struct {
 	TileGroups  []tileGroup
 	Groups      []string
 	Group       string
+	Status      string
+	Favs        []homeTile
 	Problems    []checks.Problem
 	Recent      []recentItem
 	KeyOnly     int
@@ -340,7 +345,31 @@ func (p *pages) home(w http.ResponseWriter, r *http.Request) {
 			t.URL = t.SiteURL
 		}
 	}
+	favSet := p.favorites(ctx)
+	favs := []homeTile{}
+	for i := range tiles {
+		t := &tiles[i]
+		t.FavKey = t.Entity + ":" + itoa(t.TargetID)
+		if favSet[t.FavKey] {
+			t.Fav = true
+			favs = append(favs, *t)
+		}
+	}
+	// Status filter: active = on and not down; inactive = down, or planned / deprecated / decommissioned.
+	status := q.Get("status")
+	if status == "active" || status == "inactive" {
+		kept := tiles[:0]
+		for _, t := range tiles {
+			if inactive := t.Off || t.State == "down"; inactive == (status == "inactive") {
+				kept = append(kept, t)
+			}
+		}
+		tiles = kept
+	} else {
+		status = ""
+	}
 	allProblems, _ := p.chk.Store().ListProblems(ctx, 200)
+	allProblems = append(p.healthProblems(ctx), allProblems...)
 	problems := allProblems
 	if len(problems) > 5 {
 		problems = problems[:5]
@@ -426,7 +455,7 @@ func (p *pages) home(w http.ResponseWriter, r *http.Request) {
 	p.ui.render(w, 200, "home", homePage{
 		Layout: l, View: view, TileClick: click, Greeting: greeting(time.Now()),
 		StatusClass: statusClass, StatusWord: statusWord, StatusText: statusText, Nums: nums,
-		Tiles: tiles, TileGroups: tileGroups, Groups: groups, Group: filter, Problems: problems, Recent: recent,
+		Tiles: tiles, TileGroups: tileGroups, Groups: groups, Group: filter, Status: status, Favs: favs, Problems: problems, Recent: recent,
 		KeyOnly: keyOnly, SSHTotal: sshTotal, HostsUp: len(hosts) - hostsDown, NextExpiry: nextExpiry, AllCount: allCount, ProblemN: nProblems,
 	})
 }
@@ -545,6 +574,9 @@ func (p *pages) recentChanges(ctx context.Context, n int) []recentItem {
 			continue
 		}
 		name := auditName(a.Diff)
+		if a.Entity == "setting" && strings.HasPrefix(name, "home_") {
+			continue // Tiles/Launcher toggles and other view preferences
+		}
 		title := a.Action + " " + strings.ReplaceAll(a.Entity, "_", " ")
 		if name != "" {
 			title += " · " + name
@@ -596,4 +628,44 @@ func auditName(raw []byte) string {
 		}
 	}
 	return ""
+}
+
+// favorites reads the starred tiles ("service:12,host:3") from settings.
+func (p *pages) favorites(ctx context.Context) map[string]bool {
+	out := map[string]bool{}
+	v, _ := p.set.Get(ctx, "home_favs", "")
+	for _, k := range strings.Split(v, ",") {
+		if k = strings.TrimSpace(k); k != "" {
+			out[k] = true
+		}
+	}
+	return out
+}
+
+// toggleFavorite stars or unstars a tile, then returns to the page it came from.
+func (p *pages) toggleFavorite(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	key := strings.TrimSpace(r.FormValue("key"))
+	entity, id, ok := strings.Cut(key, ":")
+	if !ok || (entity != "service" && entity != "host" && entity != "project") || id == "" || strings.ContainsAny(id, ", ") {
+		http.Error(w, "bad favourite", http.StatusBadRequest)
+		return
+	}
+	set := p.favorites(ctx)
+	if set[key] {
+		delete(set, key)
+	} else {
+		set[key] = true
+	}
+	keys := make([]string, 0, len(set))
+	for k := range set {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	_ = p.set.Set(ctx, actorOf(r), "home_favs", strings.Join(keys, ","))
+	back := "/"
+	if ref, err := url.Parse(r.Header.Get("Referer")); err == nil && ref.Path != "" {
+		back = safeBack(ref.RequestURI(), "/")
+	}
+	http.Redirect(w, r, back, http.StatusSeeOther)
 }

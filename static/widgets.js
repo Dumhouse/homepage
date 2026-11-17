@@ -456,3 +456,50 @@
   enhance(document);
   window.hsEnhance = enhance;
 })();
+
+// ---------------- sortable tables: <table class="table sortable"> ----------------
+// Click a column header to sort by it; click again to reverse. The choice is
+// remembered per page. Cells may carry data-sort="…" when the visible text is
+// not what should be compared (dates, formatted amounts).
+(() => {
+  const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' });
+  const key = t => 'sort:' + location.pathname + ':' + ([...document.querySelectorAll('table.sortable')].indexOf(t));
+  const val = (tr, i) => {
+    const c = tr.children[i];
+    return c ? (c.dataset.sort ?? c.textContent).trim() : '';
+  };
+  const apply = (table, col, dir) => {
+    const body = table.tBodies[0];
+    if (!body) return;
+    const rows = [...body.rows].filter(r => r.children.length > col);
+    const num = rows.every(r => { const v = val(r, col).replace(/[^\d.\-]/g, ''); return v !== '' && !isNaN(+v); });
+    rows.sort((a, b) => {
+      const x = val(a, col), y = val(b, col);
+      if (num) return (parseFloat(x.replace(/[^\d.\-]/g, '')) - parseFloat(y.replace(/[^\d.\-]/g, ''))) * dir;
+      if (x === '' || y === '') return x === y ? 0 : (x === '' ? 1 : -1); // empty cells last
+      return collator.compare(x, y) * dir;
+    });
+    rows.forEach(r => body.appendChild(r));
+    [...table.tHead.rows[0].cells].forEach((th, i) => th.setAttribute('aria-sort', i === col ? (dir > 0 ? 'ascending' : 'descending') : 'none'));
+  };
+  document.querySelectorAll('table.sortable').forEach(table => {
+    if (!table.tHead) return;
+    [...table.tHead.rows[0].cells].forEach((th, i) => {
+      if (!th.textContent.trim().replace('?', '')) return; // action columns
+      th.classList.add('sort-h');
+      th.tabIndex = 0;
+      th.setAttribute('role', 'columnheader');
+      const go = () => {
+        const dir = th.getAttribute('aria-sort') === 'ascending' ? -1 : 1;
+        apply(table, i, dir);
+        try { localStorage.setItem(key(table), i + ':' + dir); } catch {}
+      };
+      th.addEventListener('click', e => { if (!e.target.closest('.help, a, button')) go(); });
+      th.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
+    });
+    try {
+      const saved = (localStorage.getItem(key(table)) || '').split(':');
+      if (saved.length === 2) apply(table, +saved[0], +saved[1]);
+    } catch {}
+  });
+})();

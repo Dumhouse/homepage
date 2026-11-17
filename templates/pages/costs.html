@@ -30,7 +30,7 @@
         <a class="chip {{if eq .Filter "power"}}on{{end}}" href="/costs?f=power{{if .PerYear}}&per=year{{end}}">Electricity</a>
       </div></div></div>
     {{if .Recurring}}
-    <table class="table">
+    <table class="table sortable">
       <thead><tr><th>What</th><th>Provider · account</th><th>Next</th><th class="r">Cost</th><th class="r hide-md">Per month</th><th></th></tr></thead>
       <tbody>
       {{range .Recurring}}

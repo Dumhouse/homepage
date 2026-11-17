@@ -41,6 +41,7 @@ type problemsPage struct {
 	Layout
 	Rows      []problemRow
 	Incidents []incident
+	Days      int
 	Windows   []checks.MaintenanceWindow
 }
 
@@ -125,6 +126,7 @@ func (p *pages) problems(w http.ResponseWriter, r *http.Request) {
 		p.fail(w, r, err)
 		return
 	}
+	list = append(p.healthProblems(ctx), list...)
 	now := time.Now()
 	rows := []problemRow{}
 	for _, pr := range list {
@@ -135,19 +137,23 @@ func (p *pages) problems(w http.ResponseWriter, r *http.Request) {
 		}
 		rows = append(rows, row)
 	}
-	// Incidents: runs of failed results per check over the last 7 days.
+	// Incidents: runs of failed results per check over the chosen window (1, 7 or 30 days).
+	days := 7
+	if d, _ := strconv.Atoi(r.URL.Query().Get("days")); d == 1 || d == 30 {
+		days = d
+	}
 	var incs []incident
-	cutoff := now.UTC().Add(-7 * 24 * time.Hour)
+	cutoff := now.UTC().Add(-time.Duration(days) * 24 * time.Hour)
 	if all, err := p.chk.Store().List(ctx, "", 0); err == nil {
 		for _, c := range all {
-			res, err := p.chk.Store().Recent(ctx, c.ID, 200)
+			res, err := p.chk.Store().Transitions(ctx, c.ID, cutoff) // oldest first
 			if err != nil || len(res) == 0 {
 				continue
 			}
 			title, href := "", ""
 			var cur *incident
 			var curStart time.Time
-			for i := len(res) - 1; i >= 0; i-- { // oldest first
+			for i := 0; i < len(res); i++ {
 				at, err := time.ParseInLocation(checks.TimeLayout, res[i].At, time.UTC)
 				if err != nil {
 					continue
@@ -160,9 +166,7 @@ func (p *pages) problems(w http.ResponseWriter, r *http.Request) {
 					curStart = at
 				} else if res[i].OK && cur != nil {
 					cur.Duration = shortDur(at.Sub(curStart))
-					if curStart.After(cutoff) {
-						incs = append(incs, *cur)
-					}
+					incs = append(incs, *cur)
 					cur = nil
 				}
 			}
@@ -173,15 +177,15 @@ func (p *pages) problems(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	sort.Slice(incs, func(i, j int) bool { return incs[i].Start > incs[j].Start })
-	if len(incs) > 20 {
-		incs = incs[:20]
+	if len(incs) > 50 {
+		incs = incs[:50]
 	}
 	for i := range incs {
 		incs[i].Start = shortWhen(incs[i].Start, now)
 	}
 	windows, _ := p.chk.Store().ListMaintenance(ctx)
 	l.Flash = flash(r)
-	p.ui.render(w, 200, "problems", problemsPage{Layout: l, Rows: rows, Incidents: incs, Windows: windows})
+	p.ui.render(w, 200, "problems", problemsPage{Layout: l, Rows: rows, Incidents: incs, Windows: windows, Days: days})
 }
 
 type maintenancePage struct {
@@ -251,4 +255,28 @@ func (p *pages) checkToggle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	http.Redirect(w, r, safeBack(r.FormValue("back"), "/problems"), http.StatusSeeOther)
+}
+
+// healthProblems turns host warnings from facts (a failing disk, a degraded
+// pool, a UPS on battery, collected by SSH or an integration) into problems,
+// so they show in Needs a look next to failing checks. Snoozed hosts are
+// left out.
+func (p *pages) healthProblems(ctx context.Context) []checks.Problem {
+	hosts, err := p.inv.ListHosts(ctx)
+	if err != nil {
+		return nil
+	}
+	out := []checks.Problem{}
+	for _, h := range hosts {
+		f, err := p.inv.GetHostFacts(ctx, h.ID)
+		if err != nil || f == nil || f.Error == "" {
+			continue
+		}
+		if in, _ := p.chk.Store().InMaintenance(ctx, "host", h.ID); in {
+			continue
+		}
+		out = append(out, checks.Problem{TargetEntity: "host", TargetID: h.ID, Title: h.Name, Kind: "health",
+			State: "warning", LastError: f.Error, LastRunAt: f.CollectedAt})
+	}
+	return out
 }

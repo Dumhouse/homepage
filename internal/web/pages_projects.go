@@ -120,6 +120,7 @@ type projectPage struct {
 	Project   *inventory.Project
 	Env       *inventory.ProjectEnv
 	EnvName   string
+	AddEnv    bool
 	EnvLinks  []inventory.AppLink
 	LinkCheck map[int64]*checks.Check
 	LinkBars  map[int64][]checks.Bar
@@ -207,7 +208,7 @@ func (p *pages) project(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	p.ui.render(w, 200, "project", projectPage{
-		Layout: l, Project: proj, Env: env, EnvName: envName, EnvLinks: links,
+		Layout: l, Project: proj, Env: env, EnvName: envName, AddEnv: r.URL.Query().Get("addenv") != "", EnvLinks: links,
 		LinkCheck: linkChecks, LinkBars: linkBars, FormError: formError(r),
 		Access: acc, RepoURL: repo, SvcUp: svcUp,
 	})

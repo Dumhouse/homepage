@@ -133,8 +133,8 @@ func TestForms(t *testing.T) {
 	if _, body = page(t, srv, "/projects/acme"); strings.Contains(body, "https://acme.example.com/admin") {
 		t.Error("deleted app link still rendered")
 	}
-	if code, loc := redirect(t, srv, "/access/2/delete", url.Values{"back": {"https://evil.example"}}); code != 303 || loc != "/" {
-		t.Errorf("open redirect should be refused: %d %s", code, loc)
+	if code, loc := redirect(t, srv, "/access/2/delete", url.Values{"back": {"https://evil.example"}}); code != 303 || !strings.HasPrefix(loc, "/projects/") {
+		t.Errorf("open redirect should fall back to the owner page: %d %s", code, loc)
 	}
 	if _, body = page(t, srv, "/projects/acme"); strings.Contains(body, ">Admin<") {
 		t.Error("deleted project access still rendered")
@@ -188,10 +188,6 @@ func TestExportsAndProtoPreview(t *testing.T) {
 	code, body = page(t, srv, "/export/inventory.json")
 	if code != 200 || !strings.Contains(body, `"acme"`) {
 		t.Errorf("json export: %d", code)
-	}
-	// prototype is still available as a preview, but no longer at the old URLs
-	if code, _ := page(t, srv, "/design/dashboard.html"); code != 200 {
-		t.Errorf("design preview: %d", code)
 	}
 	if code, _ := page(t, srv, "/dashboard.html"); code != 404 {
 		t.Errorf("old prototype URL should be gone: %d", code)

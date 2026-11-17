@@ -32,16 +32,16 @@
     <div class="row gap-12" style="align-items:flex-start">
       <span class="score {{if eq .State "down"}}c{{else}}b{{end}}" style="width:40px;height:40px;font-size:16px">{{icon .Icon 18}}</span>
       <div style="flex:1;min-width:0">
-        <div class="row wrap"><b>{{.Title}} {{if eq .State "down"}}is down{{else}}is failing{{end}}</b><span class="badge {{if eq .State "down"}}bad{{else}}warn{{end}}">{{.Severity}}</span><span class="muted small">{{.Kind}} check{{if .Since}} · last run {{.Since}}{{end}}</span></div>
+        <div class="row wrap"><b>{{.Title}} {{if eq .State "down"}}is down{{else if eq .Kind "health"}}needs a look{{else}}is failing{{end}}</b><span class="badge {{if eq .State "down"}}bad{{else}}warn{{end}}">{{.Severity}}</span><span class="muted small">{{if eq .Kind "health"}}reported by an integration or SSH facts{{else}}{{.Kind}} check{{end}}{{if .Since}} · last run {{.Since}}{{end}}</span></div>
         <p class="text-2 small mt-8">{{if .LastError}}{{.LastError}}{{else}}The last check did not succeed.{{end}}</p>
         <div class="row wrap mt-8">
           <a class="btn sm primary" href="{{.Href}}">Open</a>
-          <form method="post" action="/checks/{{.CheckID}}/run" data-async class="inline"><input type="hidden" name="back" value="/problems"><button class="btn sm">{{icon "refresh" 14}}Check now</button></form>
+          {{if .CheckID}}<form method="post" action="/checks/{{.CheckID}}/run" data-async class="inline"><input type="hidden" name="back" value="/problems"><button class="btn sm">{{icon "refresh" 14}}Check now</button></form>{{end}}
           <form method="post" action="/maintenance" class="inline">
             <input type="hidden" name="target_entity" value="{{.TargetEntity}}"><input type="hidden" name="target_id" value="{{.TargetID}}">
             <input type="hidden" name="duration_min" value="1440"><input type="hidden" name="reason" value="Snoozed from Alerts"><input type="hidden" name="back" value="/problems">
             <button class="btn sm ghost">Snooze 24 h</button></form>
-          <form method="post" action="/checks/{{.CheckID}}/toggle" class="inline"><input type="hidden" name="back" value="/problems"><button class="btn sm ghost" data-tip="Stop running this check">Pause check</button></form>
+          {{if .CheckID}}<form method="post" action="/checks/{{.CheckID}}/toggle" class="inline"><input type="hidden" name="back" value="/problems"><button class="btn sm ghost" data-tip="Stop running this check">Pause check</button></form>{{end}}
         </div>
       </div>
     </div>
@@ -55,7 +55,7 @@
 </div>
 
 <div data-tab="history" hidden>
-<div class="group-h"><h2>History · incidents</h2><span class="help" data-tip="Each time something went down and came back is one incident.">?</span><span class="line"></span><span class="muted">last 7 days</span></div>
+<div class="group-h"><h2>History · incidents</h2><span class="help" data-tip="Each time something went down and came back is one incident.">?</span><span class="line"></span><div class="chips"><a class="chip {{if eq .Days 1}}on{{end}}" href="/problems?days=1#history">24 h</a><a class="chip {{if eq .Days 7}}on{{end}}" href="/problems?days=7#history">7 days</a><a class="chip {{if eq .Days 30}}on{{end}}" href="/problems?days=30#history">30 days</a></div></div>
 <div class="card">
   {{if .Incidents}}
   <table class="table">

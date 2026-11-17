@@ -24,7 +24,7 @@ func TestSeedFillsAnEmptyInventoryOnce(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if st.Hosts != 2 || st.Services != 5 || st.Projects != 1 || st.Locations != 1 || st.Domains != 1 {
+	if st.Hosts != 11 || st.Projects != 3 || st.Locations != 3 || st.Domains != 3 || st.Services < 15 {
 		t.Fatalf("demo stats: %+v", st)
 	}
 	hosts, err := inv.ListHosts(ctx)
@@ -37,7 +37,7 @@ func TestSeedFillsAnEmptyInventoryOnce(t *testing.T) {
 			t.Fatal(err)
 		}
 		for _, a := range full.Addresses {
-			if !strings.HasPrefix(a.Address, "192.0.2.") {
+			if !strings.HasPrefix(a.Address, "192.0.2.") && !strings.HasPrefix(a.Address, "198.51.100.") {
 				t.Errorf("demo address %q is outside TEST-NET-1", a.Address)
 			}
 		}

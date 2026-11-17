@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"github.com/dawidof/home-services/internal/alerts"
 	"sort"
+	"strconv"
+	"strings"
 )
 
 // Field describes one config input rendered into the settings form.
@@ -39,9 +41,11 @@ type Plugin struct {
 	ID          string
 	Name        string
 	Description string
-	Fields      []Field
-	Test        func(context.Context, Config) error
-	Sync        func(context.Context, Config) ([]Op, error)
+	// Category groups plugins on the settings page ("Cloud & VPS", "VPN" …).
+	Category string
+	Fields   []Field
+	Test     func(context.Context, Config) error
+	Sync     func(context.Context, Config) ([]Op, error)
 	// Kind is KindSync (reads data into the inventory) or KindNotify
 	// (delivers alerts through Notify).
 	Kind   string
@@ -93,6 +97,8 @@ type State struct {
 	LastError   string            `json:"last_error,omitempty"`
 	LastSyncAt  string            `json:"last_sync_at,omitempty"`
 	Saved       bool              `json:"saved"`
+	Label       string            `json:"label,omitempty"`    // name of an extra instance, e.g. "lab"
+	Instance    bool              `json:"instance,omitempty"` // true for a second, third… copy of a plugin
 	Ops         []Op              `json:"ops,omitempty"`
 }
 
@@ -124,42 +130,130 @@ func (m *Manager) load(ctx context.Context, id string) (row, error) {
 	return r, nil
 }
 
+// baseID strips the instance suffix: "proxmox~2" belongs to the "proxmox" plugin.
+func baseID(id string) string {
+	if i := strings.Index(id, "~"); i >= 0 {
+		return id[:i]
+	}
+	return id
+}
+
+func (m *Manager) state(ctx context.Context, id string, p *Plugin) (State, error) {
+	r, err := m.load(ctx, id)
+	if err != nil {
+		return State{}, err
+	}
+	cfg := map[string]string{}
+	_ = json.Unmarshal([]byte(r.config), &cfg)
+	state := State{
+		Plugin: p, ID: id, Name: p.Name, Description: p.Description, Fields: p.Fields,
+		Config: cfg, HasSecret: map[string]bool{}, Enabled: r.enabled, Saved: r.exists,
+		LastTestAt: r.lastTestAt, LastError: r.lastError, LastSyncAt: r.lastSyncAt,
+		Label: cfg["_label"], Instance: id != p.ID,
+	}
+	if state.Instance {
+		state.Name = p.Name + " · " + ternaryStr(state.Label != "", state.Label, strings.TrimPrefix(id, p.ID+"~"))
+	}
+	for _, f := range p.Fields {
+		if f.Secret {
+			v, _ := m.secrets.Get(ctx, secretKey(id, f.Key))
+			state.HasSecret[f.Key] = v != ""
+		} else if _, ok := cfg[f.Key]; !ok && f.Default != "" {
+			state.Config[f.Key] = f.Default
+		}
+	}
+	if r.ops != "" {
+		_ = json.Unmarshal([]byte(r.ops), &state.Ops)
+	}
+	return state, nil
+}
+
+func ternaryStr(c bool, a, b string) string {
+	if c {
+		return a
+	}
+	return b
+}
+
+// List returns every plugin once, plus each extra instance the user added
+// (two Proxmox servers, two AdGuards…), sorted by name.
 func (m *Manager) List(ctx context.Context) ([]State, error) {
 	out := []State{}
 	for _, id := range m.order {
-		p := m.plugins[id]
-		r, err := m.load(ctx, id)
+		st, err := m.state(ctx, id, m.plugins[id])
 		if err != nil {
 			return nil, err
 		}
-		cfg := map[string]string{}
-		_ = json.Unmarshal([]byte(r.config), &cfg)
-		state := State{
-			Plugin: p, ID: p.ID, Name: p.Name, Description: p.Description, Fields: p.Fields,
-			Config: cfg, HasSecret: map[string]bool{}, Enabled: r.enabled, Saved: r.exists,
-			LastTestAt: r.lastTestAt, LastError: r.lastError, LastSyncAt: r.lastSyncAt,
+		out = append(out, st)
+	}
+	rows, err := m.db.QueryContext(ctx, `SELECT plugin_id FROM integrations WHERE plugin_id LIKE '%~%' ORDER BY plugin_id`)
+	if err != nil {
+		return nil, err
+	}
+	var extra []string
+	for rows.Next() {
+		var id string
+		if err := rows.Scan(&id); err != nil {
+			rows.Close()
+			return nil, err
 		}
-		for _, f := range p.Fields {
-			if f.Secret {
-				v, _ := m.secrets.Get(ctx, secretKey(id, f.Key))
-				state.HasSecret[f.Key] = v != ""
-			} else if _, ok := cfg[f.Key]; !ok && f.Default != "" {
-				state.Config[f.Key] = f.Default
-			}
+		extra = append(extra, id)
+	}
+	rows.Close()
+	for _, id := range extra {
+		p, ok := m.plugins[baseID(id)]
+		if !ok {
+			continue
 		}
-		if r.ops != "" {
-			_ = json.Unmarshal([]byte(r.ops), &state.Ops)
+		st, err := m.state(ctx, id, p)
+		if err != nil {
+			return nil, err
 		}
-		out = append(out, state)
+		out = append(out, st)
 	}
 	sort.SliceStable(out, func(i, j int) bool { return out[i].Name < out[j].Name })
 	return out, nil
 }
 
+// AddInstance creates another copy of a plugin with its own settings and
+// secrets, and returns its id ("proxmox~2").
+func (m *Manager) AddInstance(ctx context.Context, actor, plugin, label string) (string, error) {
+	p, err := m.plugin(plugin)
+	if err != nil {
+		return "", err
+	}
+	label = strings.TrimSpace(label)
+	if len(label) > 40 {
+		return "", fmt.Errorf("%w: name is too long", ErrInvalid)
+	}
+	for n := 2; n < 100; n++ {
+		id := p.ID + "~" + strconv.Itoa(n)
+		if r, err := m.load(ctx, id); err != nil {
+			return "", err
+		} else if r.exists {
+			continue
+		}
+		b, _ := json.Marshal(map[string]string{"_label": label})
+		err := m.tx(ctx, func(tx *sql.Tx) error {
+			if _, err := tx.ExecContext(ctx, `INSERT INTO integrations(plugin_id,config) VALUES(?,?)`, id, string(b)); err != nil {
+				return err
+			}
+			return audit(ctx, tx, actor, "create", "integration", id, map[string]any{"label": label})
+		})
+		return id, err
+	}
+	return "", fmt.Errorf("%w: too many instances of %s", ErrInvalid, p.Name)
+}
+
 func (m *Manager) plugin(id string) (*Plugin, error) {
-	p, ok := m.plugins[id]
+	p, ok := m.plugins[baseID(id)]
 	if !ok {
 		return nil, fmt.Errorf("%w: unknown integration %q", ErrInvalid, id)
+	}
+	if baseID(id) != id {
+		if r, err := m.load(context.Background(), id); err != nil || !r.exists {
+			return nil, fmt.Errorf("%w: unknown integration %q", ErrInvalid, id)
+		}
 	}
 	return p, nil
 }
@@ -179,6 +273,9 @@ func (m *Manager) Save(ctx context.Context, actor, id string, values map[string]
 	}
 	cfg := map[string]string{}
 	_ = json.Unmarshal([]byte(r.config), &cfg)
+	if l, ok := values["_label"]; ok && id != p.ID {
+		cfg["_label"] = strings.TrimSpace(l)
+	}
 	for _, f := range p.Fields {
 		v := values[f.Key]
 		if f.Secret {
@@ -344,3 +441,13 @@ func (s State) Configured() bool {
 func (s State) Working() bool {
 	return s.Configured() && s.LastError == "" && (s.LastTestAt != "" || s.LastSyncAt != "")
 }
+
+// Plugin categories, in the order the settings page shows them.
+const (
+	CatServers = "Servers & containers"
+	CatNetwork = "Network & DNS"
+	CatPower   = "Power"
+)
+
+// Categories lists the sync categories in display order.
+var Categories = []string{CatServers, CatNetwork, CatCloud, CatVPN, CatMetrics, CatStorage, CatDisks, CatPower}

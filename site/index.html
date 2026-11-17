@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Home Services — a self-hosted inventory for your home lab, with health checks and an MCP server</title>
+<meta name="description" content="Open-source home-lab inventory: hosts, services, projects, domains and costs with health checks, discovery, 31 integrations and an MCP server so AI agents can propose changes. One Go binary, one SQLite file. AGPL-3.0.">
+<meta property="og:title" content="Home Services — one place that knows everything about your home lab">
+<meta property="og:description" content="Hosts, services, projects, domains, costs and health checks in one Go binary. An MCP server lets AI agents read it and propose changes — never see a password.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://dawidof.github.io/home-services/images/dashboard.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://dawidof.github.io/home-services/">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="style.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Home Services","applicationCategory":"DeveloperApplication","operatingSystem":"Linux, macOS, Docker","license":"https://www.gnu.org/licenses/agpl-3.0.html","description":"Self-hosted home-lab inventory with health checks, discovery, integrations and an MCP server.","url":"https://dawidof.github.io/home-services/","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}</script>
+</head>
+<body>
+<header class="top"><div class="wrap">
+  <a class="brand" href="./"><img src="favicon.svg" alt="">Home Services</a>
+  <nav>
+    <a href="#features">Features</a><a href="#agents">AI agents</a><a href="#integrations">Integrations</a><a href="#start">Quick start</a><a href="docs/getting-started.html">Docs</a>
+    <a class="gh" href="{{repo}}"><svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>GitHub</a>
+  </nav>
+</div></header>
+
+<main>
+<section class="hero"><div class="wrap">
+  <span class="pill">Open source · AGPL-3.0 · one binary, no cloud</span>
+  <h1>One place that knows <span class="grad">everything</span> about your home lab.</h1>
+  <p class="lead">Hosts, services, projects, domains, costs and health checks — plus an MCP server so your AI agent can read it and <em>propose</em> changes without ever seeing a password.</p>
+  <div class="cta">
+    <a class="btn primary" href="#start">Get started in 2 minutes</a>
+    <a class="btn" href="{{repo}}">★ Star on GitHub</a>
+    <a class="btn" href="docs/getting-started.html">Read the docs</a>
+  </div>
+  <div class="shot"><div class="bar"><i></i><i></i><i></i></div><img src="images/dashboard.png" alt="Home Services dashboard with service tiles and 24-hour availability bars" width="1600" height="911"></div>
+</div></section>
+
+<section id="features"><div class="wrap">
+  <h2>Everything a home lab accumulates, in one place</h2>
+  <p class="sub">An inventory that checks itself, so it never goes stale.</p>
+  <div class="grid">
+    <div class="card"><div class="ico">🖥️</div><h3>Inventory</h3><p>Hosts (VM, LXC, bare metal, VPS) with addresses, SSH logins and tags; services with ports and domains; locations; projects with environments, app links and runbooks.</p></div>
+    <div class="card"><div class="ico">💓</div><h3>Health checks</h3><p>TCP, HTTP, TLS expiry, DNS and SSH-key checks on a schedule, with 24-hour availability bars, incident history and maintenance windows.</p></div>
+    <div class="card"><div class="ico">🔔</div><h3>Alerts</h3><p>ntfy, Gotify and webhooks with flap protection, new-device alerts, a weekly digest and domain-renewal reminders.</p></div>
+    <div class="card"><div class="ico">📡</div><h3>Discovery</h3><p>Scan your subnets, recognise what answers by port, page title and favicon, then register it with one click — or ignore it.</p></div>
+    <div class="card"><div class="ico">🌐</div><h3>Domains &amp; costs</h3><p>Registrar, expiry, DNS records, and every recurring cost in any currency — even live electricity from Home Assistant, Shelly or Tasmota.</p></div>
+    <div class="card"><div class="ico">🔐</div><h3>No passwords stored</h3><p>Logins are method + account + a link to your password manager. Safe to share with an agent. Integration tokens are AES-GCM encrypted.</p></div>
+  </div>
+</div></section>
+
+<section class="alt" id="agents"><div class="wrap">
+  <h2>Built for AI agents — with a human in the loop</h2>
+  <p class="sub">Connect Claude Code or any MCP client. It can search, probe and <em>propose</em>; you review and apply.</p>
+  <div class="pair">
+    <div class="txt">
+      <h3>Agents propose. You apply.</h3>
+      <p>A <code>propose</code>-scope token lets an agent queue a changeset — "add this host, link that service" — with the evidence for each change. You read it, apply it in one click, and can undo it later.</p>
+      <ul><li>Scopes: <code>read</code>, <code>propose</code>, <code>write</code></li><li>42 tools: search, probe, <code>used_by</code> ("what breaks if this is down?"), free-port suggestions…</li><li>Never receives a password or an integration secret</li></ul>
+    </div>
+    <div class="frame"><img src="images/review.gif" alt="Reviewing and applying an AI-proposed changeset" loading="lazy"></div>
+  </div>
+  <pre><code>./bin/homeservices token create --name claude-code --scope propose
+claude mcp add --transport http homeservices http://localhost:8080/mcp \
+  --header "Authorization: Bearer hs_…"</code></pre>
+</div></section>
+
+<section><div class="wrap">
+  <div class="pair flip">
+    <div class="txt">
+      <h3>Find anything in a keystroke</h3>
+      <p>Press <kbd>Ctrl</kbd>/<kbd>⌘</kbd> + <kbd>K</kbd> to search hosts, services, projects, app links and locations — or to jump straight to a new host or project.</p>
+      <ul><li>Tiles or launcher home page, light and dark themes</li><li>Active / inactive filter, favourites, sortable tables</li><li>Phone-friendly layout</li></ul>
+    </div>
+    <div class="frame"><img src="images/search.gif" alt="Searching with the command palette" loading="lazy"></div>
+  </div>
+  <div class="pair">
+    <div class="txt">
+      <h3>See what is wrong — and since when</h3>
+      <p>The Alerts page lists what needs a look now, the history of incidents over 24 hours, 7 or 30 days, and any maintenance windows. Disk, pool and UPS warnings from your integrations appear here too.</p>
+    </div>
+    <div class="frame"><img src="images/alerts.png" alt="Alerts page with a failing disk warning and a down service" loading="lazy"></div>
+  </div>
+  <div class="pair flip">
+    <div class="txt">
+      <h3>Hosts, with everything about them</h3>
+      <p>Services with live health, SSH posture (key-only or still accepting passwords), logins, facts like OS and uptime, a runbook and a timeline.</p>
+    </div>
+    <div class="frame"><img src="images/host.png" alt="A host page" loading="lazy"></div>
+  </div>
+</div></section>
+
+<section class="alt" id="integrations"><div class="wrap">
+  <h2>31 integrations, all read-only</h2>
+  <p class="sub">Import instead of typing. Everything arrives as a changeset you review. Run two of the same (two Proxmox nodes?) — no problem.</p>
+  <div class="chips">
+    <span class="chip"><b>Servers</b>Proxmox · Docker</span>
+    <span class="chip"><b>Network</b>Caddy · Cloudflare · UniFi · OPNsense · MikroTik · OpenWrt · Pi-hole · AdGuard · Nginx Proxy Manager · Traefik</span>
+    <span class="chip"><b>Cloud</b>Hetzner · DigitalOcean · OVHcloud</span>
+    <span class="chip"><b>VPN</b>Tailscale · Headscale</span>
+    <span class="chip"><b>Metrics</b>Prometheus · Netdata · Beszel · Glances</span>
+    <span class="chip"><b>Storage</b>TrueNAS · Synology · OpenMediaVault · NUT · Redfish/IPMI · Scrutiny</span>
+    <span class="chip"><b>Power</b>Electricity (Home Assistant, Shelly, Tasmota)</span>
+    <span class="chip"><b>Notify</b>ntfy · Gotify · Webhook</span>
+  </div>
+  <p class="tabs-note"><a href="docs/integrations.html">See what each one needs →</a> · It can also <a href="docs/api.html#exports">export</a> to Homepage, Ansible, Prometheus and NetBox.</p>
+</div></section>
+
+<section id="start"><div class="wrap">
+  <h2>Up and running in two minutes</h2>
+  <p class="sub">One static binary, one SQLite file. No Node, no build step, no CDN, no telemetry.</p>
+<pre><code># try it with a fictional demo lab
+git clone {{repo}}.git && cd home-services
+make build
+HS_DATA=./demo-data ./bin/homeservices demo
+HS_DATA=./demo-data ./bin/homeservices            # → http://localhost:8080
+
+# or run it for real
+docker compose up -d</code></pre>
+  <p class="tabs-note">By default there is no login — it is meant for a trusted network. Set <code>HS_AUTH=password</code> before exposing it anywhere else. <a href="docs/deployment.html">Deployment guide →</a></p>
+</div></section>
+
+<section class="alt final"><div class="wrap">
+  <h2>Free, open source, yours</h2>
+  <p class="sub">AGPL-3.0. Your data stays in one file on your hardware. Contributions — especially new integrations — are welcome.</p>
+  <div class="cta">
+    <a class="btn primary" href="docs/getting-started.html">Read the docs</a>
+    <a class="btn" href="{{repo}}">View on GitHub</a>
+    <a class="btn" href="{{repo}}/releases">Download a release</a>
+  </div>
+</div></section>
+</main>
+
+<footer><div class="wrap">
+  <span>© Home Services contributors · <a href="{{repo}}/blob/main/LICENSE">AGPL-3.0</a></span>
+  <a href="docs/getting-started.html">Docs</a><a href="{{repo}}/blob/main/SECURITY.md">Security</a><a href="{{repo}}/blob/main/CONTRIBUTING.md">Contributing</a><a href="{{repo}}/blob/main/CHANGELOG.md">Changelog</a>
+  <span class="sp">Made for people who run too many containers.</span>
+</div></footer>
+</body>
+</html>

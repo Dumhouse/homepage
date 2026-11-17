@@ -211,3 +211,101 @@ func TestServiceOpMatchesHostByAddress(t *testing.T) {
 		t.Errorf("undo should remove the service: %+v", full.Services)
 	}
 }
+
+// Address links, costs and facts from the cloud, VPN and metrics plugins.
+func TestAddressCostAndFacts(t *testing.T) {
+	ctx := context.Background()
+	d, err := db.Open(t.TempDir() + "/t.db")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer d.Close()
+	inv := inventory.New(d)
+	s := changesets.New(d, inv)
+	nas, _ := inv.CreateHost(ctx, "ui", inventory.Host{Name: "NAS", Kind: "bare", Addresses: []inventory.Address{{Address: "192.168.1.20"}}})
+
+	// facts for a known host are written at once; an unknown one waits
+	n, missing, rest := s.ApplyFacts(ctx, "plugin:prometheus", []changesets.Op{
+		{Entity: "facts", Ref: "nas", Data: map[string]string{"host": "nas", "os": "Debian 12", "disk_used_pct": "42", "uptime": "3 days"}},
+		{Entity: "facts", Ref: "ghost", Data: map[string]string{"host": "ghost", "os": "Alpine"}},
+		{Entity: "host", Ref: "ghost", Data: map[string]string{"kind": "bare"}},
+	})
+	if n != 1 || len(missing) != 1 || len(rest) != 2 {
+		t.Fatalf("facts: %d %v %d", n, missing, len(rest))
+	}
+	if f, _ := inv.GetHostFacts(ctx, nas.ID); f == nil || f.OS != "Debian 12" || f.DiskUsedPct != 42 {
+		t.Fatalf("facts not saved: %+v", f)
+	}
+
+	ops := []changesets.Op{
+		{Action: "link", Entity: "address", Ref: "nas", Data: map[string]string{"host": "nas.tail1.ts.net", "address": "100.64.0.5", "kind": "tailscale", "optional": "1"}},
+		{Action: "link", Entity: "address", Ref: "pixel", Data: map[string]string{"host": "pixel", "address": "100.64.0.9", "kind": "tailscale", "optional": "1"}},
+		{Action: "create", Entity: "host", Ref: "web-1", Data: map[string]string{"kind": "vps", "address": "203.0.113.5", "address_kind": "public", "address2": "10.0.0.2"}},
+		{Action: "create", Entity: "cost", Ref: "web-1", Data: map[string]string{"label": "web-1", "host": "web-1", "amount_cents": "451", "currency": "EUR", "source": "plugin:hetzner"}},
+	}
+	fresh := s.Fresh(ctx, ops)
+	if len(fresh) != 3 { // pixel isn't documented and is optional
+		t.Fatalf("fresh: %+v", fresh)
+	}
+	cs, _ := s.Create(ctx, "ui", "sync", "plugin:x", fresh)
+	applied, err := s.Apply(ctx, "ui", cs.ID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, op := range applied.Ops {
+		if op.Error != "" {
+			t.Fatalf("%s %s: %s", op.Entity, op.Ref, op.Error)
+		}
+	}
+	h, _ := inv.GetHost(ctx, nas.ID)
+	if len(h.Addresses) != 2 || h.Addresses[1].Kind != "tailscale" {
+		t.Fatalf("tailscale address: %+v", h.Addresses)
+	}
+	costs, _ := inv.ListCosts(ctx)
+	if len(costs) != 1 || costs[0].TargetEntity != "host" || costs[0].TargetID == 0 || costs[0].AmountCents != 451 {
+		t.Fatalf("cost: %+v", costs)
+	}
+	if again := s.Fresh(ctx, ops); len(again) != 0 {
+		t.Fatalf("second sync should be empty: %+v", again)
+	}
+}
+
+// A DHCP lease fills an empty LAN address but never replaces one you entered;
+// an empty error from a later sync clears the host warning.
+func TestLeaseOnlyIfEmptyAndWarningClears(t *testing.T) {
+	ctx := context.Background()
+	d, err := db.Open(t.TempDir() + "/t.db")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer d.Close()
+	inv := inventory.New(d)
+	s := changesets.New(d, inv)
+	nas, _ := inv.CreateHost(ctx, "ui", inventory.Host{Name: "nas", Kind: "bare", Addresses: []inventory.Address{{Kind: "lan", Address: "192.168.1.20"}}})
+	pve, _ := inv.CreateHost(ctx, "ui", inventory.Host{Name: "pve", Kind: "bare"})
+	lease := func(host, ip string) changesets.Op {
+		return changesets.Op{Action: "link", Entity: "address", Ref: host,
+			Data: map[string]string{"host": host, "address": ip, "kind": "lan", "optional": "1", "only_if_empty": "1"}}
+	}
+	fresh := s.Fresh(ctx, []changesets.Op{lease("nas", "192.168.1.77"), lease("pve.lan", "192.168.1.30")})
+	if len(fresh) != 1 || fresh[0].Ref != "pve.lan" {
+		t.Fatalf("fresh: %+v", fresh)
+	}
+	cs, _ := s.Create(ctx, "ui", "dhcp", "plugin:x", fresh)
+	s.Apply(ctx, "ui", cs.ID)
+	if h, _ := inv.GetHost(ctx, pve.ID); len(h.Addresses) != 1 || h.Addresses[0].Address != "192.168.1.30" {
+		t.Fatalf("pve: %+v", h.Addresses)
+	}
+	if h, _ := inv.GetHost(ctx, nas.ID); len(h.Addresses) != 1 || h.Addresses[0].Address != "192.168.1.20" {
+		t.Fatalf("nas address must not change: %+v", h.Addresses)
+	}
+	s.ApplyFacts(ctx, "x", []changesets.Op{{Entity: "facts", Ref: "nas", Data: map[string]string{"host": "nas", "error": "disk sda fails SMART"}}})
+	s.ApplyFacts(ctx, "x", []changesets.Op{{Entity: "facts", Ref: "nas", Data: map[string]string{"host": "nas", "os": "Debian"}}})
+	if f, _ := inv.GetHostFacts(ctx, nas.ID); f.Error == "" {
+		t.Fatal("a source that says nothing about errors must keep the warning")
+	}
+	s.ApplyFacts(ctx, "x", []changesets.Op{{Entity: "facts", Ref: "nas", Data: map[string]string{"host": "nas", "error": ""}}})
+	if f, _ := inv.GetHostFacts(ctx, nas.ID); f.Error != "" || f.OS != "Debian" {
+		t.Fatalf("cleared: %+v", f)
+	}
+}

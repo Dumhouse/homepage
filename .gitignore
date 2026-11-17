@@ -1,3 +1,11 @@
+*.db
+*.db-shm
+*.db-wal
+.DS_Store
+.claude/
+.forgejo/
+.private/
+_site/
 bin/
 data/
-.private/
+demo-data/

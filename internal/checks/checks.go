@@ -10,6 +10,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"time"
 )
 
 var (
@@ -504,4 +505,30 @@ func (s *Store) audit(ctx context.Context, tx *sql.Tx, actor, action, entity str
 		`INSERT INTO audit_log(actor,action,entity,entity_id,diff) VALUES(?,?,?,?,?)`,
 		actor, action, entity, id, string(b))
 	return err
+}
+
+// Transitions returns, oldest first, the results of a check since `since`
+// where the outcome changed (plus the first result in the window). That is all
+// an incident list needs, so a month of 5-minute probes costs a handful of rows.
+func (s *Store) Transitions(ctx context.Context, checkID int64, since time.Time) ([]ResultRow, error) {
+	rows, err := s.db.QueryContext(ctx,
+		`SELECT at,ok,COALESCE(latency_ms,0),COALESCE(message,'') FROM (
+		   SELECT id,at,ok,latency_ms,message, LAG(ok) OVER (ORDER BY id) AS prev
+		   FROM check_results WHERE check_id=? AND at>=?)
+		 WHERE prev IS NULL OR prev<>ok ORDER BY id`, checkID, since.UTC().Format(TimeLayout))
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	out := []ResultRow{}
+	for rows.Next() {
+		var r ResultRow
+		var ok int
+		if err := rows.Scan(&r.At, &ok, &r.LatencyMS, &r.Message); err != nil {
+			return nil, err
+		}
+		r.OK = ok == 1
+		out = append(out, r)
+	}
+	return out, rows.Err()
 }

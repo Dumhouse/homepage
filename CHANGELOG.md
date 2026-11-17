@@ -2,6 +2,34 @@
 
 ## Unreleased
 
+### Added
+- **Integrations (31 plugins in total):** Hetzner, DigitalOcean, OVHcloud; Tailscale, Headscale; Prometheus, Netdata, Beszel,
+  Glances; TrueNAS, Synology, **OpenMediaVault**, NUT (UPS), Redfish/IPMI; Scrutiny (SMART); UniFi, OPNsense, MikroTik, OpenWrt,
+  Pi-hole, AdGuard Home, Nginx Proxy Manager, Traefik.
+- Several copies of one plugin (for example two Proxmox servers) and a **Connected** list on the integrations page.
+- Host health warnings reported by integrations or SSH facts now appear on Alerts, the bell and the dashboard.
+- **Exports:** Homepage `services.yaml`, Ansible inventory, Prometheus file-SD targets and a NetBox IP CSV, in the UI and
+  under `/api/v1/export/`.
+- `homeservices import file.json` loads an export document from the command line (dry run unless `-apply`).
+- Dashboard: **Active / Inactive** filter and a collapsed **Favourites** section.
+- Sortable tables (Hosts, Services, Costs, Domains).
+- Alerts history can show 24 hours, 7 or 30 days.
+- A larger, fictional demo lab (`homeservices demo`), and full documentation with a GitHub Pages site.
+- The installer and unit file can serve on port 80 (`CAP_NET_BIND_SERVICE`); `update.sh` follows `HS_ADDR`.
+
+### Changed
+- Automatic checks for HTTPS services on LAN addresses ignore certificate errors (self-signed certificates are the norm).
+- Favicon fetching covers LAN services (when LAN fetching is enabled) and accepts self-signed certificates there.
+- Settings › Scanning shows the editable port list instead of a fixed text.
+- The old clickable design prototype and its `/design` route were removed; shared assets moved to `assets/`.
+
+### Fixed
+- Discovery progress card stayed visible with stale numbers after a scan finished.
+- "Add environment" opened an invisible form on project pages.
+- A location appeared once per hidden host in the Hosts filter.
+- Flash messages missing on several pages; deleting a login or DNS record could land on the wrong page.
+- Incident history only covered about 16 hours of results despite saying 7 days.
+
 ## v0.1.2 — 2026-11-17
 
 - Favicon-hash fingerprints for Grafana, Portainer and Nextcloud (MurmurHash3 of MIME base64).

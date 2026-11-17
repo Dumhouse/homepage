@@ -8,6 +8,7 @@ package icons
 import (
 	"context"
 	"crypto/sha256"
+	"crypto/tls"
 	"encoding/hex"
 	"errors"
 	"fmt"
@@ -271,6 +272,8 @@ func (f *Fetcher) get(ctx context.Context, raw string, allowPrivate bool, limit 
 func (f *Fetcher) client(allowPrivate bool) *http.Client {
 	return &http.Client{
 		Timeout: 8 * time.Second,
+		// LAN apps mostly use self-signed certificates; an icon is public data, so allow them there only.
+		Transport: &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: allowPrivate}},
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {
 			if len(via) >= 3 {
 				return errors.New("too many redirects")

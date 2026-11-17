@@ -44,6 +44,7 @@ func newPages(inv *inventory.Store, tok *tokens.Store, set *settings.Store, chk 
 func (p *pages) routes(r chi.Router) {
 	r.Get("/", p.home)
 	r.Post("/prefs", p.saveHomePrefs)
+	r.Post("/favorites", p.toggleFavorite)
 	r.Get("/hosts", p.hosts)
 	r.Get("/locations", p.locations)
 	r.Get("/locations/new", p.locationForm)
@@ -110,6 +111,7 @@ func (p *pages) routes(r chi.Router) {
 	r.Post("/settings/integrations/{id}/sync", p.integrationSync)
 	r.Post("/settings/integrations/{id}/propose", p.integrationPropose)
 	r.Post("/settings/integrations/{id}/reset", p.integrationReset)
+	r.Post("/settings/integrations/{id}/instance", p.integrationAddInstance)
 	r.Get("/discovery", p.discoveryPage)
 	r.Post("/discovery/scan", p.discoveryScan)
 	r.Get("/discovery/status", p.discoveryStatus)
@@ -140,6 +142,7 @@ func (p *pages) routes(r chi.Router) {
 	r.Post("/checks/{id}/toggle", p.checkToggle)
 	r.Get("/export/ssh-config", p.exportSSH)
 	r.Get("/export/inventory.json", p.exportJSON)
+	r.Get("/export/{name}", p.exportNamed)
 }
 
 // shell builds the layout data every page shares.
@@ -161,6 +164,7 @@ func (p *pages) shell(r *http.Request, title, page string, cr []Crumb) Layout {
 		}
 	}
 	problems, _ := p.chk.Store().ListProblems(ctx, 100)
+	problems = append(problems, p.healthProblems(ctx)...)
 	discovered, _ := p.inv.ListDiscovered(ctx, "new")
 	pending := pendingChanges(ctx, p)
 	// Same order and look as the design mockups; items without a real page yet are left out.
@@ -190,9 +194,12 @@ func (p *pages) shell(r *http.Request, title, page string, cr []Crumb) Layout {
 		if pr.State == "down" {
 			cls = "bad"
 		}
+		title := p.chk.Label(ctx, pr.TargetEntity, pr.TargetID) + " " + pr.State
+		if pr.Kind == "health" {
+			title = pr.Title + " needs a look"
+		}
 		notices = append(notices, Notice{Icon: kindIcon(pr.TargetEntity), Class: cls,
-			Title: p.chk.Label(ctx, pr.TargetEntity, pr.TargetID) + " " + pr.State, Sub: pr.LastError,
-			Href: "/problems", Btn: "Open"})
+			Title: title, Sub: pr.LastError, Href: "/problems", Btn: "Open"})
 	}
 	if stats.Expiring > 0 {
 		notices = append(notices, Notice{Icon: "globe", Class: "warn", Title: plural(stats.Expiring, "domain") + " expiring soon",
@@ -207,7 +214,7 @@ func (p *pages) shell(r *http.Request, title, page string, cr []Crumb) Layout {
 			Sub: "not in the inventory yet", Href: "/discovery", Btn: "See"})
 	}
 	return Layout{
-		Title: title, Page: page, Sidebar: sidebar, HostLabel: r.Host, Version: Version, Error: errMsg,
+		Title: title, Page: page, Sidebar: sidebar, HostLabel: r.Host, Version: Version, Error: errMsg, Flash: flash(r),
 		Nav: nav, Ops: ops, Crumbs: cr, Stats: stats, TokenCount: activeTokens,
 		Notices: notices, Alerts: len(problems) + stats.Expiring,
 	}

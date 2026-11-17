@@ -36,7 +36,9 @@ HS_AUTH=password HS_PASSWORD_HASH=$(./bin/homeservices hash-password) ./bin/home
 2. `Sync` must be **read-only** and return `[]integrations.Op` proposals — never call inventory.
 3. Register it in `main` next to Caddy/Proxmox/Cloudflare.
 4. Add tests with `httptest` fixtures for the upstream API.
-5. Update `IMPLEMENTATION.md` and, for a user-visible plugin, the README/plugin docs.
+5. Add the plugin to `docs/integrations.md` (the table is generated from the plugin list; add setup notes if it needs
+   something created on the other side) and to `CHANGELOG.md`. More in
+   [docs/architecture.md](docs/architecture.md#adding-an-integration).
 
 ## Adding a page
 
@@ -55,3 +57,15 @@ usable by `propose_changes` for review.
 
 Short imperative subject; mention task IDs like `M8.3` when they exist. One logical change per
 commit, tests included.
+
+## Docs and screenshots
+
+- Documentation is Markdown in `docs/`; the GitHub Pages site is built from it by `python3 site/build.py`
+  (needs `pip install markdown`). Open `_site/index.html` to preview.
+- Screenshots and GIFs in `docs/images/` are taken from the fictional demo lab (`homeservices demo`). Never use real
+  addresses, hostnames or domains in docs or tests — use `192.168.1.x`, `192.0.2.x` and `example.com`.
+
+## Pull requests
+
+Keep them focused, add a test, and note user-visible changes in `CHANGELOG.md`. By contributing you agree that your work is
+licensed under AGPL-3.0, like the rest of the project. Please follow the [Code of Conduct](CODE_OF_CONDUCT.md).

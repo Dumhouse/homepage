@@ -1,154 +1,219 @@
+<div align="center">
+
+<img src="assets/favicon.svg" width="72" alt="">
+
 # Home Services
 
+**One place that knows everything about your home lab.**<br>
+Hosts, services, projects, logins, domains, costs and health checks — in a single Go binary with an MCP server, so your AI agent can read it and propose changes without ever seeing a password.
+
 [![CI](https://github.com/dawidof/home-services/actions/workflows/ci.yml/badge.svg)](https://github.com/dawidof/home-services/actions/workflows/ci.yml)
+[![License: AGPL v3](https://img.shields.io/badge/license-AGPL--3.0-blue.svg)](LICENSE)
+[![Release](https://img.shields.io/github/v/release/dawidof/home-services?sort=semver)](https://github.com/dawidof/home-services/releases)
+![Go](https://img.shields.io/badge/Go-single%20binary-00ADD8?logo=go&logoColor=white)
+![SQLite](https://img.shields.io/badge/SQLite-one%20file-003B57?logo=sqlite&logoColor=white)
 
-A self-hosted inventory for a home lab: hosts, their addresses and SSH logins, services,
-projects with environments and app links, logins (as Vaultwarden links), domains, costs,
-health checks and alerts — in one Go binary with an embedded UI and an MCP server for AI agents.
+[**Documentation**](https://dawidof.github.io/home-services/) ·
+[Quick start](#quick-start) ·
+[Features](#features) ·
+[Integrations](docs/integrations.md) ·
+[AI agents](docs/ai-agents.md)
 
-```
-Go · SQLite · html/template + htmx · one binary · no build step for the UI
-```
+<img src="docs/images/dashboard.png" alt="The Home Services dashboard: tiles for every service with 24-hour availability bars" width="900">
 
-## What it does
+</div>
 
-- **Inventory** — hosts, locations, services, projects (groups, envs, app links, runbooks),
-  access entries (method/account/Vaultwarden link, never secrets), domains + DNS records, costs
-  (multi-currency with paid-day rates and optional live electricity from Home Assistant/Shelly/Tasmota).
-- **Checks** — TCP/HTTP/TLS/DNS/SSH-key probes, a 5 s scheduler, state machine
-  (`up → failing → down → recovering → up`), 24 h availability bars, `/problems` page,
-  maintenance windows that silence alerts.
-- **Alerts** — ntfy, Gotify and webhook plugins (per-event switches), dedupe, flap guard,
-  SSH password-auth warnings, new-device alerts, weekly digest, domain renewals at 30/7/1 days,
-  maintenance windows.
-- **AI agents** — MCP over Streamable HTTP, token scopes (read/write), patch semantics,
-  Markdown resources, `/inventory.md`, and a **changeset review queue** (`propose_changes` →
-  human applies/rejects/undoes) so agents can suggest work without writing directly.
-- **Discovery** — bounded subnet scan, banner/HTTP-title fingerprints, an inbox to register or
-  ignore new hosts and create services from open ports.
-- **Integrations** — read-only plugins with encrypted secrets: Caddy routes, Proxmox VMs/CTs,
-  Cloudflare zones/records, Docker containers (all as proposed changesets), plus notification
-  plugins and an Electricity plugin for power costs. The page suggests plugins based on what is
-  already in the inventory.
-- **Ops** — systemd unit, install/update scripts with rollback, backups, CSV/JSON/ssh-config
-  exports, nightly retention.
+---
+
+## Why
+
+A home lab grows until nobody — including you — remembers which container runs what, where the
+certificate lives, when the domain expires, or what breaks if the NAS goes down. Spreadsheets rot.
+Wikis rot. **Home Services** keeps the inventory next to the thing that actually checks it:
+
+- it **probes** your services, so the inventory shows what is really up, with history;
+- it **discovers** new devices and **imports** from Proxmox, Caddy, Cloudflare, UniFi, MikroTik and
+  [26 more systems](docs/integrations.md), so you don't type everything in;
+- it speaks **MCP**, so Claude Code or any agent can answer "what runs on the NAS?" and *propose*
+  changes that you review and apply — never write directly;
+- it stores **no passwords**. Logins are links to your password manager.
+
+Everything ships as **one static binary** with an embedded UI and one SQLite file. No Node, no
+build step, no CDN, no telemetry.
+
+## Features
+
+| | |
+|---|---|
+| **Inventory** | Hosts (VM, LXC, bare metal, VPS) with addresses, SSH logins and tags · services with ports and domains · locations · projects with environments, app links and runbooks · domains with registrar, expiry and DNS records · costs in any currency, including live electricity |
+| **Health** | TCP, HTTP, TLS-expiry, DNS and SSH-key checks every few minutes · `up → failing → down → recovering` state machine · 24 h availability bars and incident history · maintenance windows · SSH password-auth warnings |
+| **Alerts** | ntfy, Gotify and webhook plugins · flap guard and de-duplication · new-device alerts · weekly digest · domain renewal reminders at 30 / 7 / 1 days |
+| **Discovery** | Bounded subnet scan with banner, HTTP-title and favicon-hash fingerprints · an inbox to register or ignore what it finds |
+| **Integrations** | 31 read-only plugins with encrypted secrets, several copies of the same plugin allowed ([full list](docs/integrations.md)) |
+| **AI agents** | MCP over HTTP with `read` / `propose` / `write` tokens · a **changeset review queue** · `/inventory.md` for plain-text context |
+| **Exports** | Homepage `services.yaml`, Ansible inventory, Prometheus targets, NetBox CSV, ssh-config, JSON |
+| **Operations** | systemd unit with install and rollback-capable update scripts · daily backups · Docker image · soft delete and an audit log everywhere |
+
+### See it work
+
+<table>
+<tr>
+<td width="50%"><img src="docs/images/search.gif" alt="Searching with the command palette"><br><sub><b>Jump to anything</b> — press <kbd>Ctrl</kbd>/<kbd>⌘</kbd> + <kbd>K</kbd> to search hosts, services, projects and app links.</sub></td>
+<td width="50%"><img src="docs/images/review.gif" alt="Reviewing and applying an AI-proposed changeset"><br><sub><b>Review what an agent proposes</b> — every change is listed with its evidence, applied in one click and undoable.</sub></td>
+</tr>
+</table>
+
+<details open>
+<summary><b>Tour of the main pages</b> (animated)</summary>
+<br>
+<img src="docs/images/tour.gif" alt="Tour: dashboard, hosts, a host's facts, a project, alerts, discovery, domains and costs" width="900">
+</details>
+
+### Screenshots
+
+<table>
+<tr>
+<td width="50%"><a href="docs/images/host.png"><img src="docs/images/host.png" alt="Host page with services, SSH access and facts"></a><br><sub><b>Host</b> — services with live health, SSH posture, facts collected over read-only SSH.</sub></td>
+<td width="50%"><a href="docs/images/project.png"><img src="docs/images/project.png" alt="Project page with environments and app links"></a><br><sub><b>Project</b> — environments, app links (<code>/admin</code>, <code>/sidekiq</code>, <code>/mcp</code>…) and what it depends on.</sub></td>
+</tr>
+<tr>
+<td><a href="docs/images/alerts.png"><img src="docs/images/alerts.png" alt="Alerts page"></a><br><sub><b>Alerts</b> — what is wrong now, history of incidents, maintenance windows.</sub></td>
+<td><a href="docs/images/discovery.png"><img src="docs/images/discovery.png" alt="Discovery inbox"></a><br><sub><b>Discovery</b> — new devices on your subnets, recognised by ports and page titles.</sub></td>
+</tr>
+<tr>
+<td><a href="docs/images/integrations.png"><img src="docs/images/integrations.png" alt="Integrations page"></a><br><sub><b>Integrations</b> — pick a plugin, press Test, then Sync. Results arrive as a changeset to review.</sub></td>
+<td><a href="docs/images/hosts.png"><img src="docs/images/hosts.png" alt="Hosts list"></a><br><sub><b>Hosts</b> — filter by location or lifecycle, sort by any column.</sub></td>
+</tr>
+<tr>
+<td><a href="docs/images/launcher.png"><img src="docs/images/launcher.png" alt="Launcher view"></a><br><sub><b>Launcher</b> — a big-icon start page, if you prefer it to tiles.</sub></td>
+<td><a href="docs/images/dashboard-light.png"><img src="docs/images/dashboard-light.png" alt="Light theme"></a><br><sub><b>Light and dark</b> themes, plus custom themes from a JSON file.</sub></td>
+</tr>
+</table>
+
+<p align="center"><img src="docs/images/mobile.png" alt="Mobile dashboard" width="220">&nbsp;&nbsp;<img src="docs/images/mobile-hosts.png" alt="Mobile hosts list" width="220"><br><sub>Works on a phone too.</sub></p>
 
 ## Quick start
+
+### Try it with demo data (30 seconds)
 
 ```bash
 git clone https://github.com/dawidof/home-services.git
 cd home-services
-
-make test        # store, API, MCP, probes, UI
 make build
-./bin/homeservices
-# open http://localhost:8080
+HS_DATA=./demo-data ./bin/homeservices demo      # a fictional lab: 11 hosts, 3 projects, …
+HS_DATA=./demo-data ./bin/homeservices           # open http://localhost:8080
 ```
 
-Or seed the demo inventory first (empty data directory required):
+The demo uses addresses from the reserved `192.0.2.0/24` range, so its health checks can never
+touch a real network (they will simply show as unreachable).
+
+### Run it for real
+
+<details open>
+<summary><b>Docker</b></summary>
 
 ```bash
-HS_DATA=./demo-data ./bin/homeservices demo
-HS_DATA=./demo-data ./bin/homeservices
+git clone https://github.com/dawidof/home-services.git && cd home-services
+docker compose up -d            # http://localhost:8080, data in ./data
+```
+</details>
+
+<details>
+<summary><b>Debian / Ubuntu LXC or VM (systemd)</b></summary>
+
+```bash
+make release
+scp bin/homeservices-linux-amd64 deploy root@your-host:/tmp/
+ssh root@your-host 'cd /tmp && ./deploy/install.sh ./homeservices-linux-amd64'   # listens on :80
 ```
 
-Data lives in `./data` by default (`HS_DATA` to change it). The SQLite file, favicon cache,
-secrets and backups all stay in that directory.
+Prebuilt Linux binaries are attached to every [release](https://github.com/dawidof/home-services/releases).
+See the [deployment guide](docs/deployment.md) for updates with automatic rollback, backups and restore.
+</details>
 
-## Connect Claude Code / another agent
+<details>
+<summary><b>From source</b></summary>
 
 ```bash
-./bin/homeservices token create --name claude-code --scope propose   # or write
-# store the token in Vaultwarden, then:
+make test && make build
+./bin/homeservices            # http://localhost:8080, data in ./data
+```
+
+Needs Go (see `go.mod`). There is nothing else to install — the UI is embedded.
+</details>
+
+### Then
+
+1. **Add what you have.** Press **Add**, or open **Discovery** and scan a subnet, or connect an
+   [integration](docs/integrations.md) such as Proxmox or Caddy and press *Sync*.
+2. **Let it watch.** Services with a port or domain get health checks automatically.
+3. **Connect an agent** (optional): see [AI agents](#connect-claude-code-or-another-agent).
+4. **Add a notifier** (optional): ntfy, Gotify or a webhook under *Settings › Integrations*.
+
+> **Security:** by default there is **no login** (`HS_AUTH=none`) because the app is meant for a
+> trusted network. If anyone untrusted can reach the port, set `HS_AUTH=password` — see
+> [Security](SECURITY.md).
+
+## Connect Claude Code or another agent
+
+```bash
+./bin/homeservices token create --name claude-code --scope propose     # read | propose | write
 claude mcp add --transport http homeservices http://localhost:8080/mcp \
   --header "Authorization: Bearer hs_…"
 ```
 
 - `read` tokens can search and read everything.
-- `propose` tokens can read and queue changesets (no direct writes); a human applies them.
-- `write` tokens can create/update/delete directly and propose changesets.
-- `/api/v1` and `/mcp` always require a token (unless the request carries a UI session or is
-  same-origin with `HS_AUTH=none`).
-- Without MCP, agents can fetch `/inventory.md` with the same token.
+- `propose` tokens can also queue **changesets** (add this host, link that service). A human reviews
+  and applies them on the *AI changes* page, and can undo them later.
+- `write` tokens can change the inventory directly.
+- Agents **never** receive passwords: access entries hold a method, an account name and a link to
+  the item in Vaultwarden, Bitwarden or whatever you use.
 
-Agents never get passwords. Access entries point at Vaultwarden items.
-
-## Deploy
-
-A Debian/Ubuntu LXC or VM:
-
-```bash
-make release
-sudo ./deploy/install.sh ./bin/homeservices-linux-amd64
-```
-
-The installer creates the `homeservices` user, `/var/lib/homeservices`, `/etc/homeservices/env`,
-the systemd unit and a daily backup timer, then waits for `/healthz`. Updates use
-`deploy/update.sh` (backup → migration dry-run → swap → health check → auto-rollback).
-See [`deploy/README.md`](deploy/README.md) for backups, restore and the environment table.
-
-### Docker
-
-```bash
-docker compose up -d
-```
-
-The image runs as a non-root user with `/data` as the volume.
+Ask things like *"Inventory my network and propose what's missing"*, *"What breaks if the NAS goes
+down?"* or *"Find a free port for a new service on app-1."* More in [AI agents](docs/ai-agents.md).
 
 ## Configuration
+
+Everything has a sensible default. The common settings:
 
 | Variable | Default | Meaning |
 |---|---|---|
 | `HS_ADDR` | `:8080` | listen address |
-| `HS_DATA` | `./data` | SQLite, icons, secrets, backups |
+| `HS_DATA` | `./data` | SQLite file, icon cache, encrypted secrets, backups |
 | `HS_AUTH` | `none` | `none` (trusted LAN) or `password` |
-| `HS_PASSWORD_HASH` | — | argon2id hash (`homeservices hash-password`) |
-| `HS_SESSION_KEY` | random | HMAC key for cookies |
-| `HS_TRUSTED_PROXIES` | — | comma-separated proxy IPs/CIDRs allowed to set `X-Forwarded-For`/`CF-Connecting-IP`; forwarding headers are ignored when unset |
-| `HS_COOKIE_SECURE` | — | `1` behind HTTPS |
-| `HS_NTFY_URL` / `HS_NTFY_TOKEN` | — | ntfy topic and optional token |
-| `HS_WEBHOOK_URL` | — | JSON webhook for alerts |
-| `HS_ALERTS_MIN_DOWN` | `120` | flap guard in seconds |
-| `HS_DIGEST` / `HS_DIGEST_DAYS` | on / 7 | weekly digest |
-| `HS_MASTER_KEY` | — | key for `data/secrets.enc` (integration tokens) |
-| `HS_SSH_KEY` / `HS_SSH_FACTS_USER` | — / `inventory` | read-only SSH facts |
+| `HS_PASSWORD_HASH` | — | argon2id hash from `homeservices hash-password` |
+| `HS_MASTER_KEY` | — | key that encrypts integration secrets (`secrets.enc`) |
+| `HS_NTFY_URL` / `HS_WEBHOOK_URL` | — | where alerts go (or use the plugins in the UI) |
 
-CLI: `token`, `migrate [-check]`, `backup` (DB + `secrets.enc`), `scan -subnet`, `demo`,
-`version`, `hash-password`.
+All variables, the CLI and per-page settings are in the [configuration reference](docs/configuration.md).
 
-## Layout
+## How it is built
 
-```
-cmd/homeservices      flags + CLI (token, migrate, backup, scan, demo)
-internal/inventory    the only writer: validation, soft delete, audit, search, exports
-internal/checks       scheduler, probes, auto checks, retention
-internal/alerts       ntfy/webhook notifiers + rules
-internal/digest       weekly summary
-internal/expiry       domain renewal alerts
-internal/integrations plugin registry, SecretStore, Caddy/Proxmox/Cloudflare
-internal/discovery    subnet scanner + fingerprints
-internal/facts        read-only SSH facts
-internal/changesets   propose → review → apply/undo
-internal/mcp          MCP tools and resources
-internal/web          chi router, JSON API, server-rendered UI
-templates/ static/    embedded templates, htmx, ui.js (no CDN)
-deploy/               systemd units, install/update scripts
-design/               original clickable prototype (served under /design as a preview)
-```
+Go · SQLite (pure Go, no CGO) · `html/template` + [htmx](https://htmx.org) · chi · the official MCP Go SDK.
+One writer (`inventory.Store`) owns all writes, every change leaves an audit row, deletes are soft,
+migrations are append-only. Details in [Architecture](docs/architecture.md).
 
-Ground rules: every write goes through `inventory.Store` in a transaction with an audit row;
-soft delete everywhere; migrations are append-only; no secrets in SQLite.
+## Documentation
 
-## Status
+| | |
+|---|---|
+| [Getting started](docs/getting-started.md) | install, first run, adding your first things |
+| [Concepts](docs/concepts.md) | hosts vs services vs projects, checks, changesets, logins |
+| [Integrations](docs/integrations.md) | every plugin, what it needs, how to set it up |
+| [AI agents (MCP)](docs/ai-agents.md) | tokens, scopes, tools, example prompts |
+| [REST API & exports](docs/api.md) | endpoints, Homepage / Ansible / Prometheus exports |
+| [Configuration](docs/configuration.md) | environment variables, CLI, settings pages |
+| [Deployment](docs/deployment.md) | systemd, Docker, reverse proxy, backups, updates |
+| [Architecture](docs/architecture.md) | packages, ground rules, how to extend |
+| [FAQ & troubleshooting](docs/faq.md) | common questions |
 
-The full plan is implemented, tested, deployed on a Debian LXC and published here: inventory, MCP
-with read/propose/write scopes, every core page, checks and alerts, discovery and integrations,
-changesets and the open-source packaging. See [`CHANGELOG.md`](CHANGELOG.md) for the release notes,
-[`IMPLEMENTATION.md`](IMPLEMENTATION.md) for the task list and `PLAN.md` for the design rationale.
+## Contributing
 
-`homeservices help` lists every command; `migrate -check`, `backup`, `scan`, `demo` and
-`hash-password` are safe to run before the server starts.
+Issues and pull requests are welcome — see [CONTRIBUTING.md](CONTRIBUTING.md). The fastest loop is
+`make test` and `make run`. New integrations are the most useful contribution: a plugin is one Go
+file plus a test with an HTTP fixture ([how](docs/architecture.md#adding-an-integration)).
 
 ## License
 
-AGPL-3.0. See [LICENSE](LICENSE).
+[AGPL-3.0](LICENSE). If you run a modified version as a network service, you must offer its source
+to the users of that service.

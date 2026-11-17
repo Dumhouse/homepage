@@ -143,6 +143,7 @@ func New(db *sql.DB, a auth.Provider, opts ...Option) (http.Handler, error) {
 	r.Group(func(r chi.Router) {
 		r.Use(tokenAuth(tok, a, "api:", true))
 		(&api{inv: inv, chk: chk, icons: cfg.fetcher, intg: cfg.intg, facts: cfg.facts, cs: cs, scan: cfg.scanner}).routes(r)
+		r.Get("/api/v1/export/{name}", pages.exportNamed)
 		r.Get("/inventory.md", func(w http.ResponseWriter, r *http.Request) {
 			md, err := inv.InventoryMarkdown(r.Context())
 			if err != nil {
@@ -173,15 +174,11 @@ func New(db *sql.DB, a auth.Provider, opts ...Option) (http.Handler, error) {
 		r.Mount("/mcp", mcpHandler)
 	})
 
-	design, err := fs.Sub(homeservices.Design, "design")
-	if err != nil {
-		return nil, err
-	}
 	static, err := fs.Sub(homeservices.UI, "static")
 	if err != nil {
 		return nil, err
 	}
-	assets, err := fs.Sub(design, "assets")
+	assets, err := fs.Sub(homeservices.Assets, "assets")
 	if err != nil {
 		return nil, err
 	}
@@ -189,13 +186,8 @@ func New(db *sql.DB, a auth.Provider, opts ...Option) (http.Handler, error) {
 		r.Handle("/icons/*", http.StripPrefix("/icons/", http.FileServer(http.Dir(filepath.Join(cfg.dataDir, "icons")))))
 	}
 	r.Handle("/static/*", http.StripPrefix("/static/", http.FileServerFS(static)))
-	// Shared prototype assets (app.css, boot.js) are still used by real pages.
+	// Shared stylesheet and boot scripts used by every page.
 	r.Handle("/assets/*", http.StripPrefix("/assets/", http.FileServerFS(assets)))
-	// Screens that are not ported yet stay reachable under /design/ as a preview.
-	r.Get("/design", func(w http.ResponseWriter, req *http.Request) {
-		http.Redirect(w, req, "/design/dashboard.html", http.StatusFound)
-	})
-	r.Handle("/design/*", http.StripPrefix("/design/", http.FileServerFS(design)))
 	return a.Wrap(r), nil
 }
 

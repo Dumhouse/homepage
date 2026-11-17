@@ -5,9 +5,11 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/dawidof/home-services/internal/changesets"
+	"github.com/dawidof/home-services/internal/export"
 	"github.com/dawidof/home-services/internal/integrations"
 	"github.com/dawidof/home-services/internal/suggest"
 	"github.com/go-chi/chi/v5"
@@ -17,10 +19,13 @@ import (
 
 type integrationsPage struct {
 	Layout
-	States    []integrations.State
-	Suggested []suggest.Suggestion
-	Selected  string
-	Auth      string
+	States     []integrations.State
+	Suggested  []suggest.Suggestion
+	Selected   string
+	Auth       string
+	Categories []string // sync plugin groups that have at least one plugin
+	Exports    []export.Format
+	BaseURL    string
 }
 
 func (p *pages) integrationsPage(w http.ResponseWriter, r *http.Request) {
@@ -43,6 +48,23 @@ func (p *pages) integrationsPage(w http.ResponseWriter, r *http.Request) {
 	if page.Auth == "" {
 		page.Auth = "none"
 	}
+	page.Exports = export.Formats
+	scheme := "http"
+	if r.TLS != nil || r.Header.Get("X-Forwarded-Proto") == "https" {
+		scheme = "https"
+	}
+	page.BaseURL = scheme + "://" + r.Host
+	used := map[string]bool{}
+	for _, st := range states {
+		if st.Plugin != nil && st.Plugin.Kind != integrations.KindNotify {
+			used[st.Plugin.Category] = true
+		}
+	}
+	for _, c := range append(append([]string{}, integrations.Categories...), "") {
+		if used[c] {
+			page.Categories = append(page.Categories, c)
+		}
+	}
 	found := false
 	for _, st := range states {
 		found = found || st.ID == page.Selected
@@ -55,17 +77,17 @@ func (p *pages) integrationsPage(w http.ResponseWriter, r *http.Request) {
 
 func (p *pages) integrationValues(r *http.Request, id string) map[string]string {
 	values := map[string]string{}
+	base, _, _ := strings.Cut(id, "~")
 	for _, pl := range p.intg.Plugins() {
-		if pl.ID != id {
+		if pl.ID != base {
 			continue
 		}
 		for _, f := range pl.Fields {
-			if f.Kind == "bool" {
-				values[f.Key] = r.FormValue(f.Key)
-				continue
-			}
 			values[f.Key] = r.FormValue(f.Key)
 		}
+	}
+	if r.Form.Has("_label") {
+		values["_label"] = r.FormValue("_label")
 	}
 	return values
 }
@@ -172,9 +194,19 @@ func (p *pages) integrationSync(w http.ResponseWriter, r *http.Request) {
 	for _, op := range ops {
 		list = append(list, changesets.Op{Action: op.Action, Entity: op.Entity, Ref: op.Ref, Data: op.Data, Note: op.Note})
 	}
+	// Facts (OS, disk, uptime) are observations, not decisions: written now,
+	// like SSH facts. Everything else goes through review.
+	nFacts, missing, list := p.cs.ApplyFacts(ctx, "plugin:"+id, list)
+	factsNote := ""
+	if nFacts > 0 {
+		factsNote = "Updated facts of " + plural(nFacts, "host") + ". "
+	}
+	if len(missing) > 0 {
+		factsNote += plural(len(missing), "machine") + " not in the inventory yet (" + strings.Join(firstN(missing, 5), ", ") + ") — their facts are applied with the new host. "
+	}
 	fresh := p.cs.Fresh(ctx, list)
 	if len(fresh) == 0 {
-		msg := "found " + plural(len(ops), "item") + ", all already in the inventory — nothing to add"
+		msg := factsNote + "Found " + plural(len(ops), "item") + "; nothing new to add to the inventory"
 		if err != nil {
 			msg += ". Note: " + err.Error()
 		}
@@ -197,8 +229,36 @@ func (p *pages) integrationSync(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	target := "/changesets?ok=proposed#cs-" + itoa(c.ID)
-	if err != nil {
-		target = "/changesets?ok=proposed&msg=" + url.QueryEscape("sync warning: "+err.Error()) + "#cs-" + itoa(c.ID)
+	if err != nil || factsNote != "" {
+		note := factsNote
+		if err != nil {
+			note += "Sync warning: " + err.Error()
+		}
+		target = "/changesets?ok=msg&msg=" + url.QueryEscape(strings.TrimSpace(note)+" New items are below for review.") + "#cs-" + itoa(c.ID)
 	}
 	http.Redirect(w, r, target, http.StatusSeeOther)
+}
+
+func firstN(list []string, n int) []string {
+	if len(list) > n {
+		return append(list[:n:n], "…")
+	}
+	return list
+}
+
+// integrationAddInstance adds another copy of a plugin (a second Proxmox,
+// another AdGuard…) and opens its settings.
+func (p *pages) integrationAddInstance(w http.ResponseWriter, r *http.Request) {
+	if p.intg == nil {
+		p.notFound(w, r)
+		return
+	}
+	_ = r.ParseForm()
+	base, _, _ := strings.Cut(chi.URLParam(r, "id"), "~")
+	id, err := p.intg.AddInstance(r.Context(), actorOf(r), base, r.FormValue("label"))
+	if err != nil {
+		backWithError(w, r, "/settings/integrations?p="+url.QueryEscape(base), err)
+		return
+	}
+	http.Redirect(w, r, "/settings/integrations?p="+url.QueryEscape(id)+"&ok=msg&msg="+url.QueryEscape("Added — fill in its address and credentials below."), http.StatusSeeOther)
 }

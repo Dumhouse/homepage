@@ -205,7 +205,7 @@ func (s *Store) applyOp(ctx context.Context, actor string, op Op) (int64, error)
 		// deletes them, so an existing host must never be returned.
 		if existing := s.findHost(ctx, name(), data["address"]); existing != 0 {
 			if h, err := s.inv.GetHost(ctx, existing); err == nil && len(h.Addresses) == 0 && data["address"] != "" {
-				h.Addresses = []inventory.Address{{Kind: "lan", Address: data["address"], IsPrimary: true}}
+				h.Addresses = []inventory.Address{{Kind: orDefault(data["address_kind"], "lan"), Address: data["address"], IsPrimary: true}}
 				if _, err := s.inv.UpdateHost(ctx, actor, existing, *h); err != nil {
 					return 0, err
 				}
@@ -230,12 +230,18 @@ func (s *Store) applyOp(ctx context.Context, actor string, op Op) (int64, error)
 		if data["memory_mb"] != "" && data["memory_mb"] != "0" {
 			notes = append(notes, data["memory_mb"]+" MB RAM, "+data["disk_gb"]+" GB disk")
 		}
+		if data["summary"] != "" {
+			notes = append([]string{data["summary"]}, notes...)
+		}
 		h.Description = strings.Join(notes, " · ")
-		if data["status"] == "stopped" {
+		if data["status"] == "stopped" || data["status"] == "off" {
 			h.Tags = append(h.Tags, "stopped")
 		}
 		if data["address"] != "" {
-			h.Addresses = []inventory.Address{{Kind: "lan", Address: data["address"], IsPrimary: true}}
+			h.Addresses = []inventory.Address{{Kind: orDefault(data["address_kind"], "lan"), Address: data["address"], IsPrimary: true}}
+		}
+		if data["address2"] != "" && data["address2"] != data["address"] {
+			h.Addresses = append(h.Addresses, inventory.Address{Kind: orDefault(data["address2_kind"], "lan"), Address: data["address2"]})
 		}
 		created, err := s.inv.CreateHost(ctx, actor, h)
 		if err != nil {
@@ -340,6 +346,15 @@ func (s *Store) applyOp(ctx context.Context, actor string, op Op) (int64, error)
 			return 0, err
 		}
 		return created.ID, nil
+	case "address":
+		return s.linkAddress(ctx, actor, data)
+	case "cost":
+		return s.createCost(ctx, actor, op)
+	case "facts":
+		if n, missing, _ := s.ApplyFacts(ctx, actor, []Op{op}); n == 0 {
+			return 0, fmt.Errorf("no host %v in the inventory", missing)
+		}
+		return 0, nil
 	default:
 		return 0, fmt.Errorf("unsupported entity %q", op.Entity)
 	}
@@ -447,7 +462,7 @@ func (s *Store) audit(ctx context.Context, tx *sql.Tx, actor, action, entity str
 // proxy route): it sets the domain on the service on that port, or adds the
 // service. Returns the id only when a service was created.
 func (s *Store) linkService(ctx context.Context, actor string, data map[string]string) (int64, error) {
-	hostID := s.findHost(ctx, "", data["address"])
+	hostID := s.hostLoose(ctx, data["address"], data["address"]) // an IP or a host name
 	if hostID == 0 {
 		return 0, fmt.Errorf("no host has the address %s yet — add or import it first, then apply again", data["address"])
 	}
@@ -524,9 +539,28 @@ func (s *Store) Fresh(ctx context.Context, ops []Op) []Op {
 			if records[op.Data["domain"]+"|"+op.Data["name"]+"|"+op.Data["type"]+"|"+op.Data["content"]] {
 				continue
 			}
+		case "address":
+			id := s.hostLoose(ctx, op.Data["host"], op.Data["match"])
+			if id == 0 && op.Data["optional"] != "" {
+				continue // a device that isn't documented (a phone, a laptop)
+			}
+			if h := full[id]; h != nil {
+				has := false
+				for _, a := range h.Addresses {
+					has = has || a.Address == op.Data["address"] ||
+						(op.Data["only_if_empty"] != "" && a.Kind == orDefault(op.Data["kind"], "other"))
+				}
+				if has {
+					continue
+				}
+			}
+		case "cost":
+			if s.costExists(ctx, orDefault(op.Data["label"], op.Ref), orDefault(op.Data["source"], "plugin")) {
+				continue
+			}
 		case "service":
 			if op.Action == "link" {
-				if id := s.findHost(ctx, "", op.Data["address"]); id != 0 && full[id] != nil {
+				if id := s.hostLoose(ctx, op.Data["address"], op.Data["address"]); id != 0 && full[id] != nil {
 					done := false
 					for _, v := range full[id].Services {
 						done = done || (strconv.Itoa(v.Port) == op.Data["port"] && v.Domain == op.Data["domain"])
@@ -534,6 +568,14 @@ func (s *Store) Fresh(ctx context.Context, ops []Op) []Op {
 					if done {
 						continue
 					}
+				}
+			} else if id := s.hostLoose(ctx, op.Data["host"], op.Data["host"]); id != 0 && full[id] != nil {
+				has := false
+				for _, v := range full[id].Services {
+					has = has || strconv.Itoa(v.Port) == op.Data["port"]
+				}
+				if has {
+					continue
 				}
 			}
 		}

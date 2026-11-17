@@ -90,7 +90,7 @@ func (p *pages) hosts(w http.ResponseWriter, r *http.Request) {
 		}
 		return "/hosts?" + v.Encode()
 	}
-	locCount, locOrder := map[string]int{}, []string{}
+	locCount, locOrder, locSeen := map[string]int{}, []string{}, map[string]bool{}
 	lifeCount := map[string]int{}
 	needFix := 0
 	rows := []hostRow{}
@@ -106,7 +106,8 @@ func (p *pages) hosts(w http.ResponseWriter, r *http.Request) {
 		if full.Location != nil {
 			locName = full.Location.Name
 		}
-		if _, ok := locCount[locName]; !ok && locName != "" {
+		if locName != "" && !locSeen[locName] {
+			locSeen[locName] = true
 			locOrder = append(locOrder, locName)
 		}
 		lc := full.Lifecycle

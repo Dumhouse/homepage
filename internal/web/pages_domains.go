@@ -582,5 +582,9 @@ func (p *pages) domainRecordDelete(w http.ResponseWriter, r *http.Request) {
 		p.fail(w, r, err)
 		return
 	}
-	http.Redirect(w, r, "/domains/"+itoa(domainID)+"?ok=record-deleted", http.StatusSeeOther)
+	back := "/domains"
+	if domainID > 0 {
+		back += "/" + itoa(domainID)
+	}
+	http.Redirect(w, r, back+"?ok=record-deleted", http.StatusSeeOther)
 }

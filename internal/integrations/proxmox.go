@@ -18,6 +18,7 @@ import (
 func Proxmox() *Plugin {
 	return &Plugin{
 		ID:          "proxmox",
+		Category:    CatServers,
 		Name:        "Proxmox",
 		Description: "Read nodes, VMs and LXC containers, and propose host records.",
 		Fields: []Field{

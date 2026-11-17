@@ -16,6 +16,7 @@ import (
 func Caddy() *Plugin {
 	return &Plugin{
 		ID:          "caddy",
+		Category:    CatNetwork,
 		Name:        "Caddy",
 		Description: "Read hostnames and upstreams from the Caddy admin API on the edge box.",
 		Fields: []Field{

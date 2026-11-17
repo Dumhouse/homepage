@@ -140,6 +140,10 @@ func flash(r *http.Request) string {
 		return "Service removed."
 	case "access":
 		return "Access entry added."
+	case "access-deleted":
+		return "Login removed."
+	case "ignored":
+		return "Device ignored — it won't be suggested again."
 	case "env":
 		return "Environment added."
 	case "link":

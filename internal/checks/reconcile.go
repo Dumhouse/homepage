@@ -124,8 +124,12 @@ func serviceChecks(v inventory.Service, addr string) []autoCheck {
 	}
 	if v.Port > 0 && addr != "" && v.Protocol != "udp" {
 		if v.Protocol == "http" || v.Protocol == "https" {
-			out = append(out, autoCheck{"http", map[string]any{"role": "lan", "expect_status": "200-499",
-				"url": v.Protocol + "://" + net.JoinHostPort(addr, strconv.Itoa(v.Port)) + path}})
+			params := map[string]any{"role": "lan", "expect_status": "200-499",
+				"url": v.Protocol + "://" + net.JoinHostPort(addr, strconv.Itoa(v.Port)) + path}
+			if v.Protocol == "https" {
+				params["ignore_tls"] = true // LAN services usually carry self-signed certificates
+			}
+			out = append(out, autoCheck{"http", params})
 		} else {
 			out = append(out, autoCheck{"tcp", map[string]any{"role": "lan", "address": addr, "port": v.Port}})
 		}

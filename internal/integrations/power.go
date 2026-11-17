@@ -19,7 +19,7 @@ const KindPower = "power"
 // their address is set per host.
 func Power() *Plugin {
 	return &Plugin{
-		ID: "power", Name: "Electricity", Kind: KindPower,
+		ID: "power", Name: "Electricity", Kind: KindPower, Category: CatPower,
 		Description: "What your hosts draw from the wall and what it costs per month. Set watts per host by hand, or read them live from Home Assistant, a Shelly or a Tasmota plug (host page → Power).",
 		Fields: []Field{
 			{Key: "price_kwh", Label: "Price per kWh", Kind: "text", Required: true, Default: "0.25", Help: "In your default currency, e.g. 0.25. Used for the Electricity rows on the Costs page."},

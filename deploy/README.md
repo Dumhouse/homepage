@@ -23,7 +23,7 @@ daily backup timer, then waits for `/healthz`.
 
 | Variable | Default | Meaning |
 |---|---|---|
-| `HS_ADDR` | `:8080` | listen address |
+| `HS_ADDR` | `:8080` (installer writes `:80`) | listen address; ports below 1024 work because the unit grants `CAP_NET_BIND_SERVICE` |
 | `HS_DATA` | `/var/lib/homeservices` | SQLite, backups, future icon cache |
 | `HS_AUTH` | `none` | `none` (trusted LAN) or `password` |
 | `HS_PASSWORD_HASH` | — | argon2id hash from `homeservices hash-password` |
@@ -90,7 +90,7 @@ if [ -f backups/homeservices-20260101-033000.secrets.enc.gz ]; then
   sudo chmod 600 secrets.enc
 fi
 sudo systemctl start homeservices
-curl -fsS http://127.0.0.1:8080/healthz
+curl -fsS http://127.0.0.1/healthz
 ```
 
 `HS_MASTER_KEY` in `/etc/homeservices/env` must match the key used when the

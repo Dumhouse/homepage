@@ -33,6 +33,7 @@ type settingsPage struct {
 	HomeView       string
 	TileClick      string
 	Subnets        []string
+	ScanPorts      string
 	EveryH         string
 	LastScan       string
 	Notify         []notifyRow
@@ -81,6 +82,7 @@ func (p *pages) settingsSection(w http.ResponseWriter, r *http.Request) {
 		HomeView:       settingOr(r, p.set, "home_view", "launcher"),
 		TileClick:      settingOr(r, p.set, "tile_click", "site"),
 		Subnets:        p.scan.Subnets(ctx),
+		ScanPorts:      joinInts(p.scan.Ports(ctx)),
 		FaviconFetch:   settingOr(r, p.set, "favicon_fetch", "on"),
 		FaviconPrivate: settingOr(r, p.set, "favicon_private", "off"),
 	}
@@ -160,7 +162,7 @@ func (p *pages) saveDisplay(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/settings/display?ok=saved", http.StatusSeeOther)
 }
 
-// refetchFavicons queues an icon fetch for every web service.
+// refetchFavicons queues an icon fetch for every web service (public domain or LAN address).
 func (p *pages) refetchFavicons(w http.ResponseWriter, r *http.Request) {
 	services, err := p.inv.ServicesWithDomain(r.Context())
 	if err != nil {

@@ -18,13 +18,18 @@
 
 <div class="tabs">
   {{range .Project.Envs}}<a class="{{if eq .Name $.EnvName}}active{{end}}" href="/projects/{{$.Project.Slug}}?env={{.Name}}">{{title .Name}} <span class="count">{{len .Links}}</span></a>{{end}}
-  <details class="add-pop" style="align-self:center"><summary class="btn ghost sm">{{icon "plus" 14}}Environment</summary>
-    <form method="post" action="/projects/{{.Project.Slug}}/envs" class="card form-grid pop" style="left:0;right:auto">
-      <div class="field"><label>Name *</label><input class="input" name="name" required placeholder="staging"></div>
-      <div class="field"><label>Base URL</label><input class="input" name="base_url" placeholder="https://staging.acme.example.com"></div>
-      <div class="wide"><button class="btn primary sm">Add environment</button></div>
-    </form></details>
+  <a class="btn ghost sm" style="align-self:center;margin:0 4px" href="/projects/{{.Project.Slug}}?{{if .EnvName}}env={{.EnvName}}&amp;{{end}}addenv=1#addenv">{{icon "plus" 14}}Environment</a>
 </div>
+{{if .AddEnv}}
+<form id="addenv" method="post" action="/projects/{{.Project.Slug}}/envs" class="card" style="margin-bottom:16px">
+  <div class="card-h"><h3>New environment</h3></div>
+  <div class="card-b form-grid">
+    <div class="field"><label for="env-name">Name *</label><input class="input" id="env-name" name="name" required placeholder="staging" autofocus></div>
+    <div class="field"><label for="env-url">Base URL</label><input class="input" id="env-url" name="base_url" placeholder="https://staging.acme.example.com"><span class="hint">App links use it, so one list works for every environment.</span></div>
+  </div>
+  <div class="card-f row"><span class="spacer"></span><a class="btn ghost" href="/projects/{{.Project.Slug}}{{if .EnvName}}?env={{.EnvName}}{{end}}">Cancel</a><button class="btn primary">Add environment</button></div>
+</form>
+{{end}}
 
 {{if .FormError}}<div class="card err" style="margin-bottom:16px"><div class="card-b">{{icon "alert" 15}} {{.FormError}}</div></div>{{end}}
 

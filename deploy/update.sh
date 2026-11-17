@@ -12,7 +12,14 @@ if [ "$(id -u)" -ne 0 ]; then
 fi
 BIN="${1:-./bin/homeservices-linux-amd64}"
 [ -f "$BIN" ] || { echo "binary not found: $BIN" >&2; exit 1; }
-HEALTH="${HS_HEALTH_URL:-http://127.0.0.1:8080/healthz}"
+# The health URL follows HS_ADDR in /etc/homeservices/env (":80", ":8080", "0.0.0.0:80").
+hs_port() {
+  local addr
+  addr=$(sed -n 's/^HS_ADDR=//p' /etc/homeservices/env 2>/dev/null | tail -1)
+  addr=${addr:-:8080}
+  echo "${addr##*:}"
+}
+HEALTH="${HS_HEALTH_URL:-http://127.0.0.1:$(hs_port)/healthz}"
 TARGET=/usr/local/bin/homeservices
 
 run_as_app() {
@@ -46,6 +53,12 @@ cp -f "$TARGET" /usr/local/bin/homeservices.prev
 mv -f /usr/local/bin/homeservices.new "$TARGET"
 
 echo "4/5 restart"
+# pick up unit changes (e.g. the port-80 capability) when the repo copy is newer
+UNIT_SRC="$(dirname "$0")/homeservices.service"
+if [ -f "$UNIT_SRC" ] && ! cmp -s "$UNIT_SRC" /etc/systemd/system/homeservices.service; then
+  install -m 0644 "$UNIT_SRC" /etc/systemd/system/homeservices.service
+  systemctl daemon-reload
+fi
 systemctl restart homeservices.service
 
 echo "5/5 health check"

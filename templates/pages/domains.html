@@ -26,7 +26,7 @@
     <div class="card">
       <div class="card-h"><h3>{{icon "globe" 16}}Registered domains</h3><span class="muted small">where bought, who owns it, when it renews</span></div>
       {{if .Domains}}
-      <table class="table">
+      <table class="table sortable">
         <thead><tr><th>Domain</th><th>Bought at · account</th><th>Renews</th><th class="r">Per year</th></tr></thead>
         <tbody>
         {{range .Domains}}
