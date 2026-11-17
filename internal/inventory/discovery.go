@@ -56,6 +56,14 @@ func (s *Store) UpsertDiscovery(ctx context.Context, address, hostname string, p
 			}
 			id, _ = r.LastInsertId()
 			newHosts = 1
+			var known int
+			if err := tx.QueryRowContext(ctx,
+				`SELECT COUNT(*) FROM host_addresses a JOIN hosts h ON h.id=a.host_id AND h.deleted_at IS NULL WHERE a.address=?`, address).Scan(&known); err != nil {
+				return err
+			}
+			if known > 0 { // already documented: record the ports, but do not announce a new device
+				newHosts = 0
+			}
 		} else if e != nil {
 			return e
 		} else {
@@ -91,8 +99,28 @@ func (s *Store) UpsertDiscovery(ctx context.Context, address, hostname string, p
 	return newHosts, newPorts, err
 }
 
+// markKnownDiscovered moves inbox entries whose address already belongs to a live host to
+// "registered", so hosts documented by hand, imported or created by an integration do not
+// keep showing up as new devices.
+func (s *Store) markKnownDiscovered(ctx context.Context) error {
+	_, err := s.db.ExecContext(ctx, `
+		UPDATE discovered_hosts
+		   SET status='registered',
+		       host_id=(SELECT a.host_id FROM host_addresses a JOIN hosts h ON h.id=a.host_id AND h.deleted_at IS NULL
+		                 WHERE a.address=discovered_hosts.address LIMIT 1)
+		 WHERE status='new'
+		   AND EXISTS (SELECT 1 FROM host_addresses a JOIN hosts h ON h.id=a.host_id AND h.deleted_at IS NULL
+		                WHERE a.address=discovered_hosts.address)`)
+	return err
+}
+
 // ListDiscovered returns hosts by status (new, ignored, registered, or "" for all).
 func (s *Store) ListDiscovered(ctx context.Context, status string) ([]DiscoveredHost, error) {
+	if status == "" || status == "new" {
+		if err := s.markKnownDiscovered(ctx); err != nil {
+			return nil, err
+		}
+	}
 	q := `SELECT id,address,COALESCE(hostname,''),first_seen_at,last_seen_at,status,host_id,COALESCE(note,'')
 	      FROM discovered_hosts`
 	var args []any
