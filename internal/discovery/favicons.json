@@ -1,0 +1,5 @@
+[
+  {"service": "grafana", "hash": 2123863676},
+  {"service": "portainer", "hash": 712297537},
+  {"service": "nextcloud", "hash": 167837543}
+]

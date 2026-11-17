@@ -248,7 +248,9 @@ Done when: daily flow works without the prototype — add a host, its services, 
       (Proxmox, Caddy, Forgejo/Gitea, Vaultwarden, ntfy, Grafana, Home Assistant, Plex, Jellyfin, Nextcloud, Immich,
       TrueNAS, Synology, UniFi, Pi-hole, SSH, Postgres, Redis), with the port table as fallback. When the root page
       has no identifying title, one bounded probe per known port checks `/api/health`, `/api2/json/version`,
-      `/v1/health` or `/api/status` (Grafana, Proxmox, ntfy, Portainer; 401 bodies included).
+      `/v1/health` or `/api/status` (Grafana, Proxmox, ntfy, Portainer; 401 bodies included). As a last hint the
+      scanner hashes `/favicon.ico` Shodan-style (MurmurHash3 of MIME base64) and matches Grafana, Portainer and
+      Nextcloud icons.
 - [x] **M7.4 Subnet scan** — bounded TCP sweep (≤1024 addresses, 96 workers, 400 ms), banner/HTTP-title grab,
       `discovered_hosts`/`discovered_ports` (`0010`), `/discovery` inbox with register (creates host + services) and
       ignore, JSON API and `homeservices scan -subnet …` CLI. Drift detection still todo.
@@ -372,15 +374,19 @@ Everything in the plan is implemented, tested, deployed to a Debian LXC and publ
       `up`. Access/checks/backups are live; the propose token is staged on the host for Vaultwarden.
 - [x] `deploy/update.sh` exercised on the LXC: it wrote a fresh DB backup, confirmed schema 18 of 18, swapped the
       binary and came back healthy (`updated: ok 1656071`).
+- [x] Backup restore rehearsed from the nightly archive on the LXC: schema 18/18, `/healthz` OK, hosts and
+      changesets readable from the restored file; the temporary data directory was removed afterwards.
+- [x] Favicon-hash fingerprints (Grafana, Portainer, Nextcloud) and automatic GitHub release creation on tags.
 - [x] Fresh-history public repo pushed; GitHub Actions `test` job passed (tidy, vet, race, build, `help`) after
       fixing the `tags` trigger nesting in both workflow copies.
 - [x] `staticcheck` clean: removed dead helpers, fixed an unused slice, lower-cased error strings and replaced the
       deprecated `middleware.RealIP` with a trusted-proxy-aware middleware (`HS_TRUSTED_PROXIES`).
 - [x] Domain page shows nameservers, DNSSEC and transfer lock, with an on-demand live-DNS comparison; the edit form
       can set them, while older/API-shaped posts keep imported values.
-- [x] Tagged **v0.1.0** and **v0.1.1** on both histories; GitHub Actions built the Linux binary and published
-      both releases. v0.1.1 adds the trusted-proxy middleware, the domain nameserver/DNSSEC UI, probe-path
-      fingerprints and extra tests. The deployed LXC runs `v0.1.1` and `/healthz` reports it.
+- [x] Tagged **v0.1.0** and **v0.1.1** on both histories; GitHub Actions builds the Linux binary and now
+      creates the release page and attaches the binary automatically on `v*` tags (`softprops/action-gh-release`).
+      v0.1.1 adds the trusted-proxy middleware, the domain nameserver/DNSSEC UI, probe-path fingerprints and extra
+      tests. The deployed LXC runs `v0.1.1` and `/healthz` reports it.
 
 
 ## Open decisions

@@ -209,6 +209,8 @@ func (s *Scanner) identify(ctx context.Context, ip string, ports []int, tick fun
 				info.Service = svc
 			} else if svc := probeFingerprint(ctx, scheme, ip, p); svc != "" {
 				info.Service = svc
+			} else if svc := faviconFingerprint(ctx, scheme, ip, p); svc != "" {
+				info.Service = svc
 			}
 			res.Ports = append(res.Ports, info)
 			tick()
