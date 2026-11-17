@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/dawidof/home-services/internal/fx"
+	"github.com/Dumhouse/homepage/internal/fx"
 )
 
 // A purchase in another currency keeps the value it had on the day it was

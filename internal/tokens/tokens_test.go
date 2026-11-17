@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/dawidof/home-services/internal/db"
-	"github.com/dawidof/home-services/internal/tokens"
+	"github.com/Dumhouse/homepage/internal/db"
+	"github.com/Dumhouse/homepage/internal/tokens"
 )
 
 func newStore(t *testing.T) *tokens.Store {

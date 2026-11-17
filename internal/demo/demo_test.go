@@ -5,9 +5,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/dawidof/home-services/internal/db"
-	"github.com/dawidof/home-services/internal/demo"
-	"github.com/dawidof/home-services/internal/inventory"
+	"github.com/Dumhouse/homepage/internal/db"
+	"github.com/Dumhouse/homepage/internal/demo"
+	"github.com/Dumhouse/homepage/internal/inventory"
 )
 
 func TestSeedFillsAnEmptyInventoryOnce(t *testing.T) {

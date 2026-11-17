@@ -16,7 +16,7 @@ import markdown
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "_site"
-REPO = "https://github.com/dawidof/home-services"
+REPO = "https://github.com/Dumhouse/homepage"
 
 # (file, nav title, one-line description)
 PAGES = [

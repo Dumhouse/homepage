@@ -107,7 +107,7 @@ func probeAt(ctx context.Context, baseURL string, rule probeRule) string {
 	if err != nil {
 		return ""
 	}
-	req.Header.Set("User-Agent", "home-services-discovery/1")
+	req.Header.Set("User-Agent", "homeservices-discovery/1")
 	client := &http.Client{
 		// #nosec G402 -- read-only fingerprinting must also see self-signed LAN endpoints.
 		Transport:     &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: true}},

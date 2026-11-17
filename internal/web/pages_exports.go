@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/dawidof/home-services/internal/export"
-	"github.com/dawidof/home-services/internal/inventory"
+	"github.com/Dumhouse/homepage/internal/export"
+	"github.com/Dumhouse/homepage/internal/inventory"
 	"github.com/go-chi/chi/v5"
 )
 

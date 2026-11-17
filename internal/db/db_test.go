@@ -3,7 +3,7 @@ package db_test
 import (
 	"testing"
 
-	"github.com/dawidof/home-services/internal/db"
+	"github.com/Dumhouse/homepage/internal/db"
 )
 
 func TestPending(t *testing.T) {

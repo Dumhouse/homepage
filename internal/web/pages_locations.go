@@ -8,7 +8,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 
-	"github.com/dawidof/home-services/internal/inventory"
+	"github.com/Dumhouse/homepage/internal/inventory"
 )
 
 type locationsPage struct {

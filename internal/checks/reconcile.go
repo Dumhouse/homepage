@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/dawidof/home-services/internal/inventory"
+	"github.com/Dumhouse/homepage/internal/inventory"
 )
 
 // Reconcile makes sure every service, SSH login and health-checked app link has

@@ -6,7 +6,7 @@ import (
 
 	sdk "github.com/modelcontextprotocol/go-sdk/mcp"
 
-	"github.com/dawidof/home-services/internal/changesets"
+	"github.com/Dumhouse/homepage/internal/changesets"
 )
 
 type proposeArgs struct {

@@ -4,9 +4,9 @@ import (
 	"context"
 	"testing"
 
-	"github.com/dawidof/home-services/internal/checks"
-	"github.com/dawidof/home-services/internal/db"
-	"github.com/dawidof/home-services/internal/inventory"
+	"github.com/Dumhouse/homepage/internal/checks"
+	"github.com/Dumhouse/homepage/internal/db"
+	"github.com/Dumhouse/homepage/internal/inventory"
 )
 
 // A service with both a LAN port and a domain gets two auto checks, so the

@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/dawidof/home-services/internal/inventory"
+	"github.com/Dumhouse/homepage/internal/inventory"
 )
 
 func TestSearch(t *testing.T) {

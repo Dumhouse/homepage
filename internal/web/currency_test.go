@@ -8,8 +8,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/dawidof/home-services/internal/fx"
-	"github.com/dawidof/home-services/internal/inventory"
+	"github.com/Dumhouse/homepage/internal/fx"
+	"github.com/Dumhouse/homepage/internal/inventory"
 )
 
 // Costs in other currencies are converted into the default currency for

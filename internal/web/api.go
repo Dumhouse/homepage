@@ -8,12 +8,12 @@ import (
 
 	"github.com/go-chi/chi/v5"
 
-	"github.com/dawidof/home-services/internal/changesets"
-	"github.com/dawidof/home-services/internal/checks"
-	"github.com/dawidof/home-services/internal/discovery"
-	"github.com/dawidof/home-services/internal/icons"
-	"github.com/dawidof/home-services/internal/integrations"
-	"github.com/dawidof/home-services/internal/inventory"
+	"github.com/Dumhouse/homepage/internal/changesets"
+	"github.com/Dumhouse/homepage/internal/checks"
+	"github.com/Dumhouse/homepage/internal/discovery"
+	"github.com/Dumhouse/homepage/internal/icons"
+	"github.com/Dumhouse/homepage/internal/integrations"
+	"github.com/Dumhouse/homepage/internal/inventory"
 )
 
 // api exposes the inventory as JSON under /api/v1. The UI (htmx) and tools can both use it.

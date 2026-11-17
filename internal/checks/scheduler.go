@@ -7,8 +7,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/dawidof/home-services/internal/alerts"
-	"github.com/dawidof/home-services/internal/inventory"
+	"github.com/Dumhouse/homepage/internal/alerts"
+	"github.com/Dumhouse/homepage/internal/inventory"
 )
 
 // Scheduler runs due checks on a ticker, reconciles auto checks every minute and

@@ -10,10 +10,10 @@ import (
 
 	sdk "github.com/modelcontextprotocol/go-sdk/mcp"
 
-	"github.com/dawidof/home-services/internal/auth"
-	"github.com/dawidof/home-services/internal/db"
-	"github.com/dawidof/home-services/internal/tokens"
-	"github.com/dawidof/home-services/internal/web"
+	"github.com/Dumhouse/homepage/internal/auth"
+	"github.com/Dumhouse/homepage/internal/db"
+	"github.com/Dumhouse/homepage/internal/tokens"
+	"github.com/Dumhouse/homepage/internal/web"
 )
 
 type headerRT struct{ token string }

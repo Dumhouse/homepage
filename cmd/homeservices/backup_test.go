@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/dawidof/home-services/internal/db"
+	"github.com/Dumhouse/homepage/internal/db"
 )
 
 func gunzip(t *testing.T, path, dst string) {

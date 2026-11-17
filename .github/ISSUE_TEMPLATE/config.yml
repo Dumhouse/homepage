@@ -1,8 +1,8 @@
 blank_issues_enabled: false
 contact_links:
   - name: Question or idea
-    url: https://github.com/dawidof/home-services/discussions
+    url: https://github.com/Dumhouse/homepage/discussions
     about: Ask how to do something, or float an idea before filing a feature request.
   - name: Security problem
-    url: https://github.com/dawidof/home-services/security/advisories/new
+    url: https://github.com/Dumhouse/homepage/security/advisories/new
     about: Please report vulnerabilities privately, not as a public issue.

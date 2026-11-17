@@ -8,7 +8,7 @@ import (
 
 	sdk "github.com/modelcontextprotocol/go-sdk/mcp"
 
-	"github.com/dawidof/home-services/internal/inventory"
+	"github.com/Dumhouse/homepage/internal/inventory"
 )
 
 // addResources exposes Markdown summaries as resources:

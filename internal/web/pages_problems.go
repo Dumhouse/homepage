@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/dawidof/home-services/internal/checks"
+	"github.com/Dumhouse/homepage/internal/checks"
 	"github.com/go-chi/chi/v5"
 )
 

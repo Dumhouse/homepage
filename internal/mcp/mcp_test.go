@@ -11,12 +11,12 @@ import (
 
 	sdk "github.com/modelcontextprotocol/go-sdk/mcp"
 
-	"github.com/dawidof/home-services/internal/changesets"
-	"github.com/dawidof/home-services/internal/checks"
-	"github.com/dawidof/home-services/internal/db"
-	"github.com/dawidof/home-services/internal/inventory"
-	hsmcp "github.com/dawidof/home-services/internal/mcp"
-	"github.com/dawidof/home-services/internal/request"
+	"github.com/Dumhouse/homepage/internal/changesets"
+	"github.com/Dumhouse/homepage/internal/checks"
+	"github.com/Dumhouse/homepage/internal/db"
+	"github.com/Dumhouse/homepage/internal/inventory"
+	hsmcp "github.com/Dumhouse/homepage/internal/mcp"
+	"github.com/Dumhouse/homepage/internal/request"
 )
 
 func connect(t *testing.T, ctx context.Context, inv *inventory.Store, chk *checks.Scheduler, cs *changesets.Store) *sdk.ClientSession {

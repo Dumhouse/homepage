@@ -9,8 +9,8 @@ Pick one. All three give you the same app.
 ### Docker
 
 ```bash
-git clone https://github.com/dawidof/home-services.git
-cd home-services
+git clone https://github.com/Dumhouse/homepage.git
+cd homepage
 docker compose up -d
 ```
 
@@ -28,7 +28,7 @@ ssh root@your-host 'cd /tmp && ./deploy/install.sh ./homeservices-linux-amd64'
 The installer creates a `homeservices` user, a state directory, an environment file, the systemd unit
 and a daily backup timer, then waits for the health check. It listens on port **80** by default
 (`HS_PORT=8080 ./deploy/install.sh …` to change it). Prebuilt binaries are attached to every
-[GitHub release](https://github.com/dawidof/home-services/releases).
+[GitHub release](https://github.com/Dumhouse/homepage/releases).
 
 ### From source
 

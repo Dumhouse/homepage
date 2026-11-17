@@ -7,9 +7,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/dawidof/home-services/internal/auth"
-	"github.com/dawidof/home-services/internal/db"
-	"github.com/dawidof/home-services/internal/web"
+	"github.com/Dumhouse/homepage/internal/auth"
+	"github.com/Dumhouse/homepage/internal/db"
+	"github.com/Dumhouse/homepage/internal/web"
 )
 
 func TestChangesetsAPIAndUI(t *testing.T) {

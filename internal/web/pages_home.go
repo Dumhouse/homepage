@@ -10,8 +10,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/dawidof/home-services/internal/checks"
-	"github.com/dawidof/home-services/internal/inventory"
+	"github.com/Dumhouse/homepage/internal/checks"
+	"github.com/Dumhouse/homepage/internal/inventory"
 )
 
 // ---- dashboard ----

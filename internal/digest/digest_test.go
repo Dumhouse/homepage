@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/dawidof/home-services/internal/digest"
+	"github.com/Dumhouse/homepage/internal/digest"
 )
 
 func TestBuild(t *testing.T) {

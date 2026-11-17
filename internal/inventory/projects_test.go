@@ -5,7 +5,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/dawidof/home-services/internal/inventory"
+	"github.com/Dumhouse/homepage/internal/inventory"
 )
 
 func TestLocations(t *testing.T) {

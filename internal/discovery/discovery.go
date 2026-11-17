@@ -18,7 +18,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/dawidof/home-services/internal/inventory"
+	"github.com/Dumhouse/homepage/internal/inventory"
 )
 
 var DefaultPorts = []int{22, 80, 443, 2019, 3000, 5432, 6379, 8006, 8080, 8081, 8443, 9000, 9090, 32400}
@@ -289,7 +289,7 @@ func fetchTitle(ctx context.Context, ip string, port int) (string, string) {
 			},
 		}
 		req, _ := http.NewRequestWithContext(cctx, http.MethodGet, scheme+"://"+net.JoinHostPort(ip, strconv.Itoa(port))+"/", nil)
-		req.Header.Set("User-Agent", "home-services-discovery/1")
+		req.Header.Set("User-Agent", "homeservices-discovery/1")
 		resp, err := client.Do(req)
 		if err == nil {
 			body, _ := io.ReadAll(io.LimitReader(resp.Body, 32<<10))

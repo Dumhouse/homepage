@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/dawidof/home-services/internal/inventory"
+	"github.com/Dumhouse/homepage/internal/inventory"
 )
 
 func TestSSHConfig(t *testing.T) {

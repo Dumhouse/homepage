@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"sort"
 
-	"github.com/dawidof/home-services/internal/checks"
-	"github.com/dawidof/home-services/internal/inventory"
+	"github.com/Dumhouse/homepage/internal/checks"
+	"github.com/Dumhouse/homepage/internal/inventory"
 )
 
 // ---- expiry calendar ----

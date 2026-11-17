@@ -16,8 +16,8 @@ import (
 
 	"golang.org/x/crypto/ssh"
 
-	"github.com/dawidof/home-services/internal/db"
-	"github.com/dawidof/home-services/internal/integrations"
+	"github.com/Dumhouse/homepage/internal/db"
+	"github.com/Dumhouse/homepage/internal/integrations"
 )
 
 func TestFileSecrets(t *testing.T) {

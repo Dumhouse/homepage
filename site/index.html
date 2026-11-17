@@ -8,12 +8,12 @@
 <meta property="og:title" content="Home Services — one place that knows everything about your home lab">
 <meta property="og:description" content="Hosts, services, projects, domains, costs and health checks in one Go binary. An MCP server lets AI agents read it and propose changes — never see a password.">
 <meta property="og:type" content="website">
-<meta property="og:image" content="https://dawidof.github.io/home-services/images/dashboard.png">
+<meta property="og:image" content="https://dumhouse.github.io/homepage/images/dashboard.png">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="canonical" href="https://dawidof.github.io/home-services/">
+<link rel="canonical" href="https://dumhouse.github.io/homepage/">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="style.css">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Home Services","applicationCategory":"DeveloperApplication","operatingSystem":"Linux, macOS, Docker","license":"https://www.gnu.org/licenses/agpl-3.0.html","description":"Self-hosted home-lab inventory with health checks, discovery, integrations and an MCP server.","url":"https://dawidof.github.io/home-services/","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Home Services","applicationCategory":"DeveloperApplication","operatingSystem":"Linux, macOS, Docker","license":"https://www.gnu.org/licenses/agpl-3.0.html","description":"Self-hosted home-lab inventory with health checks, discovery, integrations and an MCP server.","url":"https://dumhouse.github.io/homepage/","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}</script>
 </head>
 <body>
 <header class="top"><div class="wrap">
@@ -111,7 +111,7 @@ claude mcp add --transport http homeservices http://localhost:8080/mcp \
   <h2>Up and running in two minutes</h2>
   <p class="sub">One static binary, one SQLite file. No Node, no build step, no CDN, no telemetry.</p>
 <pre><code># try it with a fictional demo lab
-git clone {{repo}}.git && cd home-services
+git clone {{repo}}.git && cd homepage
 make build
 HS_DATA=./demo-data ./bin/homeservices demo
 HS_DATA=./demo-data ./bin/homeservices            # → http://localhost:8080

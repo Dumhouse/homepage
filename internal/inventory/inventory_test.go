@@ -5,8 +5,8 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/dawidof/home-services/internal/db"
-	"github.com/dawidof/home-services/internal/inventory"
+	"github.com/Dumhouse/homepage/internal/db"
+	"github.com/Dumhouse/homepage/internal/inventory"
 )
 
 func newStore(t *testing.T) *inventory.Store {

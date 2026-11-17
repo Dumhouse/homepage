@@ -12,10 +12,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/dawidof/home-services/internal/checks"
-	"github.com/dawidof/home-services/internal/integrations"
-	"github.com/dawidof/home-services/internal/inventory"
-	"github.com/dawidof/home-services/internal/power"
+	"github.com/Dumhouse/homepage/internal/checks"
+	"github.com/Dumhouse/homepage/internal/integrations"
+	"github.com/Dumhouse/homepage/internal/inventory"
+	"github.com/Dumhouse/homepage/internal/power"
 	"github.com/go-chi/chi/v5"
 )
 

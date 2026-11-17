@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/dawidof/home-services/internal/changesets"
+	"github.com/Dumhouse/homepage/internal/changesets"
 	"github.com/go-chi/chi/v5"
 )
 

@@ -11,11 +11,11 @@ import (
 
 	sdk "github.com/modelcontextprotocol/go-sdk/mcp"
 
-	"github.com/dawidof/home-services/internal/changesets"
-	"github.com/dawidof/home-services/internal/checks"
-	"github.com/dawidof/home-services/internal/integrations"
-	"github.com/dawidof/home-services/internal/inventory"
-	"github.com/dawidof/home-services/internal/request"
+	"github.com/Dumhouse/homepage/internal/changesets"
+	"github.com/Dumhouse/homepage/internal/checks"
+	"github.com/Dumhouse/homepage/internal/integrations"
+	"github.com/Dumhouse/homepage/internal/inventory"
+	"github.com/Dumhouse/homepage/internal/request"
 )
 
 const instructions = `Home Services is a self-hosted inventory of a home lab: hosts (VMs, LXCs, bare metal),
@@ -33,7 +33,7 @@ Rules:
 
 // New builds the MCP server with all read and write tools.
 func New(inv *inventory.Store, chk *checks.Scheduler, cs *changesets.Store, intg *integrations.Manager) *sdk.Server {
-	s := sdk.NewServer(&sdk.Implementation{Name: "home-services", Version: "0.1.0"},
+	s := sdk.NewServer(&sdk.Implementation{Name: "homeservices", Version: "0.1.0"},
 		&sdk.ServerOptions{Instructions: instructions})
 	addReadTools(s, inv)
 	addWriteTools(s, inv)

@@ -122,7 +122,7 @@ func (w *Webhook) Send(ctx context.Context, e Event) error {
 		return err
 	}
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("User-Agent", "home-services-alerts/1")
+	req.Header.Set("User-Agent", "homeservices-alerts/1")
 	client := w.Client
 	if client == nil {
 		client = &http.Client{Timeout: 8 * time.Second}

@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/dawidof/home-services/internal/demo"
-	"github.com/dawidof/home-services/internal/inventory"
+	"github.com/Dumhouse/homepage/internal/demo"
+	"github.com/Dumhouse/homepage/internal/inventory"
 )
 
 // demoCmd seeds a fictional example lab (hosts, services, projects, domains, costs, discovery) into an empty database.

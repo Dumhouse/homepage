@@ -104,4 +104,4 @@ on the same disk is not a backup.
 - Checks run from wherever the app runs, so deploy it on a machine that can reach what you want to monitor.
 
 More detail on every variable is in [Configuration](configuration.md); the full ops reference lives in
-[`deploy/README.md`](https://github.com/dawidof/home-services/blob/main/deploy/README.md).
+[`deploy/README.md`](https://github.com/Dumhouse/homepage/blob/main/deploy/README.md).

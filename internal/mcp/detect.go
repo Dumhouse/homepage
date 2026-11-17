@@ -11,8 +11,8 @@ import (
 
 	sdk "github.com/modelcontextprotocol/go-sdk/mcp"
 
-	"github.com/dawidof/home-services/internal/changesets"
-	"github.com/dawidof/home-services/internal/discovery"
+	"github.com/Dumhouse/homepage/internal/changesets"
+	"github.com/Dumhouse/homepage/internal/discovery"
 )
 
 type detectArgs struct {

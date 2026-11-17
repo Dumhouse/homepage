@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/dawidof/home-services/internal/inventory"
+	"github.com/Dumhouse/homepage/internal/inventory"
 )
 
 func TestDomains(t *testing.T) {

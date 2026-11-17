@@ -3,18 +3,18 @@ package web
 import (
 	"net/http"
 
-	"github.com/dawidof/home-services/internal/power"
+	"github.com/Dumhouse/homepage/internal/power"
 
 	"github.com/go-chi/chi/v5"
 
-	"github.com/dawidof/home-services/internal/changesets"
-	"github.com/dawidof/home-services/internal/checks"
-	"github.com/dawidof/home-services/internal/discovery"
-	"github.com/dawidof/home-services/internal/icons"
-	"github.com/dawidof/home-services/internal/integrations"
-	"github.com/dawidof/home-services/internal/inventory"
-	"github.com/dawidof/home-services/internal/settings"
-	"github.com/dawidof/home-services/internal/tokens"
+	"github.com/Dumhouse/homepage/internal/changesets"
+	"github.com/Dumhouse/homepage/internal/checks"
+	"github.com/Dumhouse/homepage/internal/discovery"
+	"github.com/Dumhouse/homepage/internal/icons"
+	"github.com/Dumhouse/homepage/internal/integrations"
+	"github.com/Dumhouse/homepage/internal/inventory"
+	"github.com/Dumhouse/homepage/internal/settings"
+	"github.com/Dumhouse/homepage/internal/tokens"
 )
 
 // pages serves the server-rendered UI. It is a thin adapter over the stores,

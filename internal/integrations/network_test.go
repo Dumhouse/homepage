@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/dawidof/home-services/internal/integrations"
+	"github.com/Dumhouse/homepage/internal/integrations"
 )
 
 func basic(user, pass string) func(*http.Request) bool {

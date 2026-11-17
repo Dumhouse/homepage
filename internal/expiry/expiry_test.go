@@ -5,12 +5,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/dawidof/home-services/internal/alerts"
-	"github.com/dawidof/home-services/internal/checks"
-	"github.com/dawidof/home-services/internal/db"
-	"github.com/dawidof/home-services/internal/expiry"
-	"github.com/dawidof/home-services/internal/inventory"
-	"github.com/dawidof/home-services/internal/settings"
+	"github.com/Dumhouse/homepage/internal/alerts"
+	"github.com/Dumhouse/homepage/internal/checks"
+	"github.com/Dumhouse/homepage/internal/db"
+	"github.com/Dumhouse/homepage/internal/expiry"
+	"github.com/Dumhouse/homepage/internal/inventory"
+	"github.com/Dumhouse/homepage/internal/settings"
 )
 
 type capture struct{ events []alerts.Event }

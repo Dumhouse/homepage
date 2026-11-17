@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/dawidof/home-services/internal/inventory"
+	"github.com/Dumhouse/homepage/internal/inventory"
 )
 
 func seedInventory(t *testing.T, ctx context.Context, s *inventory.Store) {

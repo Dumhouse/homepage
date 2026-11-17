@@ -13,7 +13,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/dawidof/home-services/internal/inventory"
+	"github.com/Dumhouse/homepage/internal/inventory"
 )
 
 // Format describes one export for the settings page.

@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/dawidof/home-services/internal/inventory"
+	"github.com/Dumhouse/homepage/internal/inventory"
 )
 
 func postLocation(t *testing.T, h http.Handler, path string, form url.Values) string {

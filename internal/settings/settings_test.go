@@ -5,8 +5,8 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/dawidof/home-services/internal/db"
-	"github.com/dawidof/home-services/internal/settings"
+	"github.com/Dumhouse/homepage/internal/db"
+	"github.com/Dumhouse/homepage/internal/settings"
 )
 
 func TestSettings(t *testing.T) {

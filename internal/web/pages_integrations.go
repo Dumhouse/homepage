@@ -8,10 +8,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/dawidof/home-services/internal/changesets"
-	"github.com/dawidof/home-services/internal/export"
-	"github.com/dawidof/home-services/internal/integrations"
-	"github.com/dawidof/home-services/internal/suggest"
+	"github.com/Dumhouse/homepage/internal/changesets"
+	"github.com/Dumhouse/homepage/internal/export"
+	"github.com/Dumhouse/homepage/internal/integrations"
+	"github.com/Dumhouse/homepage/internal/suggest"
 	"github.com/go-chi/chi/v5"
 )
 

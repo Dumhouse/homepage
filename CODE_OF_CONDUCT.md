@@ -9,7 +9,7 @@ and many of us run these lab setups as a hobby.
 (including addresses, hostnames and credentials from their setups), and sustained disruption of discussions.
 
 **Reporting.** If you see or experience something that breaks these rules, report it privately to the maintainers through
-a [private security advisory](https://github.com/dawidof/home-services/security/advisories/new) or by contacting the
+a [private security advisory](https://github.com/Dumhouse/homepage/security/advisories/new) or by contacting the
 maintainer listed on their GitHub profile. Maintainers may edit or remove comments, close threads and block users who
 violate this code. Reports are handled in confidence.
 

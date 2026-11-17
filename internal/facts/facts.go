@@ -13,7 +13,7 @@ import (
 
 	"golang.org/x/crypto/ssh"
 
-	"github.com/dawidof/home-services/internal/inventory"
+	"github.com/Dumhouse/homepage/internal/inventory"
 )
 
 type Collector struct {

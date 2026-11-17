@@ -5,9 +5,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/dawidof/home-services/internal/auth"
-	"github.com/dawidof/home-services/internal/db"
-	"github.com/dawidof/home-services/internal/web"
+	"github.com/Dumhouse/homepage/internal/auth"
+	"github.com/Dumhouse/homepage/internal/db"
+	"github.com/Dumhouse/homepage/internal/web"
 )
 
 // Adding a subnet must keep the ones already configured; removing drops one.

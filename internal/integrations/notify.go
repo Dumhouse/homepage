@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/dawidof/home-services/internal/alerts"
+	"github.com/Dumhouse/homepage/internal/alerts"
 )
 
 // Notification plugins send alerts somewhere you will see them. They have no

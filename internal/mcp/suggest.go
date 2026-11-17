@@ -6,9 +6,9 @@ import (
 
 	sdk "github.com/modelcontextprotocol/go-sdk/mcp"
 
-	"github.com/dawidof/home-services/internal/integrations"
-	"github.com/dawidof/home-services/internal/inventory"
-	"github.com/dawidof/home-services/internal/suggest"
+	"github.com/Dumhouse/homepage/internal/integrations"
+	"github.com/Dumhouse/homepage/internal/inventory"
+	"github.com/Dumhouse/homepage/internal/suggest"
 )
 
 type suggestionsOut struct {

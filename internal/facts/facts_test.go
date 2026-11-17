@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/dawidof/home-services/internal/facts"
+	"github.com/Dumhouse/homepage/internal/facts"
 )
 
 func TestParseFacts(t *testing.T) {

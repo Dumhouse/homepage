@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/dawidof/home-services/internal/alerts"
+	"github.com/Dumhouse/homepage/internal/alerts"
 	"sort"
 	"strconv"
 	"strings"

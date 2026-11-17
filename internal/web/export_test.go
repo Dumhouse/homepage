@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/dawidof/home-services/internal/inventory"
+	"github.com/Dumhouse/homepage/internal/inventory"
 )
 
 // Exports open in the browser; a host warning from facts shows on Alerts and

@@ -6,9 +6,9 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/dawidof/home-services/internal/auth"
-	"github.com/dawidof/home-services/internal/request"
-	"github.com/dawidof/home-services/internal/tokens"
+	"github.com/Dumhouse/homepage/internal/auth"
+	"github.com/Dumhouse/homepage/internal/request"
+	"github.com/Dumhouse/homepage/internal/tokens"
 )
 
 // actorUI is the audit actor for changes made through the web UI.
@@ -74,7 +74,7 @@ func withIdentity(r *http.Request, actor, scope string) *http.Request {
 }
 
 func unauthorized(w http.ResponseWriter) {
-	w.Header().Set("WWW-Authenticate", `Bearer realm="home-services"`)
+	w.Header().Set("WWW-Authenticate", `Bearer realm="homeservices"`)
 	reply(w, http.StatusUnauthorized, map[string]string{"error": "authentication required"})
 }
 

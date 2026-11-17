@@ -1,6 +1,6 @@
 # Documentation
 
-Rendered version: <https://dawidof.github.io/home-services/>
+Rendered version: <https://dumhouse.github.io/homepage/>
 
 - [Getting started](getting-started.md)
 - [Concepts](concepts.md)

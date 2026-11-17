@@ -1,4 +1,4 @@
-module github.com/dawidof/home-services
+module github.com/Dumhouse/homepage
 
 go 1.27.4
 

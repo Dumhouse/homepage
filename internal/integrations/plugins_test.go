@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/dawidof/home-services/internal/integrations"
+	"github.com/Dumhouse/homepage/internal/integrations"
 )
 
 // serve answers path → body; anything else is a 404.

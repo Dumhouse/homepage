@@ -4,9 +4,9 @@ import (
 	"context"
 	"testing"
 
-	"github.com/dawidof/home-services/internal/db"
-	"github.com/dawidof/home-services/internal/inventory"
-	"github.com/dawidof/home-services/internal/suggest"
+	"github.com/Dumhouse/homepage/internal/db"
+	"github.com/Dumhouse/homepage/internal/inventory"
+	"github.com/Dumhouse/homepage/internal/suggest"
 )
 
 func TestSuggestions(t *testing.T) {

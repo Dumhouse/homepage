@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/dawidof/home-services/internal/inventory"
-	"github.com/dawidof/home-services/internal/settings"
-	"github.com/dawidof/home-services/internal/tokens"
+	"github.com/Dumhouse/homepage/internal/inventory"
+	"github.com/Dumhouse/homepage/internal/settings"
+	"github.com/Dumhouse/homepage/internal/tokens"
 )
 
 // ---- settings · MCP ----

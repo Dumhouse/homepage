@@ -9,10 +9,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/dawidof/home-services/internal/discovery"
-	"github.com/dawidof/home-services/internal/fx"
-	"github.com/dawidof/home-services/internal/integrations"
-	"github.com/dawidof/home-services/internal/inventory"
+	"github.com/Dumhouse/homepage/internal/discovery"
+	"github.com/Dumhouse/homepage/internal/fx"
+	"github.com/Dumhouse/homepage/internal/integrations"
+	"github.com/Dumhouse/homepage/internal/inventory"
 	"github.com/go-chi/chi/v5"
 )
 

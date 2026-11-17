@@ -3,7 +3,7 @@ package themes_test
 import (
 	"testing"
 
-	"github.com/dawidof/home-services/internal/themes"
+	"github.com/Dumhouse/homepage/internal/themes"
 )
 
 func TestRepoThemes(t *testing.T) {

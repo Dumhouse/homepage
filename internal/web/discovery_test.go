@@ -8,12 +8,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/dawidof/home-services/internal/auth"
-	"github.com/dawidof/home-services/internal/db"
-	"github.com/dawidof/home-services/internal/discovery"
-	"github.com/dawidof/home-services/internal/inventory"
-	"github.com/dawidof/home-services/internal/settings"
-	"github.com/dawidof/home-services/internal/web"
+	"github.com/Dumhouse/homepage/internal/auth"
+	"github.com/Dumhouse/homepage/internal/db"
+	"github.com/Dumhouse/homepage/internal/discovery"
+	"github.com/Dumhouse/homepage/internal/inventory"
+	"github.com/Dumhouse/homepage/internal/settings"
+	"github.com/Dumhouse/homepage/internal/web"
 )
 
 func TestDiscoveryPageAndAPI(t *testing.T) {

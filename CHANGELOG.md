@@ -84,4 +84,4 @@ systemd/Docker packaging.
 - AGPL-3.0, CONTRIBUTING and SECURITY docs, demo seed data, theme validation and CI with `go vet`,
   `go mod tidy -diff`, `go test -race ./...` and release builds.
 
-[Unreleased]: https://github.com/dawidof/home-services/compare/v0.1.2...HEAD
+[Unreleased]: https://github.com/Dumhouse/homepage/compare/v0.1.2...HEAD

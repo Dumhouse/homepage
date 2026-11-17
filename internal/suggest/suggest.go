@@ -8,7 +8,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/dawidof/home-services/internal/inventory"
+	"github.com/Dumhouse/homepage/internal/inventory"
 )
 
 type Suggestion struct {

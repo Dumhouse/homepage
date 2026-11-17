@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/dawidof/home-services/internal/alerts"
+	"github.com/Dumhouse/homepage/internal/alerts"
 )
 
 type capture struct{ events []alerts.Event }

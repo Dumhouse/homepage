@@ -8,8 +8,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/dawidof/home-services/internal/discovery"
-	"github.com/dawidof/home-services/internal/inventory"
+	"github.com/Dumhouse/homepage/internal/discovery"
+	"github.com/Dumhouse/homepage/internal/inventory"
 	"github.com/go-chi/chi/v5"
 )
 

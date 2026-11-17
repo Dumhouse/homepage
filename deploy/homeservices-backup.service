@@ -1,6 +1,6 @@
 [Unit]
 Description=Home Services SQLite backup
-Documentation=https://github.com/dawidof/home-services
+Documentation=https://github.com/Dumhouse/homepage
 
 [Service]
 Type=oneshot

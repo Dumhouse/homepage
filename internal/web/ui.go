@@ -3,7 +3,7 @@ package web
 import (
 	"bytes"
 	"fmt"
-	"github.com/dawidof/home-services/internal/discovery"
+	"github.com/Dumhouse/homepage/internal/discovery"
 	"html/template"
 	"io"
 	"log"
@@ -12,8 +12,8 @@ import (
 	"strconv"
 	"strings"
 
-	homeservices "github.com/dawidof/home-services"
-	"github.com/dawidof/home-services/internal/inventory"
+	homeservices "github.com/Dumhouse/homepage"
+	"github.com/Dumhouse/homepage/internal/inventory"
 	"github.com/yuin/goldmark"
 )
 

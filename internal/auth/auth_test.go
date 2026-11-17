@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/dawidof/home-services/internal/auth"
+	"github.com/Dumhouse/homepage/internal/auth"
 )
 
 var ok = http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) { w.Write([]byte("secret")) })

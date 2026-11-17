@@ -11,7 +11,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/dawidof/home-services/internal/inventory"
+	"github.com/Dumhouse/homepage/internal/inventory"
 )
 
 // Setting keys used by the runner.

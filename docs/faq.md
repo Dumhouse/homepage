@@ -62,7 +62,7 @@ Everything it found already exists. Syncs only propose what is new; unchanged it
 
 **Is it safe to expose to the internet?**
 Not as is. Put it behind a VPN (Tailscale, WireGuard) or a reverse proxy with authentication, and set `HS_AUTH=password`. API and
-MCP tokens are always required regardless. See [SECURITY.md](https://github.com/dawidof/home-services/blob/main/SECURITY.md).
+MCP tokens are always required regardless. See [SECURITY.md](https://github.com/Dumhouse/homepage/blob/main/SECURITY.md).
 
 **Where do passwords go?**
 Nowhere — the app stores only a link to your password manager. Integration tokens are the exception and are AES-GCM encrypted in

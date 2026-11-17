@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/dawidof/home-services/internal/inventory"
+	"github.com/Dumhouse/homepage/internal/inventory"
 )
 
 // Seed fills an empty store. It refuses to touch a database that already has hosts or projects.

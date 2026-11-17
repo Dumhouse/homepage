@@ -1,6 +1,6 @@
 [Unit]
 Description=Home Services inventory, checks and MCP
-Documentation=https://github.com/dawidof/home-services
+Documentation=https://github.com/Dumhouse/homepage
 After=network-online.target
 Wants=network-online.target
 

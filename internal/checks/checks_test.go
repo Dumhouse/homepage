@@ -14,10 +14,10 @@ import (
 
 	"golang.org/x/crypto/ssh"
 
-	"github.com/dawidof/home-services/internal/alerts"
-	"github.com/dawidof/home-services/internal/checks"
-	"github.com/dawidof/home-services/internal/db"
-	"github.com/dawidof/home-services/internal/inventory"
+	"github.com/Dumhouse/homepage/internal/alerts"
+	"github.com/Dumhouse/homepage/internal/checks"
+	"github.com/Dumhouse/homepage/internal/db"
+	"github.com/Dumhouse/homepage/internal/inventory"
 )
 
 func newStore(t *testing.T) *checks.Store {

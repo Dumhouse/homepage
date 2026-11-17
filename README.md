@@ -7,13 +7,13 @@
 **One place that knows everything about your home lab.**<br>
 Hosts, services, projects, logins, domains, costs and health checks — in a single Go binary with an MCP server, so your AI agent can read it and propose changes without ever seeing a password.
 
-[![CI](https://github.com/dawidof/home-services/actions/workflows/ci.yml/badge.svg)](https://github.com/dawidof/home-services/actions/workflows/ci.yml)
+[![CI](https://github.com/Dumhouse/homepage/actions/workflows/ci.yml/badge.svg)](https://github.com/Dumhouse/homepage/actions/workflows/ci.yml)
 [![License: AGPL v3](https://img.shields.io/badge/license-AGPL--3.0-blue.svg)](LICENSE)
-[![Release](https://img.shields.io/github/v/release/dawidof/home-services?sort=semver)](https://github.com/dawidof/home-services/releases)
+[![Release](https://img.shields.io/github/v/release/Dumhouse/homepage?sort=semver)](https://github.com/Dumhouse/homepage/releases)
 ![Go](https://img.shields.io/badge/Go-single%20binary-00ADD8?logo=go&logoColor=white)
 ![SQLite](https://img.shields.io/badge/SQLite-one%20file-003B57?logo=sqlite&logoColor=white)
 
-[**Documentation**](https://dawidof.github.io/home-services/) ·
+[**Documentation**](https://dumhouse.github.io/homepage/) ·
 [Quick start](#quick-start) ·
 [Features](#features) ·
 [Integrations](docs/integrations.md) ·
@@ -97,8 +97,8 @@ build step, no CDN, no telemetry.
 ### Try it with demo data (30 seconds)
 
 ```bash
-git clone https://github.com/dawidof/home-services.git
-cd home-services
+git clone https://github.com/Dumhouse/homepage.git
+cd homepage
 make build
 HS_DATA=./demo-data ./bin/homeservices demo      # a fictional lab: 11 hosts, 3 projects, …
 HS_DATA=./demo-data ./bin/homeservices           # open http://localhost:8080
@@ -113,7 +113,7 @@ touch a real network (they will simply show as unreachable).
 <summary><b>Docker</b></summary>
 
 ```bash
-git clone https://github.com/dawidof/home-services.git && cd home-services
+git clone https://github.com/Dumhouse/homepage.git && cd homepage
 docker compose up -d            # http://localhost:8080, data in ./data
 ```
 </details>
@@ -127,7 +127,7 @@ scp bin/homeservices-linux-amd64 deploy root@your-host:/tmp/
 ssh root@your-host 'cd /tmp && ./deploy/install.sh ./homeservices-linux-amd64'   # listens on :80
 ```
 
-Prebuilt Linux binaries are attached to every [release](https://github.com/dawidof/home-services/releases).
+Prebuilt Linux binaries are attached to every [release](https://github.com/Dumhouse/homepage/releases).
 See the [deployment guide](docs/deployment.md) for updates with automatic rollback, backups and restore.
 </details>
 

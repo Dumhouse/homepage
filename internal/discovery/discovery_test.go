@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/dawidof/home-services/internal/discovery"
+	"github.com/Dumhouse/homepage/internal/discovery"
 )
 
 func TestScanLoopback(t *testing.T) {

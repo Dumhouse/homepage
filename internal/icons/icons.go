@@ -24,8 +24,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/dawidof/home-services/internal/inventory"
-	"github.com/dawidof/home-services/internal/settings"
+	"github.com/Dumhouse/homepage/internal/inventory"
+	"github.com/Dumhouse/homepage/internal/settings"
 )
 
 var (
@@ -257,7 +257,7 @@ func (f *Fetcher) get(ctx context.Context, raw string, allowPrivate bool, limit 
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("User-Agent", "home-services-favicon/1")
+	req.Header.Set("User-Agent", "homeservices-favicon/1")
 	resp, err := f.client(allowPrivate).Do(req)
 	if err != nil {
 		return nil, err

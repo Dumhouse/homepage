@@ -106,7 +106,7 @@ func (p *Prober) http(ctx context.Context, params map[string]any) Result {
 	if err != nil {
 		return Result{Message: err.Error()}
 	}
-	req.Header.Set("User-Agent", "home-services-check/1")
+	req.Header.Set("User-Agent", "homeservices-check/1")
 	start := time.Now()
 	resp, err := client.Do(req)
 	ms := int(time.Since(start).Milliseconds())
@@ -227,7 +227,7 @@ func (p *Prober) sshProbe(ctx context.Context, params map[string]any) Result {
 	}
 	defer raw.Close()
 	cfg := &ssh.ClientConfig{
-		User:            paramString(params, "user", "home-services-probe"),
+		User:            paramString(params, "user", "homeservices-probe"),
 		Auth:            []ssh.AuthMethod{ssh.Password("")},
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 		Timeout:         p.Timeout,

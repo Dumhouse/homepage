@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/dawidof/home-services/internal/alerts"
-	"github.com/dawidof/home-services/internal/inventory"
+	"github.com/Dumhouse/homepage/internal/alerts"
+	"github.com/Dumhouse/homepage/internal/inventory"
 )
 
 // Runner executes probes and persists results. It also keeps ssh_access.status

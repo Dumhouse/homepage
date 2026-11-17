@@ -8,9 +8,9 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/dawidof/home-services/internal/alerts"
-	"github.com/dawidof/home-services/internal/db"
-	"github.com/dawidof/home-services/internal/integrations"
+	"github.com/Dumhouse/homepage/internal/alerts"
+	"github.com/Dumhouse/homepage/internal/db"
+	"github.com/Dumhouse/homepage/internal/integrations"
 )
 
 // A configured ntfy plugin receives alerts through the dispatcher, honours
