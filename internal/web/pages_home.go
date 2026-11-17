@@ -1,6 +1,8 @@
 package web
 
 import (
+	"context"
+	"encoding/json"
 	"net/http"
 	"sort"
 	"strconv"
@@ -77,7 +79,7 @@ type homePage struct {
 	Groups      []string
 	Group       string
 	Problems    []checks.Problem
-	Recent      []inventory.AuditEntry
+	Recent      []recentItem
 	KeyOnly     int
 	SSHTotal    int
 	HostsUp     int
@@ -394,12 +396,14 @@ func (p *pages) home(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	discovered, _ := p.inv.ListDiscovered(ctx, "new")
-	svcDown := 0
+	// A service can fail both its LAN and public check: count it once.
+	downSvc := map[int64]bool{}
 	for _, pr := range allProblems {
 		if pr.TargetEntity == "service" {
-			svcDown++ // failing or down
+			downSvc[pr.TargetID] = true
 		}
 	}
+	svcDown := min(len(downSvc), l.Stats.Services)
 	nums := []homeNum{
 		{Icon: "server", Label: "Hosts", Href: "/hosts", Value: itoa(int64(len(hosts) - hostsDown)), Of: "/" + itoa(int64(len(hosts))),
 			Meta: ternary(hostsDown > 0, plural(hostsDown, "host")+" down", "all reachable"), MetaClass: ternary(hostsDown > 0, "bad-t", "")},
@@ -417,7 +421,7 @@ func (p *pages) home(w http.ResponseWriter, r *http.Request) {
 		nextExpiry = strconv.Itoa(nextDays) + " d"
 	}
 
-	recent, _ := p.inv.ListAudit(ctx, "", 0, 4)
+	recent := p.recentChanges(ctx, 8)
 	l.Flash = flash(r)
 	p.ui.render(w, 200, "home", homePage{
 		Layout: l, View: view, TileClick: click, Greeting: greeting(time.Now()),
@@ -516,6 +520,80 @@ func serviceURL(h *inventory.Host, v *inventory.Service) string {
 	}
 	if v.Port > 0 && (v.Protocol == "http" || v.Protocol == "https") && len(h.Addresses) > 0 {
 		return v.Protocol + "://" + h.Addresses[0].Address + ":" + strconv.Itoa(v.Port) + v.Path
+	}
+	return ""
+}
+
+// recentItem is one line of the dashboard's Recently card.
+type recentItem struct {
+	Entity string
+	Title  string
+	Actor  string
+	At     string
+	Href   string
+	Times  int // identical changes in a row, folded into one line
+}
+
+// recentChanges lists what people and agents changed lately: background
+// jobs (system:*) are left out and repeats of the same change are folded,
+// so the card isn't filled by four "update setting" lines.
+func (p *pages) recentChanges(ctx context.Context, n int) []recentItem {
+	rows, _ := p.inv.ListAudit(ctx, "", 0, 200)
+	out := []recentItem{}
+	for _, a := range rows {
+		if strings.HasPrefix(a.Actor, "system") {
+			continue
+		}
+		name := auditName(a.Diff)
+		title := a.Action + " " + strings.ReplaceAll(a.Entity, "_", " ")
+		if name != "" {
+			title += " · " + name
+		}
+		if k := len(out) - 1; k >= 0 && out[k].Title == title && out[k].Actor == a.Actor {
+			out[k].Times++
+			continue
+		}
+		if len(out) == n {
+			break
+		}
+		it := recentItem{Entity: a.Entity, Title: title, Actor: a.Actor, At: a.At, Times: 1}
+		if a.EntityID != nil && a.Action != "delete" {
+			switch a.Entity {
+			case "host", "domain", "changeset":
+				it.Href = "/" + a.Entity + "s/" + itoa(*a.EntityID)
+			}
+		}
+		if a.Entity == "setting" || a.Entity == "integration" {
+			it.Href = "/settings"
+		}
+		out = append(out, it)
+	}
+	return out
+}
+
+// auditName pulls a human name out of an audit diff, if it has one.
+func auditName(raw []byte) string {
+	var m map[string]any
+	if json.Unmarshal(raw, &m) != nil {
+		return ""
+	}
+	look := func(m map[string]any) string {
+		for _, k := range []string{"name", "label", "title", "key", "address", "plugin_id"} {
+			if v, ok := m[k].(string); ok && v != "" {
+				return v
+			}
+		}
+		return ""
+	}
+	if v := look(m); v != "" {
+		return v
+	}
+	for _, k := range []string{"after", "new", "before", "host", "service"} {
+		if sub, ok := m[k].(map[string]any); ok {
+			if v := look(sub); v != "" {
+				return v
+			}
+		}
 	}
 	return ""
 }

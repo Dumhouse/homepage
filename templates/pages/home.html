@@ -58,7 +58,7 @@
         <div class="card-h"><h3>{{icon "clock" 16}}Recently</h3></div>
         <div class="la-list">
           {{range .Recent}}
-          <div class="la-it"><span class="n-ic info">{{icon (kindIcon .Entity) 15}}</span><span><b>{{.Action}} {{.Entity}}</b><small>{{.Actor}} · {{fmtDate .At}}</small></span></div>
+          <{{if .Href}}a href="{{.Href}}"{{else}}div{{end}} class="la-it"><span class="n-ic info">{{icon (kindIcon .Entity) 15}}</span><span><b>{{.Title}}{{if gt .Times 1}} <span class="muted">×{{.Times}}</span>{{end}}</b><small>{{.Actor}} · {{fmtDate .At}}</small></span></{{if .Href}}a{{else}}div{{end}}>
           {{else}}
           <div class="la-it"><span class="n-ic info">{{icon "clock" 15}}</span><span><b>Nothing yet</b><small>changes appear here</small></span></div>
           {{end}}

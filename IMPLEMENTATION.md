@@ -383,10 +383,11 @@ Everything in the plan is implemented, tested, deployed to a Debian LXC and publ
       deprecated `middleware.RealIP` with a trusted-proxy-aware middleware (`HS_TRUSTED_PROXIES`).
 - [x] Domain page shows nameservers, DNSSEC and transfer lock, with an on-demand live-DNS comparison; the edit form
       can set them, while older/API-shaped posts keep imported values.
-- [x] Tagged **v0.1.0** and **v0.1.1** on both histories; GitHub Actions builds the Linux binary and now
-      creates the release page and attaches the binary automatically on `v*` tags (`softprops/action-gh-release`).
-      v0.1.1 adds the trusted-proxy middleware, the domain nameserver/DNSSEC UI, probe-path fingerprints and extra
-      tests. The deployed LXC runs `v0.1.1` and `/healthz` reports it.
+- [x] Tagged **v0.1.0**, **v0.1.1** and **v0.1.2** on both histories; GitHub Actions builds the Linux binary and
+      creates the release page with the binary attached automatically on `v*` tags (`softprops/action-gh-release`),
+      verified by the v0.1.2 tag. v0.1.2 adds favicon-hash fingerprints and the automated release; v0.1.1 added the
+      trusted-proxy middleware, the domain nameserver/DNSSEC UI, probe-path fingerprints and extra tests. The
+      deployed LXC runs `v0.1.2` and `/healthz` reports it.
 
 
 ## Open decisions
