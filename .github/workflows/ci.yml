@@ -52,7 +52,7 @@ jobs:
         with:
           name: homeservices-linux-amd64
           path: bin/homeservices-linux-amd64
-      - uses: softprops/action-gh-release@v2
+      - uses: softprops/action-gh-release@v3
         with:
           name: Home Services ${{ github.ref_name }}
           files: bin/homeservices-linux-amd64
