@@ -36,7 +36,7 @@ func tokenAuth(tok *tokens.Store, a auth.Provider, prefix string, checkScope boo
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if sp, ok := a.(auth.SessionProvider); ok && sp.ValidSession(r) &&
 				(a.Name() != "none" || sameOrigin(r)) {
-				next.ServeHTTP(w, withIdentity(r, actorUI, "write"))
+				next.ServeHTTP(w, withIdentity(r, actorFrom(r.Context()), "write"))
 				return
 			}
 			if a.Name() == "none" && sameOrigin(r) {

@@ -85,6 +85,24 @@
 </div>
 {{end}}
 
+{{if eq .Section "updates"}}
+<div class="row"><h2>Updates</h2><span class="muted small">You are running {{.Version}}.</span></div>
+<form method="post" action="/settings/updates" class="card">
+  <div class="setting-row"><div class="txt"><b>Check for new releases</b><small>Once a day, asks GitHub for the latest Home Services release. Nothing about your install is sent. Off by default.{{if .Updates.EnvForced}} Set by HS_UPDATE_CHECK={{.Updates.EnvForced}} — the environment wins.{{end}}</small></div>
+    <select class="input" name="update_check" style="width:220px" {{if .Updates.EnvForced}}disabled{{end}}>
+      <option value="off" {{if not .Updates.Enabled}}selected{{end}}>Off</option>
+      <option value="on" {{if .Updates.Enabled}}selected{{end}}>On — daily</option>
+    </select></div>
+  <div class="setting-row"><div class="txt"><b>Latest release</b><small>{{if .Updates.CheckedAt}}Checked {{fmtDate .Updates.CheckedAt}}{{else}}Never checked{{end}}{{if .Updates.Error}} · <span class="bad-t">{{.Updates.Error}}</span>{{end}}</small></div>
+    <div>{{if .Updates.Latest}}{{if .Updates.Newer}}<a class="badge warn" href="{{.Updates.URL}}" target="_blank" rel="noopener">{{.Updates.Latest}} available</a>{{else}}<span class="badge ok">{{.Updates.Latest}} · up to date</span>{{end}}{{else}}<span class="muted">—</span>{{end}}</div></div>
+  <div class="setting-row"><div class="txt"><b>How to update</b><small>systemd: download the new binary and run <code>deploy/update.sh</code> — it backs up, checks migrations and rolls back on failure. Docker: <code>docker compose pull &amp;&amp; docker compose up -d</code>.</small></div>
+    <a class="btn ghost" href="https://dumhouse.github.io/homepage/docs/deployment.html" target="_blank" rel="noopener">{{icon "book" 15}} Guide</a></div>
+  <div class="card-f row"><span class="spacer"></span>
+    <button class="btn" name="check" value="1">{{icon "refresh" 15}} Save and check now</button>
+    <button class="btn primary">Save</button></div>
+</form>
+{{end}}
+
 {{if eq .Section "favicons"}}
 <div class="row"><h2>Favicons</h2><span class="muted small">Site icons on dashboard tiles and service lists</span></div>
 <form method="post" action="/settings/favicons" class="card">

@@ -1,0 +1,51 @@
+{{define "content"}}
+<div class="page-head">
+  <div>
+    <h1>Dependency map</h1>
+    <div class="sub">What runs where, and what breaks if it goes down. Click a box's ⚡ to see its impact.</div>
+  </div>
+  <div class="actions">
+    {{if .Focus}}<a class="btn ghost" href="/map{{if not .Linked}}?all=1{{end}}">Clear focus</a>{{end}}
+    {{if .Linked}}<a class="btn ghost" href="/map?all=1{{if .Focus}}&focus={{.Focus.Key}}{{end}}" data-tip="Also show hosts and services nothing depends on">Show everything</a>
+    {{else}}<a class="btn ghost" href="/map{{if .Focus}}?focus={{.Focus.Key}}{{end}}">Only linked</a>{{end}}
+  </div>
+</div>
+
+{{if .Focus}}
+<section class="card map-impact">
+  <div class="card-h"><h3>{{icon "zap" 15}} If <b>{{.Focus.Label}}</b> goes down</h3></div>
+  <div class="card-b">
+  {{if or (index .Impact "project") (index .Impact "service") (index .Impact "host")}}
+    {{range $kind := (list "project" "service" "host")}}{{with index $.Impact $kind}}
+      <p><span class="muted">{{if eq $kind "project"}}Projects{{else if eq $kind "service"}}Services{{else}}Hosts{{end}}:</span>
+      {{range .}}<a class="tag" href="{{.URL}}">{{if .State}}<span class="dot {{stateClass .State}}"></span> {{end}}{{.Label}}</a>{{end}}</p>
+    {{end}}{{end}}
+  {{else}}
+    <p class="muted">Nothing in the inventory depends on it.</p>
+  {{end}}
+  </div>
+</section>
+{{end}}
+
+{{if eq .Edges 0}}
+<div class="card empty"><div class="card-b">
+  <p>No dependencies yet. Services belong to hosts, hosts to locations, and projects link to the hosts and services they use — add those and the map draws itself.</p>
+</div></div>
+{{else}}
+<div class="map" id="depmap">
+  <svg class="map-lines" aria-hidden="true"></svg>
+  {{range .Columns}}
+  <div class="map-col">
+    <h4>{{icon .Icon 14}} {{.Title}} <span class="muted">{{len .Nodes}}</span></h4>
+    {{range .Nodes}}
+    <div class="map-node {{.Kind}}{{if .Focus}} focus{{end}}{{if .Hit}} hit{{end}}" data-key="{{.Key}}" data-deps="{{.Deps}}">
+      <a href="{{.URL}}" class="map-label">{{if .State}}<span class="dot {{stateClass .State}}" data-tip="{{.State}}"></span>{{end}}<b>{{.Label}}</b>{{if .Sub}}<small>{{.Sub}}</small>{{end}}</a>
+      {{if ne .Kind "project"}}<a class="map-impact-btn" href="/map?focus={{.Key}}{{if not $.Linked}}&all=1{{end}}" data-tip="What breaks if this is down?">{{icon "zap" 13}}</a>{{end}}
+    </div>
+    {{end}}
+  </div>
+  {{end}}
+</div>
+{{end}}
+<script src="/static/map.js?v=1" defer></script>
+{{end}}

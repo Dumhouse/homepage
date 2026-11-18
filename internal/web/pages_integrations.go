@@ -86,6 +86,9 @@ func (p *pages) integrationValues(r *http.Request, id string) map[string]string 
 			values[f.Key] = r.FormValue(f.Key)
 		}
 	}
+	if r.Form.Has("_sync") {
+		values["_sync"] = r.FormValue("_sync")
+	}
 	if r.Form.Has("_label") {
 		values["_label"] = r.FormValue("_label")
 	}
@@ -183,51 +186,28 @@ func (p *pages) integrationSync(w http.ResponseWriter, r *http.Request) {
 	back := "/settings/integrations?p=" + url.QueryEscape(id)
 	ctx, cancel := context.WithTimeout(r.Context(), 90*time.Second)
 	defer cancel()
-	ops, err := p.intg.Sync(ctx, id)
-	if err != nil && len(ops) == 0 {
+	res, err := syncToChangeset(ctx, p.intg, p.cs, id, actorOf(r))
+	if err != nil {
 		backWithError(w, r, back, err)
 		return
 	}
-	// One step: what the plugin found becomes a changeset to review, minus
-	// anything already in the inventory.
-	list := make([]changesets.Op, 0, len(ops))
-	for _, op := range ops {
-		list = append(list, changesets.Op{Action: op.Action, Entity: op.Entity, Ref: op.Ref, Data: op.Data, Note: op.Note})
-	}
-	// Facts (OS, disk, uptime) are observations, not decisions: written now,
-	// like SSH facts. Everything else goes through review.
-	nFacts, missing, list := p.cs.ApplyFacts(ctx, "plugin:"+id, list)
 	factsNote := ""
-	if nFacts > 0 {
-		factsNote = "Updated facts of " + plural(nFacts, "host") + ". "
+	if res.Facts > 0 {
+		factsNote = "Updated facts of " + plural(res.Facts, "host") + ". "
 	}
-	if len(missing) > 0 {
-		factsNote += plural(len(missing), "machine") + " not in the inventory yet (" + strings.Join(firstN(missing, 5), ", ") + ") — their facts are applied with the new host. "
+	if len(res.Missing) > 0 {
+		factsNote += plural(len(res.Missing), "machine") + " not in the inventory yet (" + strings.Join(firstN(res.Missing, 5), ", ") + ") — their facts are applied with the new host. "
 	}
-	fresh := p.cs.Fresh(ctx, list)
-	if len(fresh) == 0 {
-		msg := factsNote + "Found " + plural(len(ops), "item") + "; nothing new to add to the inventory"
+	err = res.Warning
+	if res.Changeset == nil {
+		msg := factsNote + "Found " + plural(res.Found, "item") + "; nothing new to add to the inventory"
 		if err != nil {
 			msg += ". Note: " + err.Error()
 		}
 		http.Redirect(w, r, back+"&ok=msg&msg="+url.QueryEscape(msg), http.StatusSeeOther)
 		return
 	}
-	name := id
-	for _, pl := range p.intg.Plugins() {
-		if pl.ID == id {
-			name = pl.Name
-		}
-	}
-	title := name + " sync: " + plural(len(fresh), "change")
-	if err != nil {
-		title += " (partial)"
-	}
-	c, cerr := p.cs.Create(ctx, actorOf(r), title, "plugin:"+id, fresh)
-	if cerr != nil {
-		backWithError(w, r, back, cerr)
-		return
-	}
+	c := res.Changeset
 	target := "/changesets?ok=proposed#cs-" + itoa(c.ID)
 	if err != nil || factsNote != "" {
 		note := factsNote

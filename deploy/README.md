@@ -117,3 +117,9 @@ Repeated identical alerts are deduplicated for 10 minutes.
 
 Use **Maintenance** in the sidebar (or the “1 h” button on Problems) to silence
 alerts for a target or everything while checks keep running.
+
+## Off-box backups
+
+Set `HS_BACKUP_COPY_TO=/mnt/nas/backups/homeservices` (a mounted share) and/or
+`HS_BACKUP_EXEC='rclone copy $HS_BACKUP_FILES remote:path'` in `/etc/homeservices/env`. Allow a copy
+directory in the sandbox with `systemctl edit homeservices-backup` → `[Service] ReadWritePaths=/mnt/nas/backups/homeservices`.

@@ -46,13 +46,14 @@ build step, no CDN, no telemetry.
 | | |
 |---|---|
 | **Inventory** | Hosts (VM, LXC, bare metal, VPS) with addresses, SSH logins and tags · services with ports and domains · locations · projects with environments, app links and runbooks · domains with registrar, expiry and DNS records · costs in any currency, including live electricity |
+| **Map** | Projects → services → hosts → locations with every dependency drawn · hover to trace a chain · *what breaks if this goes down?* in one click |
 | **Health** | TCP, HTTP, TLS-expiry, DNS and SSH-key checks every few minutes · `up → failing → down → recovering` state machine · 24 h availability bars and incident history · maintenance windows · SSH password-auth warnings |
 | **Alerts** | ntfy, Gotify and webhook plugins · flap guard and de-duplication · new-device alerts · weekly digest · domain renewal reminders at 30 / 7 / 1 days |
 | **Discovery** | Bounded subnet scan with banner, HTTP-title and favicon-hash fingerprints · an inbox to register or ignore what it finds |
-| **Integrations** | 31 read-only plugins with encrypted secrets, several copies of the same plugin allowed ([full list](docs/integrations.md)) |
+| **Integrations** | 31 read-only plugins with encrypted secrets, several copies of the same plugin, optional **auto-sync** every 6 h / day / week into the review queue ([full list](docs/integrations.md)) |
 | **AI agents** | MCP over HTTP with `read` / `propose` / `write` tokens · a **changeset review queue** · `/inventory.md` for plain-text context |
 | **Exports** | Homepage `services.yaml`, Ansible inventory, Prometheus targets, NetBox CSV, ssh-config, JSON |
-| **Operations** | systemd unit with install and rollback-capable update scripts · daily backups · Docker image · soft delete and an audit log everywhere |
+| **Operations** | Linux binaries for amd64, arm64 and armv7 · multi-arch Docker image · systemd unit with install and rollback-capable update scripts · daily backups with off-box copies (NAS, rclone) · opt-in update notice · sign-in by password or your SSO proxy · soft delete and an audit log everywhere |
 
 ### See it work
 
@@ -113,8 +114,8 @@ touch a real network (they will simply show as unreachable).
 <summary><b>Docker</b></summary>
 
 ```bash
-git clone https://github.com/Dumhouse/homepage.git && cd homepage
-docker compose up -d            # http://localhost:8080, data in ./data
+curl -fsSLO https://raw.githubusercontent.com/Dumhouse/homepage/main/compose.yaml
+docker compose up -d            # ghcr.io/dumhouse/homepage — http://localhost:8080, data in ./data
 ```
 </details>
 
@@ -122,12 +123,14 @@ docker compose up -d            # http://localhost:8080, data in ./data
 <summary><b>Debian / Ubuntu LXC or VM (systemd)</b></summary>
 
 ```bash
-make release
-scp bin/homeservices-linux-amd64 deploy root@your-host:/tmp/
+git clone https://github.com/Dumhouse/homepage.git && cd homepage
+curl -fLo homeservices-linux-amd64 https://github.com/Dumhouse/homepage/releases/latest/download/homeservices-linux-amd64
+scp -r homeservices-linux-amd64 deploy root@your-host:/tmp/
 ssh root@your-host 'cd /tmp && ./deploy/install.sh ./homeservices-linux-amd64'   # listens on :80
 ```
 
-Prebuilt Linux binaries are attached to every [release](https://github.com/Dumhouse/homepage/releases).
+Every [release](https://github.com/Dumhouse/homepage/releases) has Linux binaries for **amd64**, **arm64** (Raspberry Pi 4/5)
+and **armv7**, with `SHA256SUMS`. Or build them yourself with `make release`.
 See the [deployment guide](docs/deployment.md) for updates with automatic rollback, backups and restore.
 </details>
 
@@ -151,7 +154,8 @@ Needs Go (see `go.mod`). There is nothing else to install — the UI is embedded
 4. **Add a notifier** (optional): ntfy, Gotify or a webhook under *Settings › Integrations*.
 
 > **Security:** by default there is **no login** (`HS_AUTH=none`) because the app is meant for a
-> trusted network. If anyone untrusted can reach the port, set `HS_AUTH=password` — see
+> trusted network. If anyone untrusted can reach the port, set `HS_AUTH=password`, or `HS_AUTH=proxy` behind your
+> single-sign-on proxy — see
 > [Security](SECURITY.md).
 
 ## Connect Claude Code or another agent
@@ -180,10 +184,11 @@ Everything has a sensible default. The common settings:
 |---|---|---|
 | `HS_ADDR` | `:8080` | listen address |
 | `HS_DATA` | `./data` | SQLite file, icon cache, encrypted secrets, backups |
-| `HS_AUTH` | `none` | `none` (trusted LAN) or `password` |
+| `HS_AUTH` | `none` | `none` (trusted LAN), `password`, or `proxy` (Authelia, Authentik, oauth2-proxy sign-in) |
 | `HS_PASSWORD_HASH` | — | argon2id hash from `homeservices hash-password` |
 | `HS_MASTER_KEY` | — | key that encrypts integration secrets (`secrets.enc`) |
 | `HS_NTFY_URL` / `HS_WEBHOOK_URL` | — | where alerts go (or use the plugins in the UI) |
+| `HS_BACKUP_COPY_TO` / `HS_BACKUP_EXEC` | — | copy each daily backup to a NAS mount or run `rclone` |
 
 All variables, the CLI and per-page settings are in the [configuration reference](docs/configuration.md).
 

@@ -34,6 +34,8 @@ type Layout struct {
 	Notices    []Notice // bell popover in the topbar
 	Alerts     int      // problems + warnings counted on the bell
 	Error      string   // ?ok=err message, shown as a toast unless the page shows it inline
+	UpdateTag  string   // newer release, when the opt-in update check found one
+	UpdateURL  string
 }
 
 // Notice is one row in the topbar bell popover.
@@ -89,6 +91,7 @@ var pageFiles = map[string]string{
 	"host":          "host.html",
 	"host_form":     "host_form.html",
 	"services":      "services.html",
+	"map":           "map.html",
 	"locations":     "locations.html",
 	"location_form": "location_form.html",
 	"projects":      "projects.html",

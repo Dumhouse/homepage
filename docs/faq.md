@@ -75,9 +75,18 @@ or an integration secret. See [AI agents](ai-agents.md).
 ## Operations
 
 **How do I update?** `deploy/update.sh` (backup, migration check, swap, health check, automatic rollback) or
-`docker compose up -d --build`. See [Deployment](deployment.md).
+`docker compose pull && docker compose up -d`. See [Deployment](deployment.md).
 
 **How do I move to another machine?** Copy the `HS_DATA` directory and `HS_MASTER_KEY`, or use
 `homeservices backup` then restore on the new machine.
+
+**Does it phone home?** No. The only optional outbound call that is not about your own lab is the new-release check
+under *Settings › Updates*, which is off until you turn it on and sends nothing about your install.
+
+**Can I use my existing single sign-on?** Yes — `HS_AUTH=proxy` trusts the user header from Authelia, Authentik,
+oauth2-proxy or Caddy `forward_auth`. See [Deployment](deployment.md#sign-in-by-your-auth-proxy-authelia-authentik-oauth2-proxy).
+
+**Does it run on a Raspberry Pi?** Yes: every release has `linux-arm64` and `linux-armv7` binaries, and the Docker image is
+multi-arch.
 
 **I lost `HS_MASTER_KEY`.** Delete `data/secrets.enc` and re-enter your integration tokens; the inventory itself is unaffected.

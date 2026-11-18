@@ -14,6 +14,7 @@ import (
 	"github.com/Dumhouse/homepage/internal/integrations"
 	"github.com/Dumhouse/homepage/internal/inventory"
 	"github.com/Dumhouse/homepage/internal/settings"
+	"github.com/Dumhouse/homepage/internal/update"
 	"github.com/Dumhouse/homepage/internal/tokens"
 )
 
@@ -54,6 +55,7 @@ func (p *pages) routes(r chi.Router) {
 	r.Post("/locations/{id}/delete", p.locationDelete)
 	r.Post("/locations/{id}/restore", p.locationRestore)
 	r.Get("/services", p.services)
+	r.Get("/map", p.dependencyMap)
 	r.Get("/hosts/new", p.hostForm)
 	r.Get("/hosts/{id}", p.host)
 	r.Get("/hosts/{id}/edit", p.hostForm)
@@ -95,9 +97,10 @@ func (p *pages) routes(r chi.Router) {
 	r.Post("/settings/mcp/tokens/revoke", p.revokeToken)
 	r.Post("/settings", p.savePrefs)
 	r.Post("/settings/favicons", p.saveFavicons)
+	r.Post("/settings/updates", p.saveUpdates)
 	r.Post("/settings/favicons/refetch", p.refetchFavicons)
 	r.Get("/settings", p.settingsSection)
-	r.Get("/settings/{section:display|currency|scanning|notifications|favicons}", p.settingsSection)
+	r.Get("/settings/{section:display|currency|scanning|notifications|favicons|updates}", p.settingsSection)
 	r.Post("/settings/currency", p.saveCurrency)
 	r.Post("/settings/currency/refresh", p.refreshRates)
 	r.Post("/settings/display", p.saveDisplay)
@@ -174,6 +177,7 @@ func (p *pages) shell(r *http.Request, title, page string, cr []Crumb) Layout {
 		{Key: "hosts", Label: "Hosts", Icon: "server", Href: "/hosts", Count: stats.Hosts},
 		{Key: "locations", Label: "Locations", Icon: "globe", Href: "/locations", Count: stats.Locations},
 		{Key: "services", Label: "Services", Icon: "activity", Href: "/services", Count: stats.Services},
+		{Key: "map", Label: "Map", Icon: "network", Href: "/map"},
 		{Key: "domains", Label: "Domains", Icon: "globe", Href: "/domains", Count: stats.Domains, CountClass: expiringClass(stats.Expiring)},
 		{Key: "costs", Label: "Costs", Icon: "coin", Href: "/costs"},
 		{Key: "discovery", Label: "Discovery", Icon: "radar", Href: "/discovery", Count: len(discovered), CountClass: "warn"},
@@ -213,9 +217,14 @@ func (p *pages) shell(r *http.Request, title, page string, cr []Crumb) Layout {
 		notices = append(notices, Notice{Icon: "radar", Class: "info", Group: "s", Title: plural(len(discovered), "new device") + " on the network",
 			Sub: "not in the inventory yet", Href: "/discovery", Btn: "See"})
 	}
+	newTag, newURL := update.Available(ctx, p.set, Version)
+	if newTag != "" {
+		notices = append(notices, Notice{Icon: "download", Class: "info", Group: "s", Title: "Home Services " + newTag + " is available",
+			Sub: "you run " + Version, Href: "/settings/updates", Btn: "See"})
+	}
 	return Layout{
 		Title: title, Page: page, Sidebar: sidebar, HostLabel: r.Host, Version: Version, Error: errMsg, Flash: flash(r),
 		Nav: nav, Ops: ops, Crumbs: cr, Stats: stats, TokenCount: activeTokens,
-		Notices: notices, Alerts: len(problems) + stats.Expiring,
+		Notices: notices, Alerts: len(problems) + stats.Expiring, UpdateTag: newTag, UpdateURL: newURL,
 	}
 }

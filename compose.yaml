@@ -1,10 +1,12 @@
+# `docker compose up -d` pulls the published image (amd64, arm64, arm/v7).
+# `docker compose up -d --build` builds it from this checkout instead.
 services:
   homeservices:
+    image: ghcr.io/dumhouse/homepage:${HS_VERSION:-latest}
     build:
       context: .
       args:
-        VERSION: ${HS_VERSION:-docker}
-    image: homeservices:local
+        VERSION: ${HS_BUILD_VERSION:-docker}
     container_name: homeservices
     restart: unless-stopped
     ports:
@@ -22,6 +24,10 @@ services:
       HS_MASTER_KEY: ${HS_MASTER_KEY:-}
       HS_SSH_KEY: ${HS_SSH_KEY:-}
       HS_SSH_FACTS_USER: ${HS_SSH_FACTS_USER:-inventory}
+      HS_TRUSTED_PROXIES: ${HS_TRUSTED_PROXIES:-}
+      HS_AUTH_PROXY_HEADER: ${HS_AUTH_PROXY_HEADER:-}
+      HS_AUTH_PROXY_USERS: ${HS_AUTH_PROXY_USERS:-}
+      HS_UPDATE_CHECK: ${HS_UPDATE_CHECK:-}
       TZ: ${TZ:-UTC}
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/healthz"]

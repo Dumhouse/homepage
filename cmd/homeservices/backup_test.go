@@ -100,3 +100,69 @@ func TestUsageListsCommands(t *testing.T) {
 		}
 	}
 }
+
+func TestBackupCopyToAndExec(t *testing.T) {
+	dir := t.TempDir()
+	d, err := db.OpenNoMigrate(filepath.Join(dir, "homeservices.db"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := d.Exec(`CREATE TABLE marker (x TEXT)`); err != nil {
+		t.Fatal(err)
+	}
+	d.Close()
+	if err := os.WriteFile(filepath.Join(dir, "secrets.enc"), []byte("s"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	nas := filepath.Join(t.TempDir(), "nas", "lab")
+	log := filepath.Join(t.TempDir(), "exec.log")
+	files, err := runBackup(dir, 2, nas, `echo "$HS_BACKUP_FILES" > `+log)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(files) != 4 {
+		t.Fatalf("files = %v", files)
+	}
+	for _, f := range files {
+		if _, err := os.Stat(f); err != nil {
+			t.Fatal(err)
+		}
+	}
+	copied, _ := filepath.Glob(filepath.Join(nas, "homeservices-*"))
+	if len(copied) != 2 {
+		t.Fatalf("copies on the NAS: %v", copied)
+	}
+	if left, _ := filepath.Glob(filepath.Join(nas, "*.part")); len(left) != 0 {
+		t.Fatalf("partial files left: %v", left)
+	}
+	got, err := os.ReadFile(log)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(got), files[0]) || !strings.Contains(string(got), files[1]) {
+		t.Fatalf("exec saw %q", got)
+	}
+	// A failing command is reported, but the local backup is still there.
+	files, err = runBackup(dir, 2, "", "exit 3")
+	if err == nil || len(files) != 2 {
+		t.Fatalf("failing exec: %v %v", files, err)
+	}
+	if _, err := runBackup(t.TempDir(), 2, "", ""); err == nil {
+		t.Fatal("missing database must fail")
+	}
+}
+
+func TestCopyFile(t *testing.T) {
+	dir := t.TempDir()
+	src := filepath.Join(dir, "a")
+	os.WriteFile(src, []byte("hello"), 0o600)
+	if err := copyFile(src, filepath.Join(dir, "b")); err != nil {
+		t.Fatal(err)
+	}
+	if b, _ := os.ReadFile(filepath.Join(dir, "b")); !bytes.Equal(b, []byte("hello")) {
+		t.Fatalf("copy = %q", b)
+	}
+	if err := copyFile(filepath.Join(dir, "missing"), filepath.Join(dir, "c")); err == nil {
+		t.Fatal("missing source must fail")
+	}
+}

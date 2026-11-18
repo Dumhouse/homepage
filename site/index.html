@@ -26,7 +26,7 @@
 
 <main>
 <section class="hero"><div class="wrap">
-  <span class="pill">Open source · AGPL-3.0 · one binary, no cloud</span>
+  <span class="pill">Open source · AGPL-3.0 · one binary for amd64 &amp; ARM · no cloud</span>
   <h1>One place that knows <span class="grad">everything</span> about your home lab.</h1>
   <p class="lead">Hosts, services, projects, domains, costs and health checks — plus an MCP server so your AI agent can read it and <em>propose</em> changes without ever seeing a password.</p>
   <div class="cta">
@@ -46,7 +46,7 @@
     <div class="card"><div class="ico">🔔</div><h3>Alerts</h3><p>ntfy, Gotify and webhooks with flap protection, new-device alerts, a weekly digest and domain-renewal reminders.</p></div>
     <div class="card"><div class="ico">📡</div><h3>Discovery</h3><p>Scan your subnets, recognise what answers by port, page title and favicon, then register it with one click — or ignore it.</p></div>
     <div class="card"><div class="ico">🌐</div><h3>Domains &amp; costs</h3><p>Registrar, expiry, DNS records, and every recurring cost in any currency — even live electricity from Home Assistant, Shelly or Tasmota.</p></div>
-    <div class="card"><div class="ico">🔐</div><h3>No passwords stored</h3><p>Logins are method + account + a link to your password manager. Safe to share with an agent. Integration tokens are AES-GCM encrypted.</p></div>
+    <div class="card"><div class="ico">🔐</div><h3>No passwords stored</h3><p>Logins are method + account + a link to your password manager. Safe to share with an agent. Sign in with a password or your Authelia / Authentik proxy.</p></div>
   </div>
 </div></section>
 
@@ -71,7 +71,7 @@ claude mcp add --transport http homeservices http://localhost:8080/mcp \
     <div class="txt">
       <h3>Find anything in a keystroke</h3>
       <p>Press <kbd>Ctrl</kbd>/<kbd>⌘</kbd> + <kbd>K</kbd> to search hosts, services, projects, app links and locations — or to jump straight to a new host or project.</p>
-      <ul><li>Tiles or launcher home page, light and dark themes</li><li>Active / inactive filter, favourites, sortable tables</li><li>Phone-friendly layout</li></ul>
+      <ul><li>Tiles or launcher home page, light and dark themes</li><li>A dependency map: what breaks if the NAS goes down?</li><li>Active / inactive filter, favourites, sortable tables</li><li>Phone-friendly layout</li></ul>
     </div>
     <div class="frame"><img src="images/search.gif" alt="Searching with the command palette" loading="lazy"></div>
   </div>
@@ -93,7 +93,7 @@ claude mcp add --transport http homeservices http://localhost:8080/mcp \
 
 <section class="alt" id="integrations"><div class="wrap">
   <h2>31 integrations, all read-only</h2>
-  <p class="sub">Import instead of typing. Everything arrives as a changeset you review. Run two of the same (two Proxmox nodes?) — no problem.</p>
+  <p class="sub">Import instead of typing. Everything arrives as a changeset you review. Run two of the same (two Proxmox nodes?) — no problem. Turn on auto-sync and new VMs show up for review by themselves.</p>
   <div class="chips">
     <span class="chip"><b>Servers</b>Proxmox · Docker</span>
     <span class="chip"><b>Network</b>Caddy · Cloudflare · UniFi · OPNsense · MikroTik · OpenWrt · Pi-hole · AdGuard · Nginx Proxy Manager · Traefik</span>
@@ -116,8 +116,8 @@ make build
 HS_DATA=./demo-data ./bin/homeservices demo
 HS_DATA=./demo-data ./bin/homeservices            # → http://localhost:8080
 
-# or run it for real
-docker compose up -d</code></pre>
+# or run it for real (amd64, arm64, armv7)
+docker compose up -d                              # ghcr.io/dumhouse/homepage</code></pre>
   <p class="tabs-note">By default there is no login — it is meant for a trusted network. Set <code>HS_AUTH=password</code> before exposing it anywhere else. <a href="docs/deployment.html">Deployment guide →</a></p>
 </div></section>
 

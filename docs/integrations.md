@@ -20,6 +20,9 @@ Open **Settings → Integrations**, pick a plugin, fill in the fields, then **Te
 - **Suggestions.** The top of the page recommends plugins based on what is already in your inventory (for
   example, Proxmox when a service on port 8006 is documented).
 - Sync is **idempotent**: items already in the inventory are left out of the changeset.
+- **Auto-sync.** Each importing plugin has an *Auto-sync* choice: off (the default), every 6 hours, daily or weekly.
+  New items still arrive as a changeset for you to review, and while one from that plugin is waiting, the next
+  sync is skipped so proposals never pile up.
 
 
 ## All 31 plugins

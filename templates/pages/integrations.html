@@ -45,11 +45,18 @@
     <h3>{{icon "box" 15}}{{.Name}}</h3>
     {{if .LastError}}<span class="badge bad">last attempt failed</span>{{else if .LastTestAt}}<span class="badge ok">works</span>{{else if not .Configured}}<span class="badge">not set up</span>{{end}}
     {{if .LastSyncAt}}<span class="badge info">synced {{fmtDate .LastSyncAt}}</span>{{end}}
+    {{if .AutoSync}}<span class="badge">auto-sync {{.AutoSync}}</span>{{end}}
     <span class="muted small" style="margin-left:auto">{{.ID}}</span>
   </div>
   <form method="post" action="/settings/integrations/{{.ID}}" class="card-b">
     <div class="form-grid">
       {{if .Instance}}<div class="field"><label for="{{$st.ID}}-label">Name of this copy</label><input class="input" id="{{$st.ID}}-label" name="_label" value="{{.Label}}" placeholder="e.g. lab, office"><span class="hint">Shown next to {{.Plugin.Name}} so you can tell the copies apart.</span></div>{{end}}
+      {{if .CanSync}}<div class="field"><label for="{{$st.ID}}-sync">Auto-sync</label><select class="input" id="{{$st.ID}}-sync" name="_sync">
+        <option value="" {{if not .AutoSync}}selected{{end}}>Off — only when I press Sync</option>
+        <option value="6h" {{if eq .AutoSync "6h"}}selected{{end}}>Every 6 hours</option>
+        <option value="daily" {{if eq .AutoSync "daily"}}selected{{end}}>Daily</option>
+        <option value="weekly" {{if eq .AutoSync "weekly"}}selected{{end}}>Weekly</option>
+      </select><span class="hint">New items arrive as a changeset to review. Skipped while an earlier one waits.</span></div>{{end}}
       {{range $f := .Fields}}
       <div class="field">
         {{if eq $f.Kind "bool"}}{{if eq $f.Key "on_down"}}<label>Send when…</label>{{else}}<label>&nbsp;</label>{{end}}{{else}}<label for="{{$st.ID}}-{{$f.Key}}">{{$f.Label}}{{if $f.Required}} *{{end}}</label>{{end}}

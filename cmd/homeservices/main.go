@@ -13,6 +13,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/exec"
 	"os/signal"
 	"path/filepath"
 	"sort"
@@ -37,6 +38,7 @@ import (
 	"github.com/Dumhouse/homepage/internal/power"
 	"github.com/Dumhouse/homepage/internal/settings"
 	"github.com/Dumhouse/homepage/internal/tokens"
+	"github.com/Dumhouse/homepage/internal/update"
 	"github.com/Dumhouse/homepage/internal/web"
 	"golang.org/x/term"
 )
@@ -109,6 +111,8 @@ func main() {
 	ap, err := auth.New(auth.Config{
 		Mode: os.Getenv("HS_AUTH"), PasswordHash: os.Getenv("HS_PASSWORD_HASH"),
 		SessionKey: []byte(os.Getenv("HS_SESSION_KEY")), Secure: os.Getenv("HS_COOKIE_SECURE") == "1",
+		TrustedProxies: os.Getenv("HS_TRUSTED_PROXIES"), ProxyHeader: os.Getenv("HS_AUTH_PROXY_HEADER"),
+		ProxyUsers: os.Getenv("HS_AUTH_PROXY_USERS"),
 	})
 	if err != nil {
 		log.Fatal(err)
@@ -197,6 +201,10 @@ func main() {
 	defer stopPower()
 	stopExpiry := expiry.Start(ctx, inv, settings.New(d), dispatcher, sched.Store(), sched.Label)
 	defer stopExpiry()
+	stopUpdate := update.Loop(ctx, settings.New(d))
+	defer stopUpdate()
+	stopSync := web.AutoSync(ctx, d, im)
+	defer stopSync()
 	if os.Getenv("HS_DIGEST") != "off" {
 		stopDigest := startDigest(ctx, d, inv, sched, dispatcher)
 		defer stopDigest()
@@ -223,7 +231,7 @@ usage:
   homeservices [-addr :8080] [-data ./data]     start the server
   homeservices version
   homeservices migrate [-check] [-data dir]
-  homeservices backup [-keep 14] [-data dir]
+  homeservices backup [-keep 14] [-copy-to dir] [-exec cmd] [-data dir]
   homeservices scan -subnet 192.168.1.0/24 [-ports 22,80,443] [-data dir]
   homeservices demo [-data dir]
   homeservices import [-apply] [-mode merge|replace] [-data dir] file.json
@@ -232,8 +240,10 @@ usage:
   homeservices hash-password
 
 Environment: HS_ADDR, HS_DATA, HS_AUTH, HS_PASSWORD_HASH, HS_SESSION_KEY,
-HS_COOKIE_SECURE, HS_MASTER_KEY, HS_NTFY_URL, HS_NTFY_TOKEN, HS_WEBHOOK_URL,
-HS_ALERTS_MIN_DOWN, HS_DIGEST, HS_DIGEST_DAYS, HS_SSH_KEY, HS_SSH_FACTS_USER.
+HS_COOKIE_SECURE, HS_TRUSTED_PROXIES, HS_AUTH_PROXY_HEADER,
+HS_AUTH_PROXY_USERS, HS_MASTER_KEY, HS_NTFY_URL, HS_NTFY_TOKEN, HS_WEBHOOK_URL,
+HS_ALERTS_MIN_DOWN, HS_DIGEST, HS_DIGEST_DAYS, HS_BACKUP_COPY_TO, HS_BACKUP_EXEC,
+HS_UPDATE_CHECK, HS_SSH_KEY, HS_SSH_FACTS_USER.
 `)
 }
 
@@ -474,52 +484,121 @@ func scanCmd(args []string) {
 }
 
 // backupCmd writes an online SQLite copy to data/backups, gzipped, keeping the
-// newest N files. Safe to run while the service is up.
+// newest N files. Safe to run while the service is up. With -copy-to (or
+// HS_BACKUP_COPY_TO) the files are also copied to a second directory, such as
+// a NAS mount; with -exec (or HS_BACKUP_EXEC) a command runs afterwards with
+// the new files in $HS_BACKUP_FILES, e.g. "rclone copy $HS_BACKUP_FILES b2:lab".
 func backupCmd(args []string) {
 	fs := flag.NewFlagSet("backup", flag.ExitOnError)
 	dataDir := dataFlag(fs)
 	keep := fs.Int("keep", 14, "how many backups to keep")
+	copyTo := fs.String("copy-to", os.Getenv("HS_BACKUP_COPY_TO"), "also copy backups to this directory (off-box mount)")
+	execCmd := fs.String("exec", os.Getenv("HS_BACKUP_EXEC"), "shell command to run after the backup; files are in $HS_BACKUP_FILES")
 	fs.Parse(args)
-	data := *dataDir
+	files, err := runBackup(*dataDir, *keep, *copyTo, *execCmd)
+	for _, f := range files {
+		fmt.Println(f)
+	}
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+// runBackup does the work of backupCmd and returns the files it wrote.
+func runBackup(data string, keep int, copyTo, execCmd string) ([]string, error) {
 	dbPath := filepath.Join(data, "homeservices.db")
 	if _, err := os.Stat(dbPath); err != nil {
-		log.Fatalf("database not found at %s", dbPath)
+		return nil, fmt.Errorf("database not found at %s", dbPath)
 	}
 	// No migrations here: a backup must never change the schema, especially
 	// during update.sh's dry-run before the new binary starts.
 	d, err := db.OpenNoMigrate(dbPath)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 	defer d.Close()
 
 	dir := filepath.Join(data, "backups")
 	if err := os.MkdirAll(dir, 0o750); err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 	stamp := time.Now().UTC().Format("20060102-150405")
 	tmp := filepath.Join(dir, ".tmp-"+stamp+".db")
 	defer os.Remove(tmp)
 	if _, err := d.Exec(`VACUUM INTO ?`, tmp); err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 	out := filepath.Join(dir, "homeservices-"+stamp+".db.gz")
 	if err := gzipFile(tmp, out); err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
-	fmt.Println(out)
-	pruneBackups(dir, "homeservices-*.db.gz", *keep)
+	files := []string{out}
+	pruneBackups(dir, "homeservices-*.db.gz", keep)
 
 	// Integration tokens live outside SQLite; without this file a restore
 	// leaves every integration disconnected.
 	if _, err := os.Stat(filepath.Join(data, "secrets.enc")); err == nil {
 		secretOut := filepath.Join(dir, "homeservices-"+stamp+".secrets.enc.gz")
 		if err := gzipFile(filepath.Join(data, "secrets.enc"), secretOut); err != nil {
-			log.Fatal(err)
+			return files, err
 		}
-		fmt.Println(secretOut)
-		pruneBackups(dir, "homeservices-*.secrets.enc.gz", *keep)
+		files = append(files, secretOut)
+		pruneBackups(dir, "homeservices-*.secrets.enc.gz", keep)
 	}
+
+	if copyTo != "" {
+		if err := os.MkdirAll(copyTo, 0o750); err != nil {
+			return files, fmt.Errorf("copy-to: %w", err)
+		}
+		for _, f := range append([]string(nil), files...) {
+			dst := filepath.Join(copyTo, filepath.Base(f))
+			if err := copyFile(f, dst); err != nil {
+				return files, fmt.Errorf("copy-to: %w", err)
+			}
+			files = append(files, dst)
+		}
+		pruneBackups(copyTo, "homeservices-*.db.gz", keep)
+		pruneBackups(copyTo, "homeservices-*.secrets.enc.gz", keep)
+	}
+	if execCmd != "" {
+		cmd := exec.Command("/bin/sh", "-c", execCmd)
+		cmd.Env = append(os.Environ(), "HS_BACKUP_FILES="+strings.Join(files[:min(len(files), 2)], " "), "HS_BACKUP_DIR="+dir)
+		cmd.Stdout, cmd.Stderr = os.Stderr, os.Stderr
+		if err := cmd.Run(); err != nil {
+			return files, fmt.Errorf("backup -exec: %w", err)
+		}
+	}
+	return files, nil
+}
+
+// copyFile copies through a temp file and renames, so a half-written copy on
+// a flaky mount never looks like a good backup.
+func copyFile(src, dst string) error {
+	in, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	defer in.Close()
+	tmp := dst + ".part"
+	out, err := os.OpenFile(tmp, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0o600)
+	if err != nil {
+		return err
+	}
+	if _, err := io.Copy(out, in); err != nil {
+		out.Close()
+		os.Remove(tmp)
+		return err
+	}
+	if err := out.Sync(); err != nil {
+		out.Close()
+		os.Remove(tmp)
+		return err
+	}
+	if err := out.Close(); err != nil {
+		os.Remove(tmp)
+		return err
+	}
+	return os.Rename(tmp, dst)
 }
 
 func pruneBackups(dir, pattern string, keep int) {

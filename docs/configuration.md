@@ -9,11 +9,13 @@ database, changeable at any time). Defaults are chosen so that a trusted home ne
 |---|---|---|
 | `HS_ADDR` | `:8080` | listen address (`:80`, `127.0.0.1:8080`, …). The systemd unit may bind low ports. |
 | `HS_DATA` | `./data` | directory for the SQLite file, favicon cache, `secrets.enc` and `backups/` |
-| `HS_AUTH` | `none` | `none` (trusted network) or `password` |
+| `HS_AUTH` | `none` | `none` (trusted network), `password`, or `proxy` (sign-in by your auth proxy: Authelia, Authentik, oauth2-proxy…) |
 | `HS_PASSWORD_HASH` | — | argon2id hash for `HS_AUTH=password` — create it with `homeservices hash-password` |
 | `HS_SESSION_KEY` | random per start | 32-byte hex HMAC key for login cookies; set it so sessions survive restarts |
 | `HS_COOKIE_SECURE` | — | set `1` when served over HTTPS |
-| `HS_TRUSTED_PROXIES` | — | comma-separated proxy IPs / CIDRs allowed to set `X-Forwarded-For` / `CF-Connecting-IP`; ignored when unset |
+| `HS_TRUSTED_PROXIES` | — | comma-separated proxy IPs / CIDRs allowed to set `X-Forwarded-For` / `CF-Connecting-IP` — and, with `HS_AUTH=proxy`, the user header. Required for proxy mode. |
+| `HS_AUTH_PROXY_HEADER` | `Remote-User` | header your auth proxy puts the signed-in user in (`X-Forwarded-User`, `X-authentik-username`, …) |
+| `HS_AUTH_PROXY_USERS` | — | optional comma-separated allow-list of users; empty lets in anyone the proxy lets in |
 | `HS_MASTER_KEY` | — | passphrase or 32-byte hex key that encrypts `secrets.enc` (integration tokens). Without it secrets are memory-only. |
 | `HS_NTFY_URL` / `HS_NTFY_TOKEN` | — | ntfy topic and optional token for alerts (the ntfy *plugin* in the UI is the alternative) |
 | `HS_WEBHOOK_URL` | — | JSON webhook for check transitions |
@@ -22,6 +24,9 @@ database, changeable at any time). Defaults are chosen so that a trusted home ne
 | `HS_DIGEST_DAYS` | `7` | digest period in days |
 | `HS_SSH_KEY` | — | private key for the read-only *Collect facts* over SSH |
 | `HS_SSH_FACTS_USER` | `inventory` | SSH user used for facts; needs only read-only commands |
+| `HS_BACKUP_COPY_TO` | — | `homeservices backup` also copies to this directory (a NAS mount), keeping the same number of files |
+| `HS_BACKUP_EXEC` | — | shell command run after each backup; the new files are in `$HS_BACKUP_FILES` (e.g. `rclone copy $HS_BACKUP_FILES b2:lab-backups`) |
+| `HS_UPDATE_CHECK` | — | `on` / `off` forces the daily new-release check (otherwise the Settings › Updates switch, off by default) |
 
 Keep `HS_MASTER_KEY` with your backups: without it the encrypted integration secrets cannot be read and you would
 re-enter them.
@@ -32,7 +37,8 @@ re-enter them.
 homeservices [-addr :8080] [-data ./data]       start the server
 homeservices version
 homeservices migrate [-check]                    apply (or only check) database migrations
-homeservices backup [-keep 14]                   online backup of the database and secrets.enc
+homeservices backup [-keep 14] [-copy-to dir] [-exec cmd]
+                                                 online backup of the database and secrets.enc
 homeservices import [-apply] [-mode merge|replace] file.json
 homeservices scan -subnet 192.168.1.0/24 [-ports 22,80,443]
 homeservices demo                                seed a fictional example lab (empty data dir only)

@@ -31,6 +31,11 @@ type Config struct {
 	PasswordHash string // argon2id hash for "password"
 	SessionKey   []byte // HMAC key for session cookies
 	Secure       bool   // set Secure on cookies (true behind HTTPS)
+
+	// proxy mode
+	TrustedProxies string // HS_TRUSTED_PROXIES: only these peers may set the user header
+	ProxyHeader    string // HS_AUTH_PROXY_HEADER, default Remote-User
+	ProxyUsers     string // HS_AUTH_PROXY_USERS: optional comma-separated allow-list
 }
 
 // New builds the provider selected by cfg.Mode.
@@ -40,8 +45,10 @@ func New(cfg Config) (Provider, error) {
 		return None{}, nil
 	case "password":
 		return newPassword(cfg)
+	case "proxy":
+		return newProxy(cfg)
 	default:
-		return nil, fmt.Errorf("unknown auth mode %q (use none or password)", cfg.Mode)
+		return nil, fmt.Errorf("unknown auth mode %q (use none, password or proxy)", cfg.Mode)
 	}
 }
 

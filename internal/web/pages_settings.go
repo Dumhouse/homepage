@@ -1,6 +1,7 @@
 package web
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -13,6 +14,7 @@ import (
 	"github.com/Dumhouse/homepage/internal/fx"
 	"github.com/Dumhouse/homepage/internal/integrations"
 	"github.com/Dumhouse/homepage/internal/inventory"
+	"github.com/Dumhouse/homepage/internal/update"
 	"github.com/go-chi/chi/v5"
 )
 
@@ -47,6 +49,17 @@ type settingsPage struct {
 	RatesDate      string
 	ManualRates    string
 	AutoRates      string
+	Updates        updatesInfo
+}
+
+type updatesInfo struct {
+	Enabled   bool
+	EnvForced string // value of HS_UPDATE_CHECK when set
+	Latest    string
+	URL       string
+	CheckedAt string
+	Error     string
+	Newer     bool
 }
 
 type rateRow struct {
@@ -56,7 +69,7 @@ type rateRow struct {
 }
 
 var sectionTitles = map[string]string{
-	"display": "Display", "currency": "Currency", "scanning": "Scanning", "notifications": "Notifications", "favicons": "Favicons",
+	"display": "Display", "currency": "Currency", "scanning": "Scanning", "notifications": "Notifications", "favicons": "Favicons", "updates": "Updates",
 }
 
 func maskURL(raw string) string {
@@ -101,6 +114,16 @@ func (p *pages) settingsSection(w http.ResponseWriter, r *http.Request) {
 			v, _ := t.Convert(100_00, c, page.Currency)
 			page.Rates = append(page.Rates, rateRow{Code: c, PerOne: strconv.FormatFloat(float64(v)/10000, 'f', 4, 64), Manual: t.Manual[c]})
 		}
+	}
+	if sec == "updates" {
+		u := &page.Updates
+		u.Enabled = update.Enabled(ctx, p.set)
+		u.EnvForced = strings.TrimSpace(os.Getenv("HS_UPDATE_CHECK"))
+		u.Latest, _ = p.set.Get(ctx, update.KeyLatest, "")
+		u.URL, _ = p.set.Get(ctx, update.KeyURL, "")
+		u.CheckedAt, _ = p.set.Get(ctx, update.KeyCheckedAt, "")
+		u.Error, _ = p.set.Get(ctx, update.KeyError, "")
+		u.Newer = update.Newer(u.Latest, Version)
 	}
 	if sec == "favicons" {
 		page.ServiceCount, page.IconCount, _ = p.inv.ServiceIconStats(ctx)
@@ -188,4 +211,45 @@ func shortErr(e string) string {
 		e = e[:67] + "…"
 	}
 	return e
+}
+
+// updateEndpoint is where "Check now" asks; tests point it at a fake server.
+var updateEndpoint = update.DefaultURL
+
+// saveUpdates switches the opt-in release check and can run it right away.
+func (p *pages) saveUpdates(w http.ResponseWriter, r *http.Request) {
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, "bad form", http.StatusBadRequest)
+		return
+	}
+	ctx := r.Context()
+	if v := r.FormValue("update_check"); v != "" {
+		if v != "on" && v != "off" {
+			http.Error(w, "bad value", http.StatusBadRequest)
+			return
+		}
+		if err := p.set.Set(ctx, actorOf(r), update.KeyEnabled, v); err != nil {
+			p.fail(w, r, err)
+			return
+		}
+	}
+	msg := "Saved."
+	if r.FormValue("check") != "" {
+		if !update.Enabled(ctx, p.set) {
+			msg = "Turn the update check on first."
+		} else {
+			cctx, cancel := context.WithTimeout(ctx, 15*time.Second)
+			rel, err := update.Check(cctx, p.set, &http.Client{Timeout: 15 * time.Second}, updateEndpoint)
+			cancel()
+			switch {
+			case err != nil:
+				msg = "Check failed: " + err.Error()
+			case update.Newer(rel.Tag, Version):
+				msg = rel.Tag + " is available."
+			default:
+				msg = "You are up to date (" + rel.Tag + ")."
+			}
+		}
+	}
+	http.Redirect(w, r, "/settings/updates?ok=msg&msg="+url.QueryEscape(msg), http.StatusSeeOther)
 }

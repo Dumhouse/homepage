@@ -583,3 +583,11 @@ func (s *Store) Fresh(ctx context.Context, ops []Op) []Op {
 	}
 	return out
 }
+
+// PendingFrom reports whether a changeset from source is still waiting for
+// review. Scheduled syncs use it so an unreviewed proposal is not repeated.
+func (s *Store) PendingFrom(ctx context.Context, source string) bool {
+	var n int
+	_ = s.db.QueryRowContext(ctx, `SELECT COUNT(*) FROM changesets WHERE status='pending' AND source=?`, source).Scan(&n)
+	return n > 0
+}

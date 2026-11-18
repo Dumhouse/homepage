@@ -17,6 +17,18 @@ These three are the heart of the inventory, and the difference matters.
   depends on (`used_by` answers *"what breaks if this host is down?"*).
 - **Locations** say where a host lives: a Proxmox node, a VPS provider, a shelf.
 
+## Dependency map
+
+**Map** in the sidebar draws the inventory as four columns — projects → services → hosts → locations — with a line for
+every dependency: a service runs on a host, a host sits in a location, a project uses the hosts and services it is linked
+or connected to. Hover a box to light up everything it needs and everything that needs it. Press its ⚡ to answer
+*"what breaks if this goes down?"* — the page lists every affected project, service and host, with their current health.
+
+![Dependency map](images/map.png)
+
+By default the map shows only things that take part in a dependency; **Show everything** adds the rest. Agents get the
+same answer from the `used_by` MCP tool.
+
 ## Lifecycle
 
 Hosts are `planned`, `active`, `deprecated` or `decommissioned`. The dashboard's **Active / Inactive**

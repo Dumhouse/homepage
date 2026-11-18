@@ -29,6 +29,7 @@
     {{- end}}
   </nav>
   <div class="sidebar-foot">
+    {{if .UpdateTag}}<a class="mcp-status" href="/settings/updates">{{icon "download" 14}} {{.UpdateTag}} available</a>{{end}}
     <a class="mcp-status" href="/settings/mcp">{{icon "bot" 14}} MCP · {{plural .TokenCount "token"}}{{if .TokenCount}} · <span class="ok-t">online</span>{{end}}</a>
     <div class="user">
       <span class="avatar" data-tip="Home Services {{.Version}}">H</span><span class="small">{{.HostLabel}}</span>
@@ -121,4 +122,5 @@
   <a class="{{if eq .Title "Notifications"}}active{{end}}" href="/settings/notifications">Notifications</a>
   <a class="{{if eq .Title "Scanning"}}active{{end}}" href="/settings/scanning">Scanning</a>
   <a class="{{if eq .Title "Favicons"}}active{{end}}" href="/settings/favicons">Favicons</a>
+  <a class="{{if eq .Title "Updates"}}active{{end}}" href="/settings/updates">Updates</a>
 </nav>{{end}}

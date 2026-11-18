@@ -10,6 +10,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 )
 
 // Field describes one config input rendered into the settings form.
@@ -97,8 +98,9 @@ type State struct {
 	LastError   string            `json:"last_error,omitempty"`
 	LastSyncAt  string            `json:"last_sync_at,omitempty"`
 	Saved       bool              `json:"saved"`
-	Label       string            `json:"label,omitempty"`    // name of an extra instance, e.g. "lab"
-	Instance    bool              `json:"instance,omitempty"` // true for a second, third… copy of a plugin
+	Label       string            `json:"label,omitempty"`     // name of an extra instance, e.g. "lab"
+	Instance    bool              `json:"instance,omitempty"`  // true for a second, third… copy of a plugin
+	AutoSync    string            `json:"auto_sync,omitempty"` // "", "6h", "daily" or "weekly"
 	Ops         []Op              `json:"ops,omitempty"`
 }
 
@@ -149,7 +151,7 @@ func (m *Manager) state(ctx context.Context, id string, p *Plugin) (State, error
 		Plugin: p, ID: id, Name: p.Name, Description: p.Description, Fields: p.Fields,
 		Config: cfg, HasSecret: map[string]bool{}, Enabled: r.enabled, Saved: r.exists,
 		LastTestAt: r.lastTestAt, LastError: r.lastError, LastSyncAt: r.lastSyncAt,
-		Label: cfg["_label"], Instance: id != p.ID,
+		Label: cfg["_label"], Instance: id != p.ID, AutoSync: cfg["_sync"],
 	}
 	if state.Instance {
 		state.Name = p.Name + " · " + ternaryStr(state.Label != "", state.Label, strings.TrimPrefix(id, p.ID+"~"))
@@ -275,6 +277,13 @@ func (m *Manager) Save(ctx context.Context, actor, id string, values map[string]
 	_ = json.Unmarshal([]byte(r.config), &cfg)
 	if l, ok := values["_label"]; ok && id != p.ID {
 		cfg["_label"] = strings.TrimSpace(l)
+	}
+	if v, ok := values["_sync"]; ok && p.Sync != nil {
+		if SyncInterval(v) > 0 {
+			cfg["_sync"] = v
+		} else {
+			delete(cfg, "_sync")
+		}
 	}
 	for _, f := range p.Fields {
 		v := values[f.Key]
@@ -451,3 +460,37 @@ const (
 
 // Categories lists the sync categories in display order.
 var Categories = []string{CatServers, CatNetwork, CatCloud, CatVPN, CatMetrics, CatStorage, CatDisks, CatPower}
+
+// SyncInterval turns an auto-sync setting into a period; 0 means off.
+func SyncInterval(v string) time.Duration {
+	switch v {
+	case "6h":
+		return 6 * time.Hour
+	case "daily":
+		return 24 * time.Hour
+	case "weekly":
+		return 7 * 24 * time.Hour
+	}
+	return 0
+}
+
+// SyncDue reports whether an instance with auto-sync on should sync now.
+// Only configured, enabled-looking instances qualify; a failing one still
+// retries on its normal period so a fixed server recovers by itself.
+func SyncDue(s State, now time.Time) bool {
+	every := SyncInterval(s.AutoSync)
+	if every == 0 || s.Plugin == nil || s.Plugin.Sync == nil || !s.Configured() {
+		return false
+	}
+	if s.LastSyncAt == "" {
+		return true
+	}
+	last, err := time.Parse("2006-01-02 15:04:05", s.LastSyncAt)
+	if err != nil {
+		return true
+	}
+	return now.Sub(last) >= every
+}
+
+// CanSync reports whether the plugin imports things (and so can auto-sync).
+func (s State) CanSync() bool { return s.Plugin != nil && s.Plugin.Sync != nil }

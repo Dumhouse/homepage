@@ -1,8 +1,21 @@
 # Changelog
 
-## Unreleased
+## v0.2.0 — 2026-11-18
 
 ### Added
+- **Dependency map** (`/map`): projects → services → hosts → locations with every dependency drawn; hover traces a
+  chain, ⚡ answers "what breaks if this goes down?".
+- **Sign-in by your SSO proxy:** `HS_AUTH=proxy` trusts `Remote-User` (or `HS_AUTH_PROXY_HEADER`) from
+  `HS_TRUSTED_PROXIES` only, with an optional `HS_AUTH_PROXY_USERS` allow-list; the user is the audit actor.
+- **Auto-sync** for importing integrations (every 6 h, daily or weekly). Results go to the review queue and a sync is
+  skipped while an earlier proposal from the same integration waits.
+- **Off-box backups:** `homeservices backup -copy-to DIR` / `HS_BACKUP_COPY_TO` and `-exec CMD` / `HS_BACKUP_EXEC`
+  (for rclone and friends).
+- **Opt-in update notice** under Settings › Updates (off by default; asks GitHub's public release endpoint once a day).
+- **Release artefacts:** Linux binaries for amd64, arm64 and armv7 with `SHA256SUMS`, and a multi-arch image at
+  `ghcr.io/dumhouse/homepage`. `compose.yaml` uses the image; `--build` still builds from source.
+- Tests: every MCP write tool is checked against read and propose tokens, and agent output is checked for integration
+  secrets; new tests for the CLI, discovery runner and exchange rates.
 - **Integrations (31 plugins in total):** Hetzner, DigitalOcean, OVHcloud; Tailscale, Headscale; Prometheus, Netdata, Beszel,
   Glances; TrueNAS, Synology, **OpenMediaVault**, NUT (UPS), Redfish/IPMI; Scrutiny (SMART); UniFi, OPNsense, MikroTik, OpenWrt,
   Pi-hole, AdGuard Home, Nginx Proxy Manager, Traefik.
