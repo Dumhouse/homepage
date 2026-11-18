@@ -12,7 +12,7 @@ ARG TARGETVARIANT
 RUN GOARM="${TARGETVARIANT#v}" CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH \
     go build -trimpath -ldflags "-s -w -X main.version=${VERSION}" -o /out/homeservices ./cmd/homeservices
 
-FROM alpine:3.22
+FROM alpine:3.24
 LABEL org.opencontainers.image.source="https://github.com/Dumhouse/homepage" \
       org.opencontainers.image.description="Self-hosted home-lab inventory with health checks and an MCP server" \
       org.opencontainers.image.licenses="AGPL-3.0-only"
